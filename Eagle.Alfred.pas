@@ -72,8 +72,7 @@ begin
     Exit;
   end;
 
-  if Cmd.Equals('HELP') or Cmd.IsEmpty then
-    Result := THelpCommand.Create(FConsoleIO);
+  Result := THelpCommand.Create(FConsoleIO);
 
 end;
 
