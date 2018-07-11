@@ -2,16 +2,27 @@ unit Eagle.Alfred.MigrateCommand;
 
 interface
 uses
-  Eagle.ConsoleIO,
-  Eagle.Alfred.Command;
+  System.DateUtils,
+  System.IOUtils,
+  System.SysUtils,
+  Eagle.Alfred,
+  Eagle.Alfred.Command,
+  Eagle.Alfred.Attributes;
 
 type
-  TMigrateCommand = class(TInterfacedObject, ICommand)
-  private
-    FConsoleIO: IConsoleIO;
+  [Command('MIGRATE', 'Cria arquivos de migração de versão do banco de dados')]
+  TMigrateCommand = class(TCommand)
   public
-    constructor Create(const AppPath: string; ConsoleIO: IConsoleIO);
+    [Action('CREATE', 'Cria um novo arquivo de migração')]
+    procedure CreateNew(const Name: string);
+
+    [Action('EXECUTE', '')]
     procedure Execute;
+
+    [Action('GENERATE', '')]
+    procedure Generate;
+
+    [Action('HELP', '')]
     procedure Help;
   end;
 
@@ -19,14 +30,27 @@ implementation
 
 { TMigrateCommand }
 
-constructor TMigrateCommand.Create(const AppPath: string; ConsoleIO: IConsoleIO);
+procedure TMigrateCommand.CreateNew(const Name: string);
+var
+  FileName, TimeStamp: string;
 begin
-  FConsoleIO := ConsoleIO;
+
+  TimeStamp := DateTimeToUnix(Now).ToString;
+
+  FileName := Name + '_' + TimeStamp + '.sql';
+
+  Tfile.WriteAllText(FileName, 'INSERT INTO MIGRATIONS (ID) VALUES (' + TimeStamp + '); ');
+
 end;
 
 procedure TMigrateCommand.Execute;
 begin
-  Help;
+
+end;
+
+procedure TMigrateCommand.Generate;
+begin
+
 end;
 
 procedure TMigrateCommand.Help;
@@ -45,5 +69,8 @@ begin
   FConsoleIO.WriteInfo('');
 
 end;
+
+initialization
+  TAlfred.GetInstance.Register(TMigrateCommand);
 
 end.

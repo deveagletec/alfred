@@ -4,22 +4,33 @@ interface
 uses
   Classes,
   SysUtils,
-  Eagle.ConsoleIO,
-  Eagle.Alfred.DprojParser,
-  Eagle.Alfred.Command;
+  System.IOUtils,
+
+  XSuperJSON, XSuperObject,
+
+  Eagle.Alfred,
+  Eagle.Alfred.Command,
+  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Data;
 
 type
-  TProjectCommand = class(TInterfacedObject, ICommand)
+
+  [Command('PROJECT', 'Gerencia os dados do projeto')]
+  TProjectCommand = class(TCommand)
   private
-    FAppPath: string;
-    FDprojParser: TDprojParser;
-    FConsoleIO: IConsoleIO;
     procedure GetSubDirs(const sRootDir: string; slt: TStrings);
     function AddDirSeparator(const dir: string): string;
   public
-    constructor Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
-    destructor Destroy; override;
+    [Action('CREATE', '')]
     procedure Execute;
+
+    [Action('SETUP', '')]
+    procedure Setup;
+
+    [Action('VERSION', '')]
+    procedure Version;
+
+    [Action('HELP', '')]
     procedure Help;
   end;
 
@@ -38,19 +49,6 @@ begin
   if h[Length(h)] <> '\' then h := h + '\';
     Result:=h;
 
-end;
-
-constructor TProjectCommand.Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
-begin
-  FAppPath := AppPath;
-  FConsoleIO := ConsoleIO;
-  FDprojParser := DprojParser;
-end;
-
-destructor TProjectCommand.Destroy;
-begin
-
-  inherited;
 end;
 
 procedure TProjectCommand.Execute;
@@ -112,5 +110,33 @@ procedure TProjectCommand.Help;
 begin
 
 end;
+
+procedure TProjectCommand.Setup;
+var
+  Package: TPackage;
+  Data: string;
+begin
+
+  Package.Version := String.Parse(CurrentYear) + '.00#';
+  Package.MigrationDir := 'migrations/';
+  Package.PackagesDir := 'packages/';
+  Package.SourceDir := 'src/';
+  Package.TestsDir := 'tests/';
+
+  Data := TJSON.Stringify(Package, True);
+
+  TFile.WriteAllText('package.json', Data);
+
+  FConsoleIO.WriteInfo('Projeto configurado com sucesso!');
+
+end;
+
+procedure TProjectCommand.Version;
+begin
+
+end;
+
+initialization
+  TAlfred.GetInstance.Register(TProjectCommand);
 
 end.

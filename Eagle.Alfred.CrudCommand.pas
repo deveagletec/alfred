@@ -1,145 +1,79 @@
-unit Eagle.Alfred.CreateCommand;
+unit Eagle.Alfred.CrudCommand;
 
 interface
 uses
-  System.SysUtils,
   System.Classes,
-  Winapi.Windows,
+  System.SysUtils,
   System.RegularExpressions,
+  Eagle.Alfred,
+  Eagle.Alfred.Command,
+  Eagle.Alfred.Attributes,
   Eagle.ConsoleIO,
-  Eagle.Alfred.DprojParser,
-  Eagle.Alfred.Command;
+  Eagle.Alfred.DprojParser;
 
 type
-
-  ECreateCommandException = class(Exception);
-
-  TCreateCommand = class
+  [Command('CRUD', 'Cria arquivos relacionados às operações de CRUD')]
+  TCrudCommand = class(TCommand)
   private
-    FAppPath: string;
-    FCommand: string;
     FModelName: string;
     FModuleName: string;
     FStringList: TStringList;
-    FDprojParser: TDprojParser;
-    FConsoleIO: IConsoleIO;
 
     procedure CreateView;
     procedure CreateViewModel;
     procedure CreateModel;
-    procedure CreateRepository;
     procedure CreateService;
-    procedure CreateTest;
+    procedure CreateRepository;
+
     procedure DoCreateModel(const SubLayer, Sufix, TemplateInterface, TemplateClass: string);
-    procedure Parse;
     procedure GenerateFile(const Template, UnitName, FileName: string; const HasGUID: Boolean = False);
-    procedure LogProgress(const Value: string; const NewLine: Boolean = False);
     procedure RegisterForm(const UnitName, FormName, Path: string);
     procedure RegisterUnit(const Name, Path: string);
-    procedure CreateDiretories(const Paths: array of string);
-    function Capitalize(const Str: string): string;
     function GuidCreate: string;
+    procedure LogProgress(const Value: string; const NewLine: Boolean = False);
   public
+
     constructor Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
     destructor Destroy; override;
-    procedure Execute;
-    procedure Help;
+
+    [Action('CREATE', '')]
+    procedure Execute(const ResourceType, ModelName, ModuleName: string);
+
+    [Action('HELP', '')]
+    procedure Help();
   end;
 
 implementation
 
-{ TCreateCommand }
+{ TCrudCommand }
 
-function TCreateCommand.Capitalize(const Str: string): string;
-var
-  flag: Boolean;
-  i: Byte;
-  s: string;
+constructor TCrudCommand.Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
 begin
-
-  flag := True;
-  s := Str.ToLower;
-  Result := EmptyStr;
-
-  for i := 1 to Length(s) do
-  begin
-
-    if flag then
-      Result := Result + AnsiUpperCase(s[i])
-    else
-      Result := Result + s[i];
-
-    flag := CharInSet(s[i], [' ', '[',']', '(', ')']);
-  end;
-
-end;
-
-constructor TCreateCommand.Create(const AppPath: string; ConsoleIO: IConsoleIO;
-    DprojParser: TDprojParser);
-begin
+  inherited Create(AppPath, ConsoleIO, DprojParser);
   FStringList := TStringList.Create;
-  FDprojParser := DprojParser;
-  FAppPath := AppPath;
-  FConsoleIO := ConsoleIO;
 end;
 
-procedure TCreateCommand.CreateDiretories(const Paths: array of string);
-var
-  Path: string;
+procedure TCrudCommand.CreateModel;
 begin
-
-  for Path in Paths do
-  begin
-    if not DirectoryExists(Path) then
-      ForceDirectories(Path);
-  end;
-
-end;
-
-procedure TCreateCommand.CreateModel;
-begin
-
-  if not TRegEx.IsMatch(FCommand, '^(m|mv|mvm|mvvm|model)$') then
-    Exit;
-
   DoCreateModel('Entity', '', 'IModel.pas', 'TModel.pas');
-
 end;
 
-procedure TCreateCommand.CreateRepository;
+procedure TCrudCommand.CreateRepository;
 begin
-
-  if not TRegEx.IsMatch(FCommand, '^(rep|repository)$') then
-    Exit;
-
   DoCreateModel('Repository', 'Repository', 'IModelRepository.pas', 'TModelRepository.pas');
-
 end;
 
-procedure TCreateCommand.CreateService;
+procedure TCrudCommand.CreateService;
 begin
-
-  if not TRegEx.IsMatch(FCommand, '^(sev|service)$') then
-    Exit;
-
   DoCreateModel('Service', 'Service', 'IModelService.pas', 'TModelService.pas');
-
 end;
 
-procedure TCreateCommand.CreateTest;
-begin
-
-end;
-
-procedure TCreateCommand.CreateView;
+procedure TCrudCommand.CreateView;
 var
   Namespace, Dir: string;
 begin
 
-  if not TRegEx.IsMatch(FCommand, '^(v|mv|vvm|mvvm|view)$') then
-    Exit;
-
-  Namespace := 'Eagle.ERP.' + FModuleName + '.View.' + FModelName;
+  Namespace := 'Eagle.ERP.' + FModuleName + '.View.' + fModelName;
 
   Dir := 'src\modulos\' + FModuleName.ToLower + '\view\';
 
@@ -152,14 +86,11 @@ begin
 
 end;
 
-procedure TCreateCommand.CreateViewModel;
+procedure TCrudCommand.CreateViewModel;
 var
   Namespace, Dir, InterfacePath, ClassPath: string;
   NamespaceInterface, NamespaceClass: string;
 begin
-
-  if not TRegEx.IsMatch(FCommand, '^(vm|vvm|mvm|mvvm|viewmodel)$') then
-    Exit;
 
   Namespace := 'Eagle.ERP.' + FModuleName + '.ViewModel.';
 
@@ -182,16 +113,13 @@ begin
 
 end;
 
-destructor TCreateCommand.Destroy;
+destructor TCrudCommand.Destroy;
 begin
-
-  if Assigned(FStringList) then
-    FStringList.Free;
-
+  FStringList.Free;
   inherited;
 end;
 
-procedure TCreateCommand.DoCreateModel(const SubLayer, Sufix, TemplateInterface, TemplateClass: string);
+procedure TCrudCommand.DoCreateModel(const SubLayer, Sufix, TemplateInterface, TemplateClass: string);
 var
   Namespace, Dir, InterfacePath, ClassPath, ModelNameFull: string;
   NamespaceInterface, NamespaceClass: string;
@@ -221,37 +149,36 @@ begin
 
 end;
 
-procedure TCreateCommand.Execute;
+procedure TCrudCommand.Execute(const ResourceType, ModelName, ModuleName: string);
 begin
 
-  try
+  FModelName := Capitalize(ModelName);
+  FModuleName := Capitalize(ModuleName);
 
-    Parse;
-
+  if TRegEx.IsMatch(ResourceType, '^(m|mv|mvm|mvvm|model)$') then
     CreateModel;
 
+  if TRegEx.IsMatch(ResourceType, '^(v|mv|vvm|mvvm|view)$') then
     CreateView;
 
+  if TRegEx.IsMatch(ResourceType, '^(v|mv|vvm|mvvm|view)$') then
     CreateViewModel;
 
-    CreateRepository;
-
+  if TRegEx.IsMatch(ResourceType, '^(sev|service)$') then
+  begin
     CreateService;
+    Exit;
+  end;
 
-    CreateTest;
-
-    FDprojParser.Save;
-
-    Help;
-
-  except
-    on E: ECreateCommandException do
-      FConsoleIO.WriteError(E.Message);
+  if TRegEx.IsMatch(ResourceType, '^(rep|repository)$') then
+  begin
+    CreateRepository;
+    Exit;
   end;
 
 end;
 
-procedure TCreateCommand.GenerateFile(const Template, UnitName, FileName: string; const HasGUID: Boolean = False);
+procedure TCrudCommand.GenerateFile(const Template, UnitName, FileName: string; const HasGUID: Boolean);
 begin
 
   LogProgress('Gerando: ' + UnitName + '...');
@@ -270,7 +197,7 @@ begin
 
 end;
 
-function TCreateCommand.GuidCreate: string;
+function TCrudCommand.GuidCreate: string;
 var
   ID: TGUID;
 begin
@@ -281,13 +208,10 @@ begin
 
 end;
 
-procedure TCreateCommand.Help;
+procedure TCrudCommand.Help;
 begin
 
-   if not FCommand.Equals('help') then
-    Exit;
-
-  FConsoleIO.WriteInfo('Cria arquivos relacionados às operções de CRUD');
+  FConsoleIO.WriteInfo('Cria arquivos relacionados às operações de CRUD');
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('Para criar arquivos use:');
   FConsoleIO.WriteInfo('CREATE [tipo] [nome_do_modelo] [nome_do_modulo]');
@@ -304,10 +228,8 @@ begin
 
 end;
 
-procedure TCreateCommand.LogProgress(const Value: string; const NewLine: Boolean = False);
+procedure TCrudCommand.LogProgress(const Value: string; const NewLine: Boolean);
 begin
-  if not Assigned(FConsoleIO) then
-    Exit;
 
   FConsoleIO.WriteProcess(Value);
 
@@ -316,18 +238,7 @@ begin
 
 end;
 
-procedure TCreateCommand.Parse;
-begin
-
-  FCommand := ParamStr(2).ToLower;
-
-  FModelName := Capitalize(ParamStr(3));
-
-  FModuleName := Capitalize(ParamStr(4));
-
-end;
-
-procedure TCreateCommand.RegisterForm(const UnitName, FormName, Path: string);
+procedure TCrudCommand.RegisterForm(const UnitName, FormName, Path: string);
 begin
 
   LogProgress('Registrado o formulário: ' + UnitName + '...');
@@ -338,7 +249,7 @@ begin
 
 end;
 
-procedure TCreateCommand.RegisterUnit(const Name, Path: string);
+procedure TCrudCommand.RegisterUnit(const Name, Path: string);
 begin
 
   LogProgress('Registrado a unit: ' + Name + '...');
@@ -348,5 +259,8 @@ begin
   LogProgress('Registrado a unit: ' + Name + '... Done', True);
 
 end;
+
+initialization
+  TAlfred.GetInstance.Register(TCrudCommand);
 
 end.

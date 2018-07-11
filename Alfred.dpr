@@ -13,17 +13,18 @@ uses
   Console in 'Console.pas',
   Eagle.Alfred.MigrateCommand in 'Eagle.Alfred.MigrateCommand.pas',
   Eagle.Alfred.Command in 'Eagle.Alfred.Command.pas',
-  Eagle.Alfred.HelpCommand in 'Eagle.Alfred.HelpCommand.pas',
-  Eagle.Alfred.ProjectCommand in 'Eagle.Alfred.ProjectCommand.pas';
+  Eagle.Alfred.ProjectCommand in 'Eagle.Alfred.ProjectCommand.pas',
+  Eagle.Alfred.Attributes in 'Eagle.Alfred.Attributes.pas',
+  Eagle.Alfred.CrudCommand in 'Eagle.Alfred.CrudCommand.pas',
+  Eagle.Alfred.CommandRegister in 'Eagle.Alfred.CommandRegister.pas',
+  Eagle.Alfred.Data in 'Eagle.Alfred.Data.pas';
 
 begin
+
   try
-    with TAlfred.Create do
-    try
-      Run;
-    finally
-      Free;
-    end;
+
+    TAlfred.GetInstance.Run();
+
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

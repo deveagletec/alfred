@@ -5,7 +5,7 @@ interface
 type
   I{ModelName}ViewModel = interface
     ['{GUID}']
-	function GetCodigo: Integer;
+    function GetCodigo: Integer;
     function GetNome: string;
     procedure SetNome(const Value: string);
     function GetIsInativo: Boolean;

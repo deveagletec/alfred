@@ -33,7 +33,8 @@ type
   private
     procedure NotifyOfEntityChange; override;
   public
-    [NotifyChange('CanSalvar, CanEdit, CanDelete, Editable, CanPrior, CanNext')]
+
+    [NotifyChange('CanSave, CanEdit, CanDelete, Editable, CanPrior, CanNext')]
     procedure OnSave(Sender: TObject); override;
 
     procedure OnSearch(Sender: TObject);
@@ -69,7 +70,7 @@ end;
 
 function T{ModelName}ViewModel.GetError: string;
 begin
-
+  Result := FLastError;
 end;
 
 function T{ModelName}ViewModel.GetIsInativo: Boolean;
@@ -84,7 +85,7 @@ end;
 
 function T{ModelName}ViewModel.GetItem(const Name: string): string;
 begin
-
+  //Adicione aqui as validações dos inputs que deverão ser executadas durante a perda de foco
 end;
 
 function T{ModelName}ViewModel.GetNome: string;
@@ -100,13 +101,12 @@ end;
 procedure T{ModelName}ViewModel.NotifyOfEntityChange;
 begin
   inherited;
-  NotifyOfPropertyChange('Codigo');
-  NotifyOfPropertyChange('Nome');
-  NotifyOfPropertyChange('IsInativo');
+  NotifyOfPropertiesChange(['Codigo', 'Nome', 'IsInativo']);
 end;
 
 procedure T{ModelName}ViewModel.OnSearch(Sender: TObject);
 begin
+  { TODO 3 : Alterar o nome da pesquisa das entidades {ModelName}s }
   FDialogService.ShowSearch('C{ModelName}S', T{ModelName}SearchResponse);
 end;
 
@@ -122,15 +122,7 @@ end;
 
 procedure T{ModelName}ViewModel.OnSearchResponse(Event: T{ModelName}SearchResponse);
 begin
-
-  FEntity := Event.Records.First;
-
-  FCanPrior := not FRepository.IsFirst(FEntity);
-
-  FCanNext := not FRepository.IsLast(FEntity);
-
-  NotifyOfEntityChange;
-
+  DoOnSearchResponse(Event.Records.First);
 end;
 
 procedure T{ModelName}ViewModel.SetIsInativo(const Value: Boolean);
