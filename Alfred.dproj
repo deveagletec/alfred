@@ -61,7 +61,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>crud create model marca estoque</Debugger_RunParams>
+        <Debugger_RunParams>project setup</Debugger_RunParams>
         <Manifest_File>None</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -76,18 +76,18 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Eagle.Alfred.CreateCommand.pas"/>
         <DCCReference Include="Eagle.Alfred.pas"/>
         <DCCReference Include="Eagle.Alfred.DprojParser.pas"/>
         <DCCReference Include="Eagle.ConsoleIO.pas"/>
-        <DCCReference Include="Console.pas"/>
-        <DCCReference Include="Eagle.Alfred.MigrateCommand.pas"/>
         <DCCReference Include="Eagle.Alfred.Command.pas"/>
-        <DCCReference Include="Eagle.Alfred.ProjectCommand.pas"/>
         <DCCReference Include="Eagle.Alfred.Attributes.pas"/>
-        <DCCReference Include="Eagle.Alfred.CrudCommand.pas"/>
-        <DCCReference Include="Eagle.Alfred.CommandRegister.pas"/>
         <DCCReference Include="Eagle.Alfred.Data.pas"/>
+        <DCCReference Include="Eagle.Alfred.CommandRegister.pas"/>
+        <DCCReference Include="commands\Eagle.Alfred.Command.Crud.pas"/>
+        <DCCReference Include="commands\Eagle.Alfred.Command.Migrate.pas"/>
+        <DCCReference Include="commands\Eagle.Alfred.Command.Project.pas"/>
+        <DCCReference Include="libs\Console.pas"/>
+        <DCCReference Include="Eagle.Alfred.Exceptions.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

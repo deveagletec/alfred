@@ -1,4 +1,4 @@
-unit Eagle.Alfred.CrudCommand;
+unit Eagle.Alfred.Command.Crud;
 
 interface
 uses
@@ -9,7 +9,8 @@ uses
   Eagle.Alfred.Command,
   Eagle.Alfred.Attributes,
   Eagle.ConsoleIO,
-  Eagle.Alfred.DprojParser;
+  Eagle.Alfred.DprojParser,
+  Eagle.Alfred.Data;
 
 type
   [Command('CRUD', 'Cria arquivos relacionados às operações de CRUD')]
@@ -33,7 +34,7 @@ type
     procedure LogProgress(const Value: string; const NewLine: Boolean = False);
   public
 
-    constructor Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
+    constructor Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
     destructor Destroy; override;
 
     [Action('CREATE', '')]
@@ -47,9 +48,10 @@ implementation
 
 { TCrudCommand }
 
-constructor TCrudCommand.Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
+constructor TCrudCommand.Create(const AppPath: string; APackage: TPackage;
+    ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
 begin
-  inherited Create(AppPath, ConsoleIO, DprojParser);
+  inherited Create(AppPath, APackage, ConsoleIO, DprojParser);
   FStringList := TStringList.Create;
 end;
 
@@ -152,6 +154,8 @@ end;
 procedure TCrudCommand.Execute(const ResourceType, ModelName, ModuleName: string);
 begin
 
+  CheckProjectConfiguration;
+
   FModelName := Capitalize(ModelName);
   FModuleName := Capitalize(ModuleName);
 
@@ -214,7 +218,7 @@ begin
   FConsoleIO.WriteInfo('Cria arquivos relacionados às operações de CRUD');
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('Para criar arquivos use:');
-  FConsoleIO.WriteInfo('CREATE [tipo] [nome_do_modelo] [nome_do_modulo]');
+  FConsoleIO.WriteInfo('CRUD CREATE [tipo] [nome_do_modelo] [nome_do_modulo]');
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('Tipos:');
   FConsoleIO.WriteInfo('');

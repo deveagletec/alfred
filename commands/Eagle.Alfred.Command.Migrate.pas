@@ -1,4 +1,4 @@
-unit Eagle.Alfred.MigrateCommand;
+unit Eagle.Alfred.Command.Migrate;
 
 interface
 uses
@@ -35,6 +35,8 @@ var
   FileName, TimeStamp: string;
 begin
 
+  CheckProjectConfiguration;
+
   TimeStamp := DateTimeToUnix(Now).ToString;
 
   FileName := Name + '_' + TimeStamp + '.sql';
@@ -46,10 +48,14 @@ end;
 procedure TMigrateCommand.Execute;
 begin
 
+  CheckProjectConfiguration;
+
 end;
 
 procedure TMigrateCommand.Generate;
 begin
+
+  CheckProjectConfiguration;
 
 end;
 

@@ -6,12 +6,18 @@ uses
   System.Generics.Collections,
   System.Rtti,
   System.TypInfo,
+  System.IOUtils,
+
+  XSuperJSON, XSuperObject,
   Spring.Reflection,
+
   Eagle.ConsoleIO,
   Eagle.Alfred.Command,
   Eagle.Alfred.Attributes,
   Eagle.Alfred.CommandRegister,
-  Eagle.Alfred.DprojParser;
+  Eagle.Alfred.DprojParser,
+  Eagle.Alfred.Data,
+  Eagle.Alfred.Exceptions;
 
 type
 
@@ -23,10 +29,12 @@ type
     FAppPath: string;
     FDprojParser: TDprojParser;
     FConsoleIO: IConsoleIO;
+    FPackage: TPackage;
     FCommands: TDictionary<string, ICommandRegister>;
     procedure Execute(Cmd: string);
     function GetParametersAction(Action: TRttiMethod): TArray<TValue>;
     procedure Help;
+    procedure Init;
   public
     class function GetInstance() : TAlfred;
     class procedure ReleaseInstance();
@@ -42,12 +50,14 @@ implementation
 
 constructor TAlfred.Create;
 begin
-  FDprojParser := TDprojParser.Create('.\packages\DelphiXE8\', 'EagleGestao');
+
   FCurrentPath := GetCurrentDir;
   FAppPath := ExtractFilePath(ParamStr(0));
   FConsoleIO := TConsoleIO.Create;
 
   FCommands := TDictionary<string, ICommandRegister>.Create;
+
+  Init;
 
 end;
 
@@ -60,6 +70,9 @@ begin
   if Assigned(FCommands) then
     FreeAndNil(FCommands);
 
+  if Assigned(FPackage) then
+    FreeAndNil(FPackage);
+
   inherited;
 end;
 
@@ -69,6 +82,7 @@ var
   ActionName: string;
   Action: TRttiMethod;
   ParamsAction: TArray<TValue>;
+  a, b: integer;
 begin
 
   ActionName := ParamStr(2).ToUpper;
@@ -131,6 +145,7 @@ var
   Par: TPair<string, ICommandRegister>;
 begin
 
+  FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('         Alfred - Code Generate for Delphi');
   FConsoleIO.WriteInfo('-----------------------------------------------------');
 
@@ -141,7 +156,21 @@ begin
   for Par in FCommands.ToArray do
     FConsoleIO.WriteInfo(Par.Value.GetName.PadRight(15, ' ') + Par.Value.GetDescription);
 
-  FConsoleIO.WriteInfo('');
+end;
+
+procedure TAlfred.Init;
+var
+  Data: string;
+begin
+
+  if not FileExists('.\package.json') then
+    Exit;
+
+  Data := TFile.ReadAllText('.\package.json');
+
+  FPackage := TJSON.Parse<TPackage>(Data);
+
+  FDprojParser := TDprojParser.Create(FPackage.DataBase + FPackage.PackagesDir, FPackage.Id);
 
 end;
 
@@ -166,7 +195,12 @@ begin
     if not RttiType.TryGetCustomAttribute<CommandAttribute>(CmdAttrib) then
       raise Exception.Create('Error command register');
 
-    CmdInstance :=  RttiType.GetMethod('Create').invoke(Cmd, [TValue.From<string>(FAppPath), TValue.From<IConsoleIO>(FConsoleIO), TValue.From<TDprojParser>(FDprojParser)]).AsObject;
+    CmdInstance :=  RttiType.GetMethod('Create').invoke(Cmd, [
+      TValue.From<string>(FAppPath),
+      TValue.From<TPackage>(FPackage),
+      TValue.From<IConsoleIO>(FConsoleIO),
+      TValue.From<TDprojParser>(FDprojParser)
+    ]).AsObject;
 
     CmdRegister := TCommandRegister.Create(CmdAttrib.Name, CmdAttrib.Description, CmdInstance);
 
@@ -207,7 +241,11 @@ begin
     Exit;
   end;
 
-  Execute(Cmd);
+  try
+    Execute(Cmd);
+  except on E: EAlfredException do
+    FConsoleIO.WriteError(E.Message);
+  end;
 
 end;
 

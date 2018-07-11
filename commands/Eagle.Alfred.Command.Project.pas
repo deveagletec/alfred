@@ -1,4 +1,4 @@
-unit Eagle.Alfred.ProjectCommand;
+unit Eagle.Alfred.Command.Project;
 
 interface
 uses
@@ -31,7 +31,7 @@ type
     procedure Version;
 
     [Action('HELP', '')]
-    procedure Help;
+    procedure Help();
   end;
 
 implementation
@@ -55,6 +55,8 @@ procedure TProjectCommand.Execute;
 var
   list: TStringList;
 begin
+
+  CheckProjectConfiguration;
 
   list := TStringList.Create;
 
@@ -117,22 +119,38 @@ var
   Data: string;
 begin
 
+  Package := TPackage.Create;
+
+  Package.Id := '';
   Package.Version := String.Parse(CurrentYear) + '.00#';
-  Package.MigrationDir := 'migrations/';
-  Package.PackagesDir := 'packages/';
-  Package.SourceDir := 'src/';
-  Package.TestsDir := 'tests/';
+  Package.BaseDir := '.\';
+  Package.MigrationDir := 'migrations\';
+  Package.PackagesDir := 'packages\';
+  Package.SourceDir := 'src\';
+  Package.TestsDir := 'tests\';
+  Package.AppNamespace := 'Eagle';
+  Package.Modular := False;
 
-  Data := TJSON.Stringify(Package, True);
+  try
 
-  TFile.WriteAllText('package.json', Data);
+    Data := TJSON.Stringify(Package, True);
 
-  FConsoleIO.WriteInfo('Projeto configurado com sucesso!');
+    TFile.WriteAllText('package.json', Data);
+
+    FConsoleIO.WriteInfo('Projeto configurado com sucesso!');
+
+  finally
+    Package.Free;
+  end;
 
 end;
 
 procedure TProjectCommand.Version;
 begin
+
+  CheckProjectConfiguration;
+
+  FConsoleIO.WriteInfo(FPackage.Version);
 
 end;
 

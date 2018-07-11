@@ -28,7 +28,7 @@ implementation
 procedure TConsoleIO.WriteColor(const Text: string; Color: Byte; const NewLine : Boolean = True);
 var
   OldColor: Byte;begin
-  OldColor := TextColor;  TextColor(Color);  if NewLine then    Writeln('');  Write(Text);  TextColor(OldColor);
+  OldColor := TextColor;  TextColor(Color);  Write(Text);  if NewLine then    Writeln('');  TextColor(OldColor);
 
 end;
 

@@ -6,18 +6,18 @@ program Alfred;
 
 uses
   System.SysUtils,
-  Eagle.Alfred.CreateCommand in 'Eagle.Alfred.CreateCommand.pas',
   Eagle.Alfred in 'Eagle.Alfred.pas',
   Eagle.Alfred.DprojParser in 'Eagle.Alfred.DprojParser.pas',
   Eagle.ConsoleIO in 'Eagle.ConsoleIO.pas',
-  Console in 'Console.pas',
-  Eagle.Alfred.MigrateCommand in 'Eagle.Alfred.MigrateCommand.pas',
   Eagle.Alfred.Command in 'Eagle.Alfred.Command.pas',
-  Eagle.Alfred.ProjectCommand in 'Eagle.Alfred.ProjectCommand.pas',
   Eagle.Alfred.Attributes in 'Eagle.Alfred.Attributes.pas',
-  Eagle.Alfred.CrudCommand in 'Eagle.Alfred.CrudCommand.pas',
+  Eagle.Alfred.Data in 'Eagle.Alfred.Data.pas',
   Eagle.Alfred.CommandRegister in 'Eagle.Alfred.CommandRegister.pas',
-  Eagle.Alfred.Data in 'Eagle.Alfred.Data.pas';
+  Eagle.Alfred.Command.Crud in 'commands\Eagle.Alfred.Command.Crud.pas',
+  Eagle.Alfred.Command.Migrate in 'commands\Eagle.Alfred.Command.Migrate.pas',
+  Eagle.Alfred.Command.Project in 'commands\Eagle.Alfred.Command.Project.pas',
+  Console in 'libs\Console.pas',
+  Eagle.Alfred.Exceptions in 'Eagle.Alfred.Exceptions.pas';
 
 begin
 

@@ -4,7 +4,9 @@ interface
 uses
   System.SysUtils,
   Eagle.ConsoleIO,
-  Eagle.Alfred.DprojParser;
+  Eagle.Alfred.DprojParser,
+  Eagle.Alfred.Data,
+  Eagle.Alfred.Exceptions;
 
 type
 
@@ -13,11 +15,14 @@ type
     FAppPath: string;
     FDprojParser: TDprojParser;
     FConsoleIO: IConsoleIO;
+    FPackage: TPackage;
 
     function Capitalize(const Str: string): string;
     procedure CreateDiretories(const Paths: array of string);
+
+    procedure CheckProjectConfiguration;
   public
-    constructor Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
+    constructor Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
   end;
 
 implementation
@@ -48,11 +53,21 @@ begin
 
 end;
 
-constructor TCommand.Create(const AppPath: string; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
+procedure TCommand.CheckProjectConfiguration;
+begin
+
+  if not Assigned(FPackage) then
+    raise EAlfredException.Create('Projeto não configurado! Arquivo package.json não encontrado.');
+
+end;
+
+constructor TCommand.Create(const AppPath: string; APackage: TPackage;
+    ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
 begin
   FDprojParser := DprojParser;
   FAppPath := AppPath;
   FConsoleIO := ConsoleIO;
+  FPackage := APackage;
 end;
 
 procedure TCommand.CreateDiretories(const Paths: array of string);
