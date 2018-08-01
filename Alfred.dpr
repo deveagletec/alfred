@@ -13,11 +13,12 @@ uses
   Eagle.Alfred.Attributes in 'Eagle.Alfred.Attributes.pas',
   Eagle.Alfred.Data in 'Eagle.Alfred.Data.pas',
   Eagle.Alfred.CommandRegister in 'Eagle.Alfred.CommandRegister.pas',
-  Eagle.Alfred.Command.Crud in 'commands\Eagle.Alfred.Command.Crud.pas',
   Eagle.Alfred.Command.Migrate in 'commands\Eagle.Alfred.Command.Migrate.pas',
   Eagle.Alfred.Command.Project in 'commands\Eagle.Alfred.Command.Project.pas',
   Console in 'libs\Console.pas',
-  Eagle.Alfred.Exceptions in 'Eagle.Alfred.Exceptions.pas';
+  Eagle.Alfred.Exceptions in 'Eagle.Alfred.Exceptions.pas',
+  Eagle.Alfred.Command.Generate in 'commands\Eagle.Alfred.Command.Generate.pas',
+  Eagle.Alfred.MigrateService in 'Eagle.Alfred.MigrateService.pas';
 
 begin
 

@@ -4,7 +4,6 @@ interface
 uses
   System.SysUtils,
   Eagle.ConsoleIO,
-  Eagle.Alfred.DprojParser,
   Eagle.Alfred.Data,
   Eagle.Alfred.Exceptions;
 
@@ -13,7 +12,6 @@ type
   TCommand = class
   protected
     FAppPath: string;
-    FDprojParser: TDprojParser;
     FConsoleIO: IConsoleIO;
     FPackage: TPackage;
 
@@ -22,7 +20,7 @@ type
 
     procedure CheckProjectConfiguration;
   public
-    constructor Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
+    constructor Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);
   end;
 
 implementation
@@ -61,10 +59,8 @@ begin
 
 end;
 
-constructor TCommand.Create(const AppPath: string; APackage: TPackage;
-    ConsoleIO: IConsoleIO; DprojParser: TDprojParser);
+constructor TCommand.Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);
 begin
-  FDprojParser := DprojParser;
   FAppPath := AppPath;
   FConsoleIO := ConsoleIO;
   FPackage := APackage;

@@ -7,7 +7,14 @@ uses
 
 type
 
-  TDprojParser = class
+  IDprojParser = interface
+    ['{995EE77F-1CD3-45A1-9F77-C718A86293D5}']
+    procedure AddForm(const UnitName, FormName, Path: string);
+    procedure AddUnit(const Name, Path: string);
+    procedure Save;
+  end;
+
+  TDprojParser = class(TInterfacedObject, IDprojParser)
     private
       FXMLDocument: IXMLDomDocument;
       FPackagePath: string;

@@ -27,7 +27,6 @@ type
   private
     FCurrentPath: string;
     FAppPath: string;
-    FDprojParser: TDprojParser;
     FConsoleIO: IConsoleIO;
     FPackage: TPackage;
     FCommands: TDictionary<string, ICommandRegister>;
@@ -63,9 +62,6 @@ end;
 
 destructor TAlfred.Destroy;
 begin
-
-  if Assigned(FDprojParser) then
-    FreeAndNil(FDprojParser);
 
   if Assigned(FCommands) then
     FreeAndNil(FCommands);
@@ -170,7 +166,8 @@ begin
 
   FPackage := TJSON.Parse<TPackage>(Data);
 
-  FDprojParser := TDprojParser.Create(FPackage.DataBase + FPackage.PackagesDir, FPackage.Id);
+  if FPackage.BaseDir.IsEmpty then
+    FPackage.BaseDir := '.\';
 
 end;
 
@@ -198,8 +195,7 @@ begin
     CmdInstance :=  RttiType.GetMethod('Create').invoke(Cmd, [
       TValue.From<string>(FAppPath),
       TValue.From<TPackage>(FPackage),
-      TValue.From<IConsoleIO>(FConsoleIO),
-      TValue.From<TDprojParser>(FDprojParser)
+      TValue.From<IConsoleIO>(FConsoleIO)
     ]).AsObject;
 
     CmdRegister := TCommandRegister.Create(CmdAttrib.Name, CmdAttrib.Description, CmdInstance);
