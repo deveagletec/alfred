@@ -34,6 +34,7 @@ type
     function GetParametersAction(Action: TRttiMethod): TArray<TValue>;
     procedure Help;
     procedure Init;
+    function IsBoolean(Param: TRttiParameter): Boolean;
   public
     class function GetInstance() : TAlfred;
     class procedure ReleaseInstance();
@@ -124,7 +125,12 @@ begin
 
     for Param in Action.Parameters do
     begin
-      Params.Add(TValue.From<string>(ParamStr(Index).ToLower));
+
+      if IsBoolean(Param) then
+        Params.Add(TValue.From<Boolean>(FindCmdLineSwitch(Param.Name, ['-'], True)))
+      else
+        Params.Add(TValue.From<string>(ParamStr(Index).ToLower));
+
       Inc(Index);
     end;
 
@@ -168,6 +174,16 @@ begin
 
   if FPackage.BaseDir.IsEmpty then
     FPackage.BaseDir := '.\';
+
+end;
+
+function TAlfred.IsBoolean(Param: TRttiParameter): Boolean;
+begin
+
+  if Param.ParamType.TypeKind <> tkEnumeration then
+    Exit(False);
+
+  Result := Param.ParamType.QualifiedName.Equals('System.Boolean');
 
 end;
 

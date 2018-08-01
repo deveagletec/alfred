@@ -48,6 +48,8 @@ begin
   FDprojParser.AddUnit(InterfaceName, '..\..\' + FFilePath + InterfaceName);
   FDprojParser.AddUnit(ClassName, '..\..\' + FFilePath + 'impl\' + ClassName);
 
+  FDprojParser.Save;
+
 end;
 
 end.

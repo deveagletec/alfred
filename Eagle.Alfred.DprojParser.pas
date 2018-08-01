@@ -3,7 +3,9 @@ unit Eagle.Alfred.DprojParser;
 interface
 uses
   System.SysUtils,System.Win.ComObj, XML.adomxmldom, ActiveX, XMLDoc, MSXML, MSXMLDOM, XMLIntf,
-  System.IOUtils, System.Classes, System.Generics.Collections;
+  System.IOUtils, System.Classes, System.Generics.Collections,
+
+  Eagle.Alfred.Exceptions;
 
 type
 
@@ -67,16 +69,18 @@ begin
 
   ItemGroup := FXMLDocument.selectSingleNode('/Project/ItemGroup');
 
-  NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/DCCReference').firstChild;
+  NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/DCCReference');
 
-  Node := NodeBase.parentNode.cloneNode(True);
+  Node := NodeBase.cloneNode(True);
 
   Node.attributes.getNamedItem('Include').Text := Path;
 
   if node.hasChildNodes then
     Node.removeChild(Node.firstChild);
 
-  ItemGroup.appendChild(Node);
+  NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/BuildConfiguration');
+
+  ItemGroup.insertBefore(Node, NodeBase);
 
   FUnitsList.Add('  ' + Name.Replace('.pas', ' in ') + Path.QuotedString + ',');
 
@@ -134,7 +138,6 @@ end;
 
 constructor TDprojParser.Create(const PackagePath, ProjectName: string);
 begin
-  CoInitialize(nil);
 
   FPackagePath := PackagePath;
   FProjectName := ProjectName;
@@ -142,11 +145,19 @@ begin
   FDprojFile := FPackagePath + ProjectName + '.dproj';
   FDprFile := FPackagePath + ProjectName + '.dpr';
 
+  if not FileExists(FDprojFile) then
+    raise EAlfredFileNotFoundException.Create('File ' + FDprojFile.QuotedString + ' not found');
+
+  if not FileExists(FDprFile) then
+    raise EAlfredFileNotFoundException.Create('File ' + FDprFile.QuotedString + ' not found');
+
+   CoInitialize(nil);
+
   FUnitsList := TList<string>.Create;
 
   FXMLDocument := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
   FXMLDocument.async := False;
-  { TODO 5 : Verificar se o arquivo de projeto existe }
+
   FXMLDocument.load(FDprojFile);
 
 end;

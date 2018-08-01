@@ -8,6 +8,8 @@ type
 
   EAlfredException = class(Exception);
 
+  EAlfredFileNotFoundException = class(EAlfredException);
+
 implementation
 
 end.

@@ -50,6 +50,8 @@ begin
 
   FDprojParser.AddUnit(FileName, '..\..\' + FFilePath + FileName);
 
+  FDprojParser.Save;
+
 end;
 
 end.

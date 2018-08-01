@@ -51,6 +51,8 @@ begin
 
   FDprojParser.AddForm(UnitName, FModelName + 'View', '..\..\' + FFilePath + UnitName);
 
+  FDprojParser.Save;
+
 end;
 
 end.

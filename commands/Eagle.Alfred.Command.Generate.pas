@@ -21,7 +21,7 @@ uses
   Eagle.Alfred.Generate.Test;
 
 type
-  [Command('GENERATE', 'Cria arquivos relacionados às operações de CRUD')]
+  [Command('GENERATE', 'Gerador de arquivos relacionados às operações de CRUD')]
   TGenerateCommand = class(TCommand)
   private
     procedure DoCreateView(const ModuleName, LayerName, ModelName: string);
@@ -37,19 +37,19 @@ type
     procedure CreateView(const ModelName, ModuleName: string);
 
     [Action('VIEWMODEL', '')]
-    procedure CreateViewModel(const ModelName, ModuleName: string);
+    procedure CreateViewModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 
     [Action('MODEL', '')]
-    procedure CreateModel(const ModelName, ModuleName: string);
+    procedure CreateModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 
     [Action('SERVICE', '')]
-    procedure CreateService(const ModelName, ModuleName: string);
+    procedure CreateService(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 
     [Action('REPOSITORY', '')]
     procedure CreateRepository(const ModelName, ModuleName: string);
 
     [Action('CRUD', '')]
-    procedure CreateCRUD(const ModelName, ModuleName: string);
+    procedure CreateCRUD(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 
     [Action('TEST', '')]
     procedure CreateTEST(const LayerName, ModelName, ModuleName: string);
@@ -65,16 +65,33 @@ implementation
 
 { TCrudCommand }
 
-procedure TGenerateCommand.CreateCRUD(const ModelName, ModuleName: string);
+procedure TGenerateCommand.CreateCRUD(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 begin
 
   CheckProjectConfiguration;
 
   DoCreateView(ModuleName, 'View', ModelName);
 
+  FConsoleIO.WriteInfo('Created View');
+
   DoCreateViewModel(ModuleName, 'ViewModel', ModelName);
 
+  FConsoleIO.WriteInfo('Created ViewModel');
+
   DoCreateModel(ModuleName, 'Entity', ModelName);
+
+  FConsoleIO.WriteInfo('Created Model');
+
+  if IgnoreTest then
+    Exit;
+
+  DoCreateTest(ModuleName, 'Entity', ModelName);
+
+  FConsoleIO.WriteInfo('Created Model Test');
+
+  DoCreateTest(ModuleName, 'ViewModel', ModelName);
+
+  FConsoleIO.WriteInfo('Created ViewModel Test');
 
 end;
 
@@ -91,17 +108,17 @@ begin
 
 end;
 
-procedure TGenerateCommand.CreateModel(const ModelName, ModuleName: string);
+procedure TGenerateCommand.CreateModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 begin
 
   CheckProjectConfiguration;
 
   DoCreateModel(ModuleName, 'Entity', ModelName);
 
-//  if IgnoreTest then
- //   Exit;
+  if IgnoreTest then
+    Exit;
 
- // DoCreateTest(ModuleName, 'Entity', ModelName);
+  DoCreateTest(ModuleName, 'Entity', ModelName);
 
 end;
 
@@ -112,19 +129,25 @@ begin
 
   DoCreateRepository(ModuleName, 'Repository', ModelName);
 
+  FConsoleIO.WriteInfo('Created Repository');
+
 end;
 
-procedure TGenerateCommand.CreateService(const ModelName, ModuleName: string);
+procedure TGenerateCommand.CreateService(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 begin
 
   CheckProjectConfiguration;
 
   DoCreateService(ModuleName, 'Service', ModelName);
 
-  //if IgnoreTest then
+  FConsoleIO.WriteInfo('Created Service');
+
+  if IgnoreTest then
     Exit;
 
   DoCreateTest(ModuleName, 'Service', ModelName);
+
+  FConsoleIO.WriteInfo('Created Service Test');
 
 end;
 
@@ -135,6 +158,8 @@ begin
 
   DoCreateTest(ModuleName, LayerName, ModelName);
 
+  FConsoleIO.WriteInfo('Created Test');
+
 end;
 
 procedure TGenerateCommand.CreateView(const ModelName, ModuleName: string);
@@ -144,19 +169,25 @@ begin
 
   DoCreateView(ModuleName, 'View', ModelName);
 
+  FConsoleIO.WriteInfo('Created View');
+
 end;
 
-procedure TGenerateCommand.CreateViewModel(const ModelName, ModuleName: string);
+procedure TGenerateCommand.CreateViewModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 begin
 
   CheckProjectConfiguration;
 
   DoCreateViewModel(ModuleName, 'ViewModel', ModelName);
 
-  //if IgnoreTest then
+  FConsoleIO.WriteInfo('Created ViewModel');
+
+  if IgnoreTest then
     Exit;
 
   DoCreateTest(ModuleName, 'ViewModel', ModelName);
+
+  FConsoleIO.WriteInfo('Created ViewModel Test');
 
 end;
 
@@ -169,8 +200,6 @@ begin
 
   Generate.Execute(ModuleName, LayerName, ModelName);
 
-  FConsoleIO.WriteInfo('Created Repository');
-
 end;
 
 procedure TGenerateCommand.DoCreateService(const ModuleName, LayerName, ModelName: string);
@@ -181,8 +210,6 @@ begin
   Generate := TServiceGenerate.Create(FAppPath, FPackage);
 
   Generate.Execute(ModuleName, LayerName, ModelName);
-
-  FConsoleIO.WriteInfo('Created Service');
 
 end;
 
@@ -206,8 +233,6 @@ begin
 
   Generate.Execute(ModuleName, LayerName, ModelName);
 
-  FConsoleIO.WriteInfo('Created View');
-
 end;
 
 procedure TGenerateCommand.DoCreateViewModel(const ModuleName, LayerName, ModelName: string);
@@ -219,8 +244,6 @@ begin
 
   Generate.Execute(ModuleName, LayerName, ModelName);
 
-  FConsoleIO.WriteInfo('Created ViewModel');
-
 end;
 
 procedure TGenerateCommand.DoCreateModel(const ModuleName, LayerName, ModelName: string);
@@ -231,8 +254,6 @@ begin
   Generate := TEntityGenerate.Create(FAppPath, FPackage);
 
   Generate.Execute(ModuleName, LayerName, ModelName);
-
-  FConsoleIO.WriteInfo('Created Model');
 
 end;
 
