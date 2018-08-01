@@ -146,7 +146,7 @@ begin
 
   FXMLDocument := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
   FXMLDocument.async := False;
-
+  { TODO 5 : Verificar se o arquivo de projeto existe }
   FXMLDocument.load(FDprojFile);
 
 end;

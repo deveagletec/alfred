@@ -11,7 +11,8 @@ uses
   Eagle.ConsoleIO,
   Eagle.Alfred.DprojParser,
   Eagle.Alfred.Data,
-  Eagle.Alfred.MigrateService;
+  Eagle.Alfred.MigrateService,
+  Eagle.Alfred.TestGenerate;
 
 type
   [Command('GENERATE', 'Cria arquivos relacionados às operações de CRUD')]
@@ -27,7 +28,7 @@ type
     procedure DoCreateViewModel;
     procedure DoCreateService;
     procedure DoCreateRepository;
-    procedure DoCreateTest;
+    procedure DoCreateTest(const ModuleName, LayerName, ModelName: string);
 
     procedure DoCreateModel(const SubLayer, Sufix, TemplateInterface, TemplateClass: string);
     procedure GenerateFile(const Template, UnitName, FileName: string; const HasGUID: Boolean = False);
@@ -59,7 +60,7 @@ type
     procedure CreateCRUD(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 
     [Action('TEST', '')]
-    procedure CreateTEST(const LayerName, ClassName, ModuleName: string);
+    procedure CreateTEST(const LayerName, ModelName, ModuleName: string);
 
     [Action('MIGRATE', '')]
     procedure CreateMigrate(const Name: string);
@@ -125,9 +126,7 @@ begin
   if IgnoreTest then
     Exit;
 
-  FLayerName := 'Entity';
-
-  DoCreateTest;
+  DoCreateTest(ModuleName, 'Entity', ModelName);
 
 end;
 
@@ -156,22 +155,16 @@ begin
   if IgnoreTest then
     Exit;
 
-  FLayerName := 'Service';
-
-  DoCreateTest;
+  DoCreateTest(ModuleName, 'Service', ModelName);
 
 end;
 
-procedure TGenerateCommand.CreateTEST(const LayerName, ClassName, ModuleName: string);
+procedure TGenerateCommand.CreateTEST(const LayerName, ModelName, ModuleName: string);
 begin
 
   CheckProjectConfiguration;
 
-  FModelName := Capitalize(ClassName);
-  FModuleName := Capitalize(ModuleName);
-  FLayerName := Capitalize(LayerName);
-
-  DoCreateTest;
+  DoCreateTest(ModuleName, LayerName, ModelName);
 
 end;
 
@@ -200,9 +193,7 @@ begin
   if IgnoreTest then
     Exit;
 
-  FLayerName := 'ViewModel';
-
-  DoCreateTest;
+  DoCreateTest(ModuleName, 'ViewModel', ModelName);
 
 end;
 
@@ -216,39 +207,14 @@ begin
   DoCreateModel('Service', 'Service', 'IModelService.pas', 'TModelService.pas');
 end;
 
-procedure TGenerateCommand.DoCreateTest;
+procedure TGenerateCommand.DoCreateTest(const ModuleName, LayerName, ModelName: string);
 var
-  Namespace, BaseDir, Dir, ModelName, ModuleName, ModulesDir: string;
+  Generate: ITestGenerate;
 begin
 
-  if FPackage.Modular then
-  begin
-    ModuleName := FModuleName + '.';
-    ModulesDir := 'modulos\' + FModuleName.ToLower + '\';
-  end
-  else
-  begin
-    ModuleName := EmptyStr;
-    ModulesDir := EmptyStr;
-  end;
+  Generate := TTestGenerate.Create(FAppPath, FPackage);
 
-  if FLayerName.ToLower.Equals('entity') then
-    ModelName := FModelName
-  else
-    if FLayerName.ToLower.Equals('viewmodel') then
-      ModelName := FModelName + FLayerName
-    else
-      ModelName := FModelName + '.Model.' + FLayerName;
-
-  Namespace := FPackage.AppNamespace + ModuleName + FLayerName + '.' + ModelName;
-
-  Dir := FPackage.TestsDir + ModulesDir + FLayerName.ToLower + '\';
-  BaseDir := FPackage.BaseDir + Dir;
-
-  CreateDiretories([BaseDir]);
-
-  GenerateFile('T' + FLayerName + 'Test.pas', Namespace + 'Test.pas', BaseDir + Namespace + 'Test.pas');
-
+  Generate.Execute(ModuleName, LayerName, ModelName);
 
 end;
 

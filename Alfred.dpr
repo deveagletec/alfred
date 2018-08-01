@@ -18,7 +18,9 @@ uses
   Console in 'libs\Console.pas',
   Eagle.Alfred.Exceptions in 'Eagle.Alfred.Exceptions.pas',
   Eagle.Alfred.Command.Generate in 'commands\Eagle.Alfred.Command.Generate.pas',
-  Eagle.Alfred.MigrateService in 'Eagle.Alfred.MigrateService.pas';
+  Eagle.Alfred.MigrateService in 'Eagle.Alfred.MigrateService.pas',
+  Eagle.Alfred.TestGenerate in 'Eagle.Alfred.TestGenerate.pas',
+  Eagle.Alfred.Utils in 'Eagle.Alfred.Utils.pas';
 
 begin
 
