@@ -6,6 +6,7 @@ uses
 
 function Capitalize(const Str: string): string;
 procedure CreateDiretories(const Paths: array of string);
+function GuidCreate: string;
 
 implementation
 
@@ -43,6 +44,17 @@ begin
     if not DirectoryExists(Path) then
       ForceDirectories(Path);
   end;
+
+end;
+
+function GuidCreate: string;
+var
+  ID: TGUID;
+begin
+
+  ID := TGUID.NewGuid;
+
+  Result := GUIDToString(ID);
 
 end;
 

@@ -61,7 +61,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>generate test entity marca estoque</Debugger_RunParams>
+        <Debugger_RunParams>generate crud marca estoque</Debugger_RunParams>
         <Manifest_File>None</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -89,8 +89,15 @@
         <DCCReference Include="Eagle.Alfred.Exceptions.pas"/>
         <DCCReference Include="commands\Eagle.Alfred.Command.Generate.pas"/>
         <DCCReference Include="Eagle.Alfred.MigrateService.pas"/>
-        <DCCReference Include="Eagle.Alfred.TestGenerate.pas"/>
         <DCCReference Include="Eagle.Alfred.Utils.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.View.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.ViewModel.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.Model.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.Entity.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.Repository.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.Service.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.Test.pas"/>
+        <DCCReference Include="generates\Eagle.Alfred.Generate.UnitGenerate.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

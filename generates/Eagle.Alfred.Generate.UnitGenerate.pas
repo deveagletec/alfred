@@ -1,4 +1,4 @@
-unit Eagle.Alfred.TestGenerate;
+unit Eagle.Alfred.Generate.UnitGenerate;
 
 interface
 uses
@@ -10,30 +10,27 @@ uses
   Eagle.Alfred.Utils;
 
 type
-
-  ITestGenerate = interface
+  IUnitGenerate = interface
     ['{3E5D1E77-C61F-486A-BA60-3BFECBF8F492}']
     procedure Execute(const ModuleName, LayerName, ModelName: string);
   end;
 
-  TTestGenerate = class(TInterfacedObject, ITestGenerate)
-  private
+  TUnitGenerate = class abstract (TInterfacedObject, IUnitGenerate)
+  protected
     FAppPath: string;
     FPackage: TPackage;
     FModuleName: string;
     FLayerName: string;
     FModelName: string;
     FClassName: string;
-    FDprojParser: IDprojParser;
-
     FNamespace: string;
     FFilePath: string;
+    FSourceDir: string;
 
     procedure MountNamespaceAndFilePath;
     procedure MountClassName;
-    procedure DoExecute;
     procedure GenerateFile(const Template, UnitName, FileName: string);
-    function GuidCreate: string;
+    procedure DoExecute; virtual; abstract;
 
   public
     constructor Create(const AppPath: string; APackage: TPackage);
@@ -42,33 +39,16 @@ type
 
 implementation
 
-{ TTestGenerate }
+{ TUnitGenerate }
 
-constructor TTestGenerate.Create(const AppPath: string; APackage: TPackage);
+constructor TUnitGenerate.Create(const AppPath: string; APackage: TPackage);
 begin
   FAppPath := AppPath;
   FPackage := APackage;
-  FDprojParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Id + 'Test');
+  FSourceDir := FPackage.SourceDir;
 end;
 
-procedure TTestGenerate.DoExecute;
-var
-  BaseDir, FileName, FilePath: string;
-begin
-
-  BaseDir := FPackage.BaseDir + FFilePath;
-
-  CreateDiretories([BaseDir]);
-
-  FileName := FNamespace + FClassName + 'Test.pas';
-
-  GenerateFile('T' + FLayerName + 'Test.pas', FileName, BaseDir + FNamespace + FClassName + 'Test.pas');
-
-  FDprojParser.AddUnit(FileName, '..\..\' + FFilePath + FileName);
-
-end;
-
-procedure TTestGenerate.Execute(const ModuleName, LayerName, ModelName: string);
+procedure TUnitGenerate.Execute(const ModuleName, LayerName, ModelName: string);
 begin
 
   FModuleName := Capitalize(ModuleName.Replace('.', ''));
@@ -83,7 +63,7 @@ begin
 
 end;
 
-procedure TTestGenerate.GenerateFile(const Template, UnitName, FileName: string);
+procedure TUnitGenerate.GenerateFile(const Template, UnitName, FileName: string);
 var
   FStringList: TStringList;
 begin
@@ -107,18 +87,7 @@ begin
 
 end;
 
-function TTestGenerate.GuidCreate: string;
-var
-  ID: TGUID;
-begin
-
-  ID := TGUID.NewGuid;
-
-  Result := GUIDToString(ID);
-
-end;
-
-procedure TTestGenerate.MountClassName;
+procedure TUnitGenerate.MountClassName;
 begin
 
   FClassName := FModelName;
@@ -128,7 +97,7 @@ begin
 
 end;
 
-procedure TTestGenerate.MountNamespaceAndFilePath;
+procedure TUnitGenerate.MountNamespaceAndFilePath;
 var
   ModuleName, ModuleDir, LayerName, LayerDir: string;
 begin
@@ -155,7 +124,7 @@ begin
 
   FNamespace := FPackage.AppNamespace + ModuleName + LayerName;
 
-  FFilePath := FPackage.TestsDir + ModuleDir + LayerDir;
+  FFilePath := FSourceDir + ModuleDir + LayerDir;
 
 end;
 
