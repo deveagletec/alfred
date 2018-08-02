@@ -25,7 +25,7 @@ type
       FDprFile: string;
       FVersionString: string;
       FUnitsList: TList<string>;
-      procedure SetDprojFile(const Value: string);
+      FChanged: Boolean;
       procedure SetVersionString(const Value: string);
       procedure UpdateDpr;
     public
@@ -60,6 +60,8 @@ begin
 
   FUnitsList.Add('  ' + UnitName.Replace('.pas', ' in ') + Path.QuotedString + ',');
 
+  FChanged := True;
+
 end;
 
 procedure TDprojParser.AddUnit(const Name, Path: string);
@@ -83,6 +85,8 @@ begin
   ItemGroup.insertBefore(Node, NodeBase);
 
   FUnitsList.Add('  ' + Name.Replace('.pas', ' in ') + Path.QuotedString + ',');
+
+  FChanged := True;
 
 end;
 
@@ -160,6 +164,8 @@ begin
 
   FXMLDocument.load(FDprojFile);
 
+  FChanged := False;
+
 end;
 
 destructor TDprojParser.Destroy;
@@ -170,15 +176,13 @@ end;
 procedure TDprojParser.Save;
 begin
 
+  if not FChanged then
+    Exit;
+
   UpdateDpr;
 
   FXMLDocument.save(FDprojFile);
 
-end;
-
-procedure TDprojParser.SetDprojFile(const Value: string);
-begin
-  FDprojFile := Value;
 end;
 
 procedure TDprojParser.SetVersionString(const Value: string);

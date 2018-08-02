@@ -47,6 +47,7 @@ type
 
   public
     constructor Create(const AppPath: string; APackage: TPackage);
+    destructor Destroy; override;
     procedure GenerateView(const ModuleName, ModelName: string);
     procedure GenerateViewModel(const ModuleName, ModelName: string);
     procedure GenerateModel(const ModuleName, ModelName: string);
@@ -61,6 +62,7 @@ implementation
 
 constructor TCodeGenerator.Create(const AppPath: string; APackage: TPackage);
 begin
+
   FAppPath := AppPath;
   FPackage := APackage;
 
@@ -70,9 +72,16 @@ begin
 
 end;
 
+destructor TCodeGenerator.Destroy;
+begin
+  FDprojParser.Save;
+  FDprojTestParser.Save;
+  inherited;
+end;
+
 procedure TCodeGenerator.DoGenerateModel(const InterfaceTemplate, ClassTemplate: string);
 var
-  BaseDir, InterfaceName, ClassName, FilePath: string;
+  BaseDir, InterfaceName, ClassName: string;
 begin
 
   BaseDir := FPackage.BaseDir + FFilePath;
@@ -88,13 +97,11 @@ begin
   FDprojParser.AddUnit(InterfaceName, '..\..\' + FFilePath + InterfaceName);
   FDprojParser.AddUnit(ClassName, '..\..\' + FFilePath + 'impl\' + ClassName);
 
-  FDprojParser.Save;
-
 end;
 
 procedure TCodeGenerator.DoGenerateTest;
 var
-  BaseDir, FileName, FilePath: string;
+  BaseDir, FileName: string;
 begin
 
   BaseDir := FPackage.BaseDir + FFilePath;
@@ -106,8 +113,6 @@ begin
   GenerateFile('T' + FLayerName + 'Test.pas', FileName, BaseDir + FileName);
 
   FDprojTestParser.AddUnit(FileName, '..\..\' + FFilePath + FileName);
-
-  FDprojTestParser.Save;
 
 end;
 
@@ -130,8 +135,6 @@ begin
   FDprojParser.AddUnit(UnitName, '..\..\' + FFilePath + UnitName);
 
   FDprojParser.AddForm(UnitName, FModelName + 'View', '..\..\' + FFilePath + UnitName);
-
-  FDprojParser.Save;
 
 end;
 
@@ -263,7 +266,6 @@ begin
   FNamespace := FPackage.AppNamespace + ModuleName + LayerName;
 
   FFilePath := FSourceDir + ModuleDir + LayerDir;
-
 
 end;
 
