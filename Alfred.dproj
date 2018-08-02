@@ -61,7 +61,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>generate crud marca estoque --ignore-test</Debugger_RunParams>
+        <Debugger_RunParams>generate crud marca teste --ignore-test</Debugger_RunParams>
         <Manifest_File>None</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -91,6 +91,7 @@
         <DCCReference Include="Eagle.Alfred.MigrateService.pas"/>
         <DCCReference Include="Eagle.Alfred.Utils.pas"/>
         <DCCReference Include="Eagle.Alfred.CodeGenerator.pas"/>
+        <DCCReference Include="commands\Eagle.Alfred.Command.Delete.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

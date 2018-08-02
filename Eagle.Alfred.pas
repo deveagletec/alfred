@@ -31,6 +31,7 @@ type
     FPackage: TPackage;
     FCommands: TDictionary<string, ICommandRegister>;
     procedure Execute(Cmd: string);
+    function GetCommandInstance(Command: ICommandRegister): TObject;
     function GetParametersAction(Action: TRttiMethod): TArray<TValue>;
     procedure Help;
     procedure Init;
@@ -79,6 +80,7 @@ var
   ActionName: string;
   Action: TRttiMethod;
   ParamsAction: TArray<TValue>;
+  CommandInstance: TObject;
 begin
 
   ActionName := ParamStr(2).ToUpper;
@@ -95,7 +97,26 @@ begin
 
   ParamsAction := GetParametersAction(Action);
 
-  Action.Invoke(Command.GetCommand, ParamsAction);
+  CommandInstance := GetCommandInstance(Command);
+
+  try
+
+    Action.Invoke(CommandInstance, ParamsAction);
+
+  finally
+    CommandInstance.Free;
+  end;
+
+end;
+
+function TAlfred.GetCommandInstance(Command: ICommandRegister): TObject;
+begin
+
+  Result :=  Command.GetCommandType.GetMethod('Create').invoke(Command.GetCommandClass, [
+      TValue.From<string>(FAppPath),
+      TValue.From<TPackage>(FPackage),
+      TValue.From<IConsoleIO>(FConsoleIO)
+    ]).AsObject;
 
 end;
 
@@ -204,13 +225,7 @@ begin
     if not RttiType.TryGetCustomAttribute<CommandAttribute>(CmdAttrib) then
       raise Exception.Create('Error command register');
 
-    CmdInstance :=  RttiType.GetMethod('Create').invoke(Cmd, [
-      TValue.From<string>(FAppPath),
-      TValue.From<TPackage>(FPackage),
-      TValue.From<IConsoleIO>(FConsoleIO)
-    ]).AsObject;
-
-    CmdRegister := TCommandRegister.Create(CmdAttrib.Name, CmdAttrib.Description, CmdInstance);
+    CmdRegister := TCommandRegister.Create(CmdAttrib.Name, CmdAttrib.Description, Cmd, RttiType);
 
     FCommands.Add(CmdAttrib.Name, CmdRegister);
 

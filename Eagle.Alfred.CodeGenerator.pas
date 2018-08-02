@@ -97,6 +97,9 @@ begin
   FDprojParser.AddUnit(InterfaceName, '..\..\' + FFilePath + InterfaceName);
   FDprojParser.AddUnit(ClassName, '..\..\' + FFilePath + 'impl\' + ClassName);
 
+  FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath);
+  FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath + 'impl\');
+
 end;
 
 procedure TCodeGenerator.DoGenerateTest;

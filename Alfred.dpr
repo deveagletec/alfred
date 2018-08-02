@@ -20,7 +20,8 @@ uses
   Eagle.Alfred.Command.Generate in 'commands\Eagle.Alfred.Command.Generate.pas',
   Eagle.Alfred.MigrateService in 'Eagle.Alfred.MigrateService.pas',
   Eagle.Alfred.Utils in 'Eagle.Alfred.Utils.pas',
-  Eagle.Alfred.CodeGenerator in 'Eagle.Alfred.CodeGenerator.pas';
+  Eagle.Alfred.CodeGenerator in 'Eagle.Alfred.CodeGenerator.pas',
+  Eagle.Alfred.Command.Delete in 'commands\Eagle.Alfred.Command.Delete.pas';
 
 begin
 

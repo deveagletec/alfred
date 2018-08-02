@@ -13,6 +13,7 @@ type
     ['{995EE77F-1CD3-45A1-9F77-C718A86293D5}']
     procedure AddForm(const UnitName, FormName, Path: string);
     procedure AddUnit(const Name, Path: string);
+    procedure AddPathInUnitSearchPath(const Path: string);
     procedure Save;
   end;
 
@@ -25,15 +26,21 @@ type
       FDprFile: string;
       FVersionString: string;
       FUnitsList: TList<string>;
+      FUnitSearchPathList: TList<string>;
+      FUnitSearchPathNode: IXMLDOMNode;
       FChanged: Boolean;
       procedure SetVersionString(const Value: string);
       procedure UpdateDpr;
+      function GetUnitSearchPathNode: IXMLDOMNode;
+      procedure InitXMLDomDocument;
     public
       procedure ChangeVersion;
       constructor Create(const PackagePath, ProjectName: string);
       destructor Destroy; override;
       procedure AddForm(const UnitName, FormName, Path: string);
       procedure AddUnit(const Name, Path: string);
+      procedure AddPathInUnitSearchPath(const Path: string);
+      procedure DeletePathInUnitSearchPath(const Path: string);
       procedure Save;
 
       property VersionString: string read FVersionString write SetVersionString;
@@ -59,6 +66,25 @@ begin
   ItemGroup.appendChild(Node);
 
   FUnitsList.Add('  ' + UnitName.Replace('.pas', ' in ') + Path.QuotedString + ',');
+
+  FChanged := True;
+
+end;
+
+procedure TDprojParser.AddPathInUnitSearchPath(const Path: string);
+var
+  UnitPath: string;
+begin
+
+  UnitPath := Path.Trim;
+
+  if UnitPath.EndsWith('\') then
+    UnitPath := UnitPath.Remove(UnitPath.Length-1);
+
+  if UnitPath.IsEmpty or FUnitSearchPathList.Contains(UnitPath) then
+    Exit;
+
+  FUnitSearchPathList.Add(UnitPath);
 
   FChanged := True;
 
@@ -155,22 +181,99 @@ begin
   if not FileExists(FDprFile) then
     raise EAlfredFileNotFoundException.Create('File ' + FDprFile.QuotedString + ' not found');
 
-   CoInitialize(nil);
+  CoInitialize(nil);
 
   FUnitsList := TList<string>.Create;
+
+  FUnitSearchPathList := TList<string>.Create;
+
+  InitXMLDomDocument;
+
+  FChanged := False;
+
+end;
+
+procedure TDprojParser.DeletePathInUnitSearchPath(const Path: string);
+var
+  UnitPath: string;
+begin
+
+  UnitPath := Path.Trim;
+
+  if UnitPath.IsEmpty or not FUnitSearchPathList.Contains(UnitPath) then
+    Exit;
+
+  FUnitSearchPathList.Remove(UnitPath);
+
+  FChanged := True;
+
+end;
+
+destructor TDprojParser.Destroy;
+begin
+
+  if Assigned(FUnitsList) then
+    FreeAndNil(FUnitsList);
+
+  if Assigned(FUnitSearchPathList) then
+    FreeAndNil(FUnitSearchPathList);
+
+end;
+
+function TDprojParser.GetUnitSearchPathNode: IXMLDOMNode;
+var
+  Node, Attribute: IXMLDOMNode;
+  NodeList: IXMLDOMNodeList;
+  Condition, AttributeValue: string;
+begin
+
+  Condition := '$(Cfg_1_Win32)'.QuotedString + '!=' + ''.QuotedString;
+
+  NodeList := FXMLDocument.selectNodes('/Project/PropertyGroup/DCC_UnitSearchPath');
+
+  Node := NodeList.nextNode;
+
+  while Node <> nil do
+  begin
+
+    Attribute := Node.parentNode.attributes.getNamedItem('Condition');
+
+    if Attribute = nil then
+      Continue;
+
+    AttributeValue := Attribute.Text;
+
+    if AttributeValue.Equals(Condition) then
+    begin
+      Result := Node;
+      Break;
+    end;
+
+    Node := NodeList.nextNode;
+
+  end;
+
+end;
+
+procedure TDprojParser.InitXMLDomDocument;
+var
+  UnitsList: string;
+begin
 
   FXMLDocument := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
   FXMLDocument.async := False;
 
   FXMLDocument.load(FDprojFile);
 
-  FChanged := False;
+  FUnitSearchPathNode := GetUnitSearchPathNode;
 
-end;
+  if FUnitSearchPathNode = nil then
+    Exit;
 
-destructor TDprojParser.Destroy;
-begin
-  FUnitsList.Free;
+  UnitsList := FUnitSearchPathNode.text;
+
+  FUnitSearchPathList.AddRange(UnitsList.Split([';']));
+
 end;
 
 procedure TDprojParser.Save;
@@ -180,6 +283,9 @@ begin
     Exit;
 
   UpdateDpr;
+
+  if FUnitSearchPathNode <> nil then
+    FUnitSearchPathNode.text := string.Join(';', FUnitSearchPathList.ToArray);
 
   FXMLDocument.save(FDprojFile);
 
