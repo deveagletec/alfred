@@ -27,7 +27,8 @@ uses
   Eagle.Alfred.Generate.Repository in 'generates\Eagle.Alfred.Generate.Repository.pas',
   Eagle.Alfred.Generate.Service in 'generates\Eagle.Alfred.Generate.Service.pas',
   Eagle.Alfred.Generate.Test in 'generates\Eagle.Alfred.Generate.Test.pas',
-  Eagle.Alfred.Generate.UnitGenerate in 'generates\Eagle.Alfred.Generate.UnitGenerate.pas';
+  Eagle.Alfred.Generate.UnitGenerate in 'generates\Eagle.Alfred.Generate.UnitGenerate.pas',
+  Eagle.Alfred.CodeGenerator in 'Eagle.Alfred.CodeGenerator.pas';
 
 begin
 
