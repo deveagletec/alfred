@@ -57,6 +57,8 @@ begin
   if not Assigned(FPackage) then
     raise EAlfredException.Create('Projeto não configurado! Arquivo package.json não encontrado.');
 
+  FPackage.Validate;
+
 end;
 
 constructor TCommand.Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);

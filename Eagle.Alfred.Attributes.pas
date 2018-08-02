@@ -23,6 +23,10 @@ type
     property Description: string read FDescription;
   end;
 
+  OptionAttribute = class(TCustomAttribute)
+
+  end;
+
   ParamAttribute = class(TCustomAttribute)
 
   end;

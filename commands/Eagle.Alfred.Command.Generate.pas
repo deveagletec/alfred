@@ -34,10 +34,10 @@ type
   public
 
     [Action('VIEW', '')]
-    procedure CreateView(const ModelName, ModuleName: string);
+    procedure CreateView(const ModelName, ModuleName: string; const Simple: Boolean);
 
     [Action('VIEWMODEL', '')]
-    procedure CreateViewModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
+    procedure CreateViewModel(const ModelName, ModuleName: string; const IgnoreTest, Simple: Boolean);
 
     [Action('MODEL', '')]
     procedure CreateModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
@@ -46,7 +46,7 @@ type
     procedure CreateService(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
 
     [Action('REPOSITORY', '')]
-    procedure CreateRepository(const ModelName, ModuleName: string);
+    procedure CreateRepository(const ModelName, ModuleName: string; const Simple: Boolean);
 
     [Action('CRUD', '')]
     procedure CreateCRUD(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
@@ -162,18 +162,18 @@ begin
 
 end;
 
-procedure TGenerateCommand.CreateView(const ModelName, ModuleName: string);
+procedure TGenerateCommand.CreateView(const ModelName, ModuleName: string; const Simple: Boolean);
 begin
 
   CheckProjectConfiguration;
 
-  DoCreateView(ModuleName, 'View', ModelName);
+  DoCreateView(ModuleName, 'View', ModelName, Simple);
 
   FConsoleIO.WriteInfo('Created View');
 
 end;
 
-procedure TGenerateCommand.CreateViewModel(const ModelName, ModuleName: string; const IgnoreTest: Boolean);
+procedure TGenerateCommand.CreateViewModel(const ModelName, ModuleName: string; const IgnoreTest, Simple: Boolean);
 begin
 
   CheckProjectConfiguration;
@@ -191,7 +191,8 @@ begin
 
 end;
 
-procedure TGenerateCommand.DoCreateRepository(const ModuleName, LayerName, ModelName: string);
+procedure TGenerateCommand.DoCreateRepository(const ModuleName, LayerName,
+    ModelName: string);
 var
   Generate: IUnitGenerate;
 begin

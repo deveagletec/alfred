@@ -10,6 +10,8 @@ type
 
   EAlfredFileNotFoundException = class(EAlfredException);
 
+  EAlfredPackageInvalidException = class(EAlfredException);
+
 implementation
 
 end.

@@ -1,6 +1,10 @@
 unit Eagle.Alfred.Data;
 
 interface
+uses
+  System.SysUtils,
+
+  Eagle.Alfred.Exceptions;
 
 type
 
@@ -24,6 +28,7 @@ type
     Dependencies: TArray<TDependency>;
 
     destructor Destroy; override;
+    procedure Validate;
   end;
 
 implementation
@@ -42,6 +47,14 @@ begin
   end;
 
   inherited;
+end;
+
+procedure TPackage.Validate;
+begin
+
+  if Id.IsEmpty then
+    raise EAlfredPackageInvalidException.Create('Package configuration Invalid! Please enter application ID');
+
 end;
 
 end.

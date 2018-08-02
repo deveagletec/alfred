@@ -172,9 +172,6 @@ begin
 
   FPackage := TJSON.Parse<TPackage>(Data);
 
-  if FPackage.BaseDir.IsEmpty then
-    FPackage.BaseDir := '.\';
-
 end;
 
 function TAlfred.IsBoolean(Param: TRttiParameter): Boolean;
