@@ -90,14 +90,6 @@
         <DCCReference Include="commands\Eagle.Alfred.Command.Generate.pas"/>
         <DCCReference Include="Eagle.Alfred.MigrateService.pas"/>
         <DCCReference Include="Eagle.Alfred.Utils.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.View.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.ViewModel.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.Model.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.Entity.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.Repository.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.Service.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.Test.pas"/>
-        <DCCReference Include="generates\Eagle.Alfred.Generate.UnitGenerate.pas"/>
         <DCCReference Include="Eagle.Alfred.CodeGenerator.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>

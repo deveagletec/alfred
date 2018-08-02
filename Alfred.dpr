@@ -20,14 +20,6 @@ uses
   Eagle.Alfred.Command.Generate in 'commands\Eagle.Alfred.Command.Generate.pas',
   Eagle.Alfred.MigrateService in 'Eagle.Alfred.MigrateService.pas',
   Eagle.Alfred.Utils in 'Eagle.Alfred.Utils.pas',
-  Eagle.Alfred.Generate.View in 'generates\Eagle.Alfred.Generate.View.pas',
-  Eagle.Alfred.Generate.ViewModel in 'generates\Eagle.Alfred.Generate.ViewModel.pas',
-  Eagle.Alfred.Generate.Model in 'generates\Eagle.Alfred.Generate.Model.pas',
-  Eagle.Alfred.Generate.Entity in 'generates\Eagle.Alfred.Generate.Entity.pas',
-  Eagle.Alfred.Generate.Repository in 'generates\Eagle.Alfred.Generate.Repository.pas',
-  Eagle.Alfred.Generate.Service in 'generates\Eagle.Alfred.Generate.Service.pas',
-  Eagle.Alfred.Generate.Test in 'generates\Eagle.Alfred.Generate.Test.pas',
-  Eagle.Alfred.Generate.UnitGenerate in 'generates\Eagle.Alfred.Generate.UnitGenerate.pas',
   Eagle.Alfred.CodeGenerator in 'Eagle.Alfred.CodeGenerator.pas';
 
 begin

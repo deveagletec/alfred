@@ -79,7 +79,6 @@ var
   ActionName: string;
   Action: TRttiMethod;
   ParamsAction: TArray<TValue>;
-  a, b: integer;
 begin
 
   ActionName := ParamStr(2).ToUpper;

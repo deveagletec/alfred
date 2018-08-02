@@ -2,26 +2,16 @@ unit Eagle.Alfred.Command.Generate;
 
 interface
 uses
-  System.Classes,
-  System.SysUtils,
-  System.RegularExpressions,
+  Eagle.ConsoleIO,
   Eagle.Alfred,
   Eagle.Alfred.Command,
   Eagle.Alfred.Attributes,
-  Eagle.ConsoleIO,
-  Eagle.Alfred.DprojParser,
   Eagle.Alfred.Data,
   Eagle.Alfred.MigrateService,
-  Eagle.Alfred.CodeGenerator,
-  Eagle.Alfred.Generate.UnitGenerate,
-  Eagle.Alfred.Generate.View,
-  Eagle.Alfred.Generate.ViewModel,
-  Eagle.Alfred.Generate.Entity,
-  Eagle.Alfred.Generate.Service,
-  Eagle.Alfred.Generate.Repository,
-  Eagle.Alfred.Generate.Test;
+  Eagle.Alfred.CodeGenerator;
 
 type
+
   [Command('GENERATE', 'Gerador de arquivos relacionados às operações de CRUD')]
   TGenerateCommand = class(TCommand)
   private
@@ -120,10 +110,14 @@ begin
 
   FCodeGenerator.GenerateModel(ModuleName, ModelName);
 
+  FConsoleIO.WriteInfo('Created Model');
+
   if IgnoreTest then
     Exit;
 
   FCodeGenerator.GenerateTest(ModuleName, 'Entity', ModelName);
+
+  FConsoleIO.WriteInfo('Created Model Test');
 
 end;
 
@@ -219,6 +213,7 @@ begin
 end;
 
 initialization
+
   TAlfred.GetInstance.Register(TGenerateCommand);
 
 end.
