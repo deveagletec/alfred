@@ -7,7 +7,8 @@ uses
   System.StrUtils,
   Eagle.Alfred.Data,
   Eagle.Alfred.DprojParser,
-  Eagle.Alfred.Utils;
+  Eagle.Alfred.Utils,
+  Eagle.Alfred.Exceptions;
 
 type
 
@@ -142,13 +143,19 @@ end;
 procedure TCodeGenerator.GenerateFile(const Template, UnitName, FileName: string);
 var
   FStringList: TStringList;
+  TemplatePath: string;
 begin
+
+  TemplatePath := FAppPath + 'templates\' + Template;
+
+  if not FileExists(TemplatePath) then
+    raise EAlfredFileNotFoundException.Create('Template File ' + TemplatePath.QuotedString + ' not found');
 
   FStringList := TStringList.Create;
 
   try
 
-    FStringList.LoadFromFile(FAppPath + 'templates\' + Template);
+    FStringList.LoadFromFile(TemplatePath);
 
     FStringList.Text := FStringList.Text.Replace('{ModelName}', FModelName, [rfReplaceAll]);
     FStringList.Text := FStringList.Text.Replace('{ModuleName}', FModuleName, [rfReplaceAll]);
