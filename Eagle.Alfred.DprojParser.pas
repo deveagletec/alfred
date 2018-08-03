@@ -67,7 +67,7 @@ begin
 
   ItemGroup.insertBefore(Node, ItemGroup.selectSingleNode('//BuildConfiguration'));
 
-  FUnitsList.Add('  ' + UnitName.Replace('.pas', ' in ') + Path.QuotedString + ',');
+  FUnitsList.Add('  ' + UnitName.Replace('.pas', ' in ') + Path.QuotedString);
 
   FChanged := True;
 
