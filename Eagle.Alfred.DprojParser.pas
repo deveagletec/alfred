@@ -39,6 +39,7 @@ type
       destructor Destroy; override;
       procedure AddForm(const UnitName, FormName, Path: string);
       procedure AddUnit(const Name, Path: string);
+      procedure DeleteUnit(const Name, Path: string);
       procedure AddPathInUnitSearchPath(const Path: string);
       procedure DeletePathInUnitSearchPath(const Path: string);
       procedure Save;
@@ -55,15 +56,17 @@ begin
 
   ItemGroup := FXMLDocument.selectSingleNode('/Project/ItemGroup');
 
-  NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/DCCReference/Form').firstChild;
+  NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/DCCReference/Form').parentNode;
 
-  Node := NodeBase.parentNode.parentNode.cloneNode(True);
+  Node := NodeBase.cloneNode(True);
 
   Node.attributes.getNamedItem('Include').Text := Path;
 
-  Node.firstChild.Text := FormName;
+  Node.selectSingleNode('//Form').text := FormName;
 
-  ItemGroup.appendChild(Node);
+  Node.lastChild.text := 'teste';
+
+  ItemGroup.insertBefore(Node, ItemGroup.selectSingleNode('//BuildConfiguration'));
 
   FUnitsList.Add('  ' + UnitName.Replace('.pas', ' in ') + Path.QuotedString + ',');
 
@@ -103,7 +106,7 @@ begin
 
   Node.attributes.getNamedItem('Include').Text := Path;
 
-  if node.hasChildNodes then
+  while node.hasChildNodes do
     Node.removeChild(Node.firstChild);
 
   NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/BuildConfiguration');
@@ -209,6 +212,11 @@ begin
 
 end;
 
+procedure TDprojParser.DeleteUnit(const Name, Path: string);
+begin
+
+end;
+
 destructor TDprojParser.Destroy;
 begin
 
@@ -262,6 +270,8 @@ begin
 
   FXMLDocument := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
   FXMLDocument.async := False;
+
+  FXMLDocument.preserveWhiteSpace := True;
 
   FXMLDocument.load(FDprojFile);
 

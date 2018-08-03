@@ -135,8 +135,6 @@ begin
   GenerateFile('View.dfm', ViewName, BaseDir + ViewName);
   GenerateFile('View.pas', UnitName, BaseDir + UnitName);
 
-  FDprojParser.AddUnit(UnitName, '..\..\' + FFilePath + UnitName);
-
   FDprojParser.AddForm(UnitName, FModelName + 'View', '..\..\' + FFilePath + UnitName);
 
 end;
