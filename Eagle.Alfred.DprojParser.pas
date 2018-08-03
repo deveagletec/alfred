@@ -26,6 +26,7 @@ type
       FDprFile: string;
       FVersionString: string;
       FUnitsList: TList<string>;
+      FUnitsDeleted: TList<string>;
       FUnitSearchPathList: TList<string>;
       FUnitSearchPathNode: IXMLDOMNode;
       FChanged: Boolean;
@@ -63,8 +64,6 @@ begin
   Node.attributes.getNamedItem('Include').Text := Path;
 
   Node.selectSingleNode('//Form').text := FormName;
-
-  Node.lastChild.text := 'teste';
 
   ItemGroup.insertBefore(Node, ItemGroup.selectSingleNode('//BuildConfiguration'));
 
@@ -113,7 +112,7 @@ begin
 
   ItemGroup.insertBefore(Node, NodeBase);
 
-  FUnitsList.Add('  ' + Name.Replace('.pas', ' in ') + Path.QuotedString + ',');
+  FUnitsList.Add('  ' + Name.Replace('.pas', ' in ') + Path.QuotedString);
 
   FChanged := True;
 
@@ -188,6 +187,8 @@ begin
 
   FUnitsList := TList<string>.Create;
 
+  FUnitsDeleted := TList<string>.Create;
+
   FUnitSearchPathList := TList<string>.Create;
 
   InitXMLDomDocument;
@@ -215,6 +216,8 @@ end;
 procedure TDprojParser.DeleteUnit(const Name, Path: string);
 begin
 
+  FUnitsDeleted.Add(Name);
+
 end;
 
 destructor TDprojParser.Destroy;
@@ -222,6 +225,9 @@ begin
 
   if Assigned(FUnitsList) then
     FreeAndNil(FUnitsList);
+
+  if Assigned(FUnitsDeleted) then
+    FreeAndNil(FUnitsDeleted);
 
   if Assigned(FUnitSearchPathList) then
     FreeAndNil(FUnitSearchPathList);
@@ -309,9 +315,12 @@ end;
 procedure TDprojParser.UpdateDpr;
 var
   DprFile: TStringList;
-  I, Count: Integer;
+  I, J, Count: Integer;
   Line: string;
 begin
+
+  if FUnitsList.Count = 0 then
+    Exit;
 
   DprFile := TStringList.Create;
 
@@ -327,14 +336,23 @@ begin
       Line := DprFile.Strings[I];
 
       if Line.EndsWith('.pas'';') then
+      begin
+        DprFile.Delete(I);
+        Line := Line.Replace(';', '');
+        FUnitsList.Insert(0, Line);
         Break;
+      end;
     end;
 
-    for Line in FUnitsList do
+    for J := 0 to FUnitsList.Count - 2 do
     begin
-      DprFile.Insert(I, Line);
+      Line := FUnitsList.Items[J];
+      DprFile.Insert(I, Line + ',');
       Inc(I);
     end;
+
+    Line := FUnitsList.Items[J];
+    DprFile.Insert(I, Line + ';');
 
     DprFile.SaveToFile(FDprFile);
 
