@@ -7,6 +7,7 @@ uses
   System.Rtti,
   System.TypInfo,
   System.IOUtils,
+  System.RegularExpressions,
 
   XSuperJSON, XSuperObject,
   Spring.Reflection,
@@ -29,13 +30,16 @@ type
     FAppPath: string;
     FConsoleIO: IConsoleIO;
     FPackage: TPackage;
+    FCmdParameters: TList<string>;
     FCommands: TDictionary<string, ICommandRegister>;
     procedure Execute(Cmd: string);
+    function FindFlagInParameters(const FlagName: string): Boolean;
     function GetCommandInstance(Command: ICommandRegister): TObject;
     function GetParametersAction(Action: TRttiMethod): TArray<TValue>;
     procedure Help;
     procedure Init;
     function IsBoolean(Param: TRttiParameter): Boolean;
+    procedure LoadCmdParameters;
   public
     class function GetInstance() : TAlfred;
     class procedure ReleaseInstance();
@@ -56,6 +60,8 @@ begin
   FAppPath := ExtractFilePath(ParamStr(0));
   FConsoleIO := TConsoleIO.Create;
 
+  FCmdParameters := TList<string>.Create;
+
   FCommands := TDictionary<string, ICommandRegister>.Create;
 
   Init;
@@ -64,6 +70,9 @@ end;
 
 destructor TAlfred.Destroy;
 begin
+
+  if Assigned(FCmdParameters) then
+    FreeAndNil(FCmdParameters);
 
   if Assigned(FCommands) then
     FreeAndNil(FCommands);
@@ -109,6 +118,17 @@ begin
 
 end;
 
+function TAlfred.FindFlagInParameters(const FlagName: string): Boolean;
+var
+  ParamName: string;
+begin
+
+  ParamName := TRegEx.Replace(FlagName, '([a-z])([A-Z])', '$1-$2').ToLower;
+
+  Result := FCmdParameters.Contains(ParamName);
+
+end;
+
 function TAlfred.GetCommandInstance(Command: ICommandRegister): TObject;
 begin
 
@@ -147,7 +167,7 @@ begin
     begin
 
       if IsBoolean(Param) then
-        Params.Add(TValue.From<Boolean>(FindCmdLineSwitch(Param.Name, ['-'], True)))
+        Params.Add(TValue.From<Boolean>(FindFlagInParameters('--' + Param.Name)))
       else
         Params.Add(TValue.From<string>(ParamStr(Index).ToLower));
 
@@ -201,6 +221,25 @@ begin
     Exit(False);
 
   Result := Param.ParamType.QualifiedName.Equals('System.Boolean');
+
+end;
+
+procedure TAlfred.LoadCmdParameters;
+var
+  ParamName: string;
+  I, Count: Integer;
+begin
+
+  Count := ParamCount;
+
+  for I := 1 to Count do
+  begin
+
+    ParamName := ParamStr(I);
+
+    FCmdParameters.Add(ParamName);
+
+  end;
 
 end;
 
@@ -263,6 +302,8 @@ begin
     Help;
     Exit;
   end;
+
+  LoadCmdParameters;
 
   try
     Execute(Cmd);
