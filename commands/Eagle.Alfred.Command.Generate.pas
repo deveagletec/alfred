@@ -77,6 +77,10 @@ begin
 
   FConsoleIO.WriteInfo('Created Model');
 
+  FCodeGenerator.GenerateRepository(ModuleName, ModelName);
+
+  FConsoleIO.WriteInfo('Created Repository');
+
   if IgnoreTest then
     Exit;
 
