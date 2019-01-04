@@ -17,7 +17,8 @@ uses
   Eagle.ConsoleIO in '..\src\Eagle.ConsoleIO.pas',
   Eagle.Alfred.Core.Command in '..\src\core\Eagle.Alfred.Core.Command.pas',
   Console in '..\libs\Console.pas',
-  Eagle.Alfred.Command.New.Project in '..\src\command\new\Eagle.Alfred.Command.New.Project.pas';
+  Eagle.Alfred.Command.New.Project in '..\src\command\new\Eagle.Alfred.Command.New.Project.pas',
+  Eagle.Alfred.Core.CommandRegister in '..\src\core\Eagle.Alfred.Core.CommandRegister.pas';
 
 begin
 

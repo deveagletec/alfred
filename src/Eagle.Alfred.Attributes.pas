@@ -1,6 +1,8 @@
 unit Eagle.Alfred.Attributes;
 
 interface
+uses
+  System.SysUtils;
 
 type
   CommandAttribute = class(TCustomAttribute)
@@ -20,10 +22,12 @@ type
   OptionAttribute = class(TCustomAttribute)
   private
     FName: string;
+    FAlias: string;
     FDescription: string;
   public
-    constructor Create(const AName, ADescription: string);
+    constructor Create(const AName, AAlias, ADescription: string);
     property Name: string read FName;
+    property Alias: string read FAlias;
     property Description: string read FDescription;
   end;
 
@@ -55,9 +59,10 @@ end;
 
 { OptionAttribute }
 
-constructor OptionAttribute.Create(const AName, ADescription: string);
+constructor OptionAttribute.Create(const AName, AAlias, ADescription: string);
 begin
-  FName := AName;
+  FName := AName.ToLower.Replace('-','', [rfReplaceAll]);
+  FAlias := AAlias.ToLower.Replace('-','', [rfReplaceAll]);
   FDescription := ADescription;
 end;
 

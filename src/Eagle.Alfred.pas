@@ -10,21 +10,17 @@ uses
   System.RegularExpressions,
 
   XSuperJSON, XSuperObject,
-  Spring.Reflection,
+
 
   Eagle.ConsoleIO,
   Eagle.Alfred.Attributes,
   Eagle.Alfred.DprojParser,
   Eagle.Alfred.Data,
   Eagle.Alfred.Exceptions,
-  Eagle.Alfred.Core.Command;
+  Eagle.Alfred.Core.Command,
+  Eagle.Alfred.Core.CommandRegister;
 
 type
-
-  TCommandMetaData = record
-    CommandClass: TClass;
-    CommandType: TRttiType;
-  end;
 
   TAlfred = class
   private
@@ -34,13 +30,18 @@ type
     FAppPath: string;
     FConsoleIO: IConsoleIO;
     FPackage: TPackage;
-    FCmdParameters: TList<string>;
-    FCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
+    FCommandArgs: TList<string>;
+    FCommandRegister: ICommandRegister;
     function CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
+    procedure DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
     procedure Execute(const GroupName, CommandName: string);
-    function FindFlagInParameters(const FlagName: string): Boolean;
+    function GetCommandParam(Attrib: ParamAttribute): string;
     procedure Help;
     procedure Init;
+    procedure LoadCommandArgs;
+    function OptionExists(const OptionAttrib: OptionAttribute): Boolean;
+    procedure SetOptions(Command: ICommand; CommandMetaData: TCommandMetaData);
+    procedure SetParams(Command: ICommand; CommandMetaData: TCommandMetaData);
   public
     class function GetInstance() : TAlfred;
     class procedure ReleaseInstance();
@@ -55,17 +56,15 @@ implementation
 { TAlfred }
 
 constructor TAlfred.Create;
-var
-  Group: TDictionary<string, TClass>;
 begin
 
   FCurrentPath := GetCurrentDir;
   FAppPath := ExtractFilePath(ParamStr(0));
   FConsoleIO := TConsoleIO.Create;
 
-  FCmdParameters := TList<string>.Create;
+  FCommandArgs := TList<string>.Create;
 
-  FCommands := TDictionary<string, TDictionary<string, TCommandMetaData>>.Create;
+  FCommandRegister := TCommandRegister.Create;
 
   Init;
 
@@ -74,13 +73,8 @@ end;
 destructor TAlfred.Destroy;
 begin
 
-  if Assigned(FCmdParameters) then
-    FreeAndNil(FCmdParameters);
-
-  if Assigned(FCommands) then
-  begin
-     FreeAndNil(FCommands);
-  end;
+  if Assigned(FCommandArgs) then
+    FreeAndNil(FCommandArgs);
 
   if Assigned(FPackage) then
     FreeAndNil(FPackage);
@@ -99,37 +93,51 @@ begin
 
 end;
 
+procedure TAlfred.DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
+begin
+  Method.Invoke(TObject(Command), [ParamValue]);
+end;
+
 procedure TAlfred.Execute(const GroupName, CommandName: string);
 var
-  CommandGroup: TDictionary<string, TCommandMetaData>;
-  CommandMetaData: TCommandMetaData;
   Command: ICommand;
+  CommandMetaData: TCommandMetaData;
 begin
 
-  CommandGroup := FCommands.Items[GroupName];
-
-  if not CommandGroup.ContainsKey(CommandName) then
-  begin
-    Help;
-    Exit;
-  end;
-
-  CommandMetaData := CommandGroup.Items[CommandName];
+  CommandMetaData := FCommandRegister.GetCommand(GroupName, CommandName);
 
   Command := CreateCommand(CommandMetaData);
+
+  SetParams(Command, CommandMetaData);
+
+  SetOptions(Command, CommandMetaData);
 
   Command.Execute;
 
 end;
 
-function TAlfred.FindFlagInParameters(const FlagName: string): Boolean;
+function TAlfred.GetCommandParam(Attrib: ParamAttribute): string;
 var
-  ParamName: string;
+  Arg: string;
 begin
 
-  ParamName := TRegEx.Replace(FlagName, '([a-z])([A-Z])', '$1-$2').ToLower;
+  if Attrib.Index > 0 then
+  begin
+    Result := FCommandArgs.Items[Attrib.Index + 1];
+    if Result.StartsWith('-') then
+      raise Exception.Create('Error Message');
 
-  Result := FCmdParameters.Contains(ParamName);
+    Exit;
+  end;
+
+  for Arg in FCommandArgs.ToArray do
+  begin
+    if not Arg.ToLower.StartsWith(Attrib.Name+'=') then
+      Continue;
+
+    Result := Arg.Split(['='])[1];
+    Exit;
+  end;
 
 end;
 
@@ -166,6 +174,8 @@ var
   Data: string;
 begin
 
+  LoadCommandArgs;
+
   if not FileExists('.\package.json') then
     Exit;
 
@@ -175,41 +185,30 @@ begin
 
 end;
 
-procedure TAlfred.Register(Cmd: TClass);
+procedure TAlfred.LoadCommandArgs;
 var
-  RttiContext: TRttiContext;
-  RttiType: TRttiType;
-  Method: TRttiMethod;
-  RttiMethods: TArray<TRttiMethod>;
-  CmdAttrib: CommandAttribute;
-  CommandsGroup: TDictionary<string, TCommandMetaData>;
-  CommandMetaData: TCommandMetaData;
+  ParamName: string;
+  I, Count: Integer;
 begin
 
-  RttiContext := TRttiContext.Create;
+  Count := ParamCount;
 
-  try
-
-    RttiType := RttiContext.GetType(Cmd.ClassInfo);
-
-    if not RttiType.TryGetCustomAttribute<CommandAttribute>(CmdAttrib) then
-      raise Exception.Create('Error command register');
-
-
-    if not FCommands.ContainsKey(CmdAttrib.GroupName) then
-      FCommands.Add(CmdAttrib.GroupName, TDictionary<string, TCommandMetaData>.Create());
-
-    CommandsGroup := FCommands.Items[CmdAttrib.GroupName];
-
-    CommandMetaData.CommandClass := Cmd;
-    CommandMetaData.CommandType := RttiType;
-
-    CommandsGroup.Add(CmdAttrib.Name, CommandMetaData);
-
-  finally
-    RttiContext.Free;
+  for I := 1 to Count do
+  begin
+    ParamName := ParamStr(I);
+    FCommandArgs.Add(ParamName);
   end;
 
+end;
+
+function TAlfred.OptionExists(const OptionAttrib: OptionAttribute): Boolean;
+begin
+  Result := FCommandArgs.Contains('-' +OptionAttrib.Alias) or FCommandArgs.Contains('--' +OptionAttrib.Name);
+end;
+
+procedure TAlfred.Register(Cmd: TClass);
+begin
+  FCommandRegister.AddCommand(Cmd);
 end;
 
 class procedure TAlfred.ReleaseInstance;
@@ -226,7 +225,7 @@ begin
   GroupName := ParamStr(1).ToLower;
   CommandName := ParamStr(2).ToLower;
 
-  if not FCommands.ContainsKey(GroupName) then
+  if not FCommandRegister.Contains(GroupName, CommandName) then
   begin
     Help;
     Exit;
@@ -240,10 +239,37 @@ begin
 
 end;
 
+procedure TAlfred.SetOptions(Command: ICommand; CommandMetaData: TCommandMetaData);
+var
+  CommandOption: TCommandOption;
+begin
+  for CommandOption in CommandMetaData.CommandOptions do
+  begin
+    if OptionExists(CommandOption.Attrib) then
+      CommandOption.Method.Invoke(TObject(Command), []);
+  end;
+end;
+
+procedure TAlfred.SetParams(Command: ICommand; CommandMetaData: TCommandMetaData);
+var
+  CommandParam: TCommandParam;
+  ParamValue: string;
+begin
+
+  for CommandParam in CommandMetaData.CommandParams do
+  begin
+    ParamValue := GetCommandParam(CommandParam.Attrib);
+    if ParamValue.IsEmpty then
+      Continue;
+
+    DoSetParam(Command, CommandParam.Method, ParamValue);
+  end;
+
+end;
+
 initialization
   TAlfred.GetInstance;
 
 finalization
   TAlfred.ReleaseInstance;
-
 end.

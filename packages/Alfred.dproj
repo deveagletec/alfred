@@ -65,7 +65,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>new project Eagle2</Debugger_RunParams>
+        <Debugger_RunParams>new project name=Eagle2 -v</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -91,6 +91,7 @@
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Command.pas"/>
         <DCCReference Include="..\libs\Console.pas"/>
         <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Project.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.CommandRegister.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

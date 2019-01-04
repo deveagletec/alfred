@@ -18,10 +18,10 @@ type
     procedure Execute; override;
     procedure Help; override;
 
-    [ParamAttribute(3, 'Nome do projeto')]
+    [ParamAttribute('name', 'Nome do projeto')]
     procedure SetName(const Name: string);
 
-    [OptionAttribute('v', 'Adds more details to output logging.')]
+    [OptionAttribute('verbose', 'v', 'Adds more details to output logging.')]
     procedure Verbose;
   end;
 
