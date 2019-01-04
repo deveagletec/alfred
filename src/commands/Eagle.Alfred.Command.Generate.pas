@@ -12,7 +12,7 @@ uses
 
 type
 
-  [Command('GENERATE', 'Gerador de arquivos relacionados às operações de CRUD')]
+  [Command('generate', 'GENERATE', 'Gerador de arquivos relacionados às operações de CRUD')]
   TGenerateCommand = class(TCommand)
   private
     FCodeGenerator: ICodeGenerator;

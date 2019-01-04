@@ -15,7 +15,7 @@ uses
 
 type
 
-  [Command('PROJECT', 'Gerencia os dados do projeto')]
+  [Command('new', 'PROJECT', 'Gerencia os dados do projeto')]
   TProjectCommand = class(TCommand)
   private
     procedure GetSubDirs(const sRootDir: string; slt: TStrings);

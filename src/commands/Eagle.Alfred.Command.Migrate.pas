@@ -10,7 +10,7 @@ uses
   Eagle.Alfred.Attributes;
 
 type
-  [Command('MIGRATE', 'Cria arquivos de migração de versão do banco de dados')]
+  [Command('db', 'MIGRATE', 'Cria arquivos de migração de versão do banco de dados')]
   TMigrateCommand = class(TCommand)
   public
     [Action('CREATE', 'Cria um novo arquivo de migração')]

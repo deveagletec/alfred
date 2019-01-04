@@ -13,14 +13,18 @@ uses
   Spring.Reflection,
 
   Eagle.ConsoleIO,
-  Eagle.Alfred.Command,
   Eagle.Alfred.Attributes,
-  Eagle.Alfred.CommandRegister,
   Eagle.Alfred.DprojParser,
   Eagle.Alfred.Data,
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Exceptions,
+  Eagle.Alfred.Core.Command;
 
 type
+
+  TCommandMetaData = record
+    CommandClass: TClass;
+    CommandType: TRttiType;
+  end;
 
   TAlfred = class
   private
@@ -31,15 +35,12 @@ type
     FConsoleIO: IConsoleIO;
     FPackage: TPackage;
     FCmdParameters: TList<string>;
-    FCommands: TDictionary<string, ICommandRegister>;
-    procedure Execute(Cmd: string);
+    FCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
+    function CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
+    procedure Execute(const GroupName, CommandName: string);
     function FindFlagInParameters(const FlagName: string): Boolean;
-    function GetCommandInstance(Command: ICommandRegister): TObject;
-    function GetParametersAction(Action: TRttiMethod): TArray<TValue>;
     procedure Help;
     procedure Init;
-    function IsBoolean(Param: TRttiParameter): Boolean;
-    procedure LoadCmdParameters;
   public
     class function GetInstance() : TAlfred;
     class procedure ReleaseInstance();
@@ -54,6 +55,8 @@ implementation
 { TAlfred }
 
 constructor TAlfred.Create;
+var
+  Group: TDictionary<string, TClass>;
 begin
 
   FCurrentPath := GetCurrentDir;
@@ -62,7 +65,7 @@ begin
 
   FCmdParameters := TList<string>.Create;
 
-  FCommands := TDictionary<string, ICommandRegister>.Create;
+  FCommands := TDictionary<string, TDictionary<string, TCommandMetaData>>.Create;
 
   Init;
 
@@ -75,7 +78,9 @@ begin
     FreeAndNil(FCmdParameters);
 
   if Assigned(FCommands) then
-    FreeAndNil(FCommands);
+  begin
+     FreeAndNil(FCommands);
+  end;
 
   if Assigned(FPackage) then
     FreeAndNil(FPackage);
@@ -83,38 +88,37 @@ begin
   inherited;
 end;
 
-procedure TAlfred.Execute(Cmd: string);
-var
-  Command: ICommandRegister;
-  ActionName: string;
-  Action: TRttiMethod;
-  ParamsAction: TArray<TValue>;
-  CommandInstance: TObject;
+function TAlfred.CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
 begin
 
-  ActionName := ParamStr(2).ToUpper;
+  Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [
+    TValue.From<string>(FAppPath),
+    TValue.From<TPackage>(FPackage),
+    TValue.From<IConsoleIO>(FConsoleIO)
+  ]).AsType<ICommand>;
 
-  Command := FCommands.Items[Cmd];
+end;
 
-  if not Command.ContainsAction(ActionName) then
+procedure TAlfred.Execute(const GroupName, CommandName: string);
+var
+  CommandGroup: TDictionary<string, TCommandMetaData>;
+  CommandMetaData: TCommandMetaData;
+  Command: ICommand;
+begin
+
+  CommandGroup := FCommands.Items[GroupName];
+
+  if not CommandGroup.ContainsKey(CommandName) then
   begin
     Help;
     Exit;
   end;
 
-  Action := Command.GetAction(ActionName).Method;
+  CommandMetaData := CommandGroup.Items[CommandName];
 
-  ParamsAction := GetParametersAction(Action);
+  Command := CreateCommand(CommandMetaData);
 
-  CommandInstance := GetCommandInstance(Command);
-
-  try
-
-    Action.Invoke(CommandInstance, ParamsAction);
-
-  finally
-    CommandInstance.Free;
-  end;
+  Command.Execute;
 
 end;
 
@@ -129,17 +133,6 @@ begin
 
 end;
 
-function TAlfred.GetCommandInstance(Command: ICommandRegister): TObject;
-begin
-
-  Result :=  Command.GetCommandType.GetMethod('Create').invoke(Command.GetCommandClass, [
-      TValue.From<string>(FAppPath),
-      TValue.From<TPackage>(FPackage),
-      TValue.From<IConsoleIO>(FConsoleIO)
-    ]).AsObject;
-
-end;
-
 class function TAlfred.GetInstance: TAlfred;
 begin
 
@@ -150,41 +143,9 @@ begin
 
 end;
 
-function TAlfred.GetParametersAction(Action: TRttiMethod): TArray<TValue>;
-var
-  Param: TRttiParameter;
-  Params: TList<TValue>;
-  Index: Integer;
-begin
-
-  Index := 3;
-
-  Params := TList<TValue>.Create;
-
-  try
-
-    for Param in Action.Parameters do
-    begin
-
-      if IsBoolean(Param) then
-        Params.Add(TValue.From<Boolean>(FindFlagInParameters('--' + Param.Name)))
-      else
-        Params.Add(TValue.From<string>(ParamStr(Index).ToLower));
-
-      Inc(Index);
-    end;
-
-    Result := Params.ToArray;
-
-  finally
-    Params.Free;
-  end;
-
-end;
-
 procedure TAlfred.Help;
 var
-  Par: TPair<string, ICommandRegister>;
+  Par: TPair<string, TClass>;
 begin
 
   FConsoleIO.WriteInfo('');
@@ -195,8 +156,8 @@ begin
   FConsoleIO.WriteInfo('digite nome_do_comando HELP');
   FConsoleIO.WriteInfo('');
 
-  for Par in FCommands.ToArray do
-    FConsoleIO.WriteInfo(Par.Value.GetName.PadRight(15, ' ') + Par.Value.GetDescription);
+ // for Par in FCommands.ToArray do
+ //   FConsoleIO.WriteInfo(Par.Value.GetName.PadRight(15, ' ') + Par.Value.GetDescription);
 
 end;
 
@@ -214,35 +175,6 @@ begin
 
 end;
 
-function TAlfred.IsBoolean(Param: TRttiParameter): Boolean;
-begin
-
-  if Param.ParamType.TypeKind <> tkEnumeration then
-    Exit(False);
-
-  Result := Param.ParamType.QualifiedName.Equals('System.Boolean');
-
-end;
-
-procedure TAlfred.LoadCmdParameters;
-var
-  ParamName: string;
-  I, Count: Integer;
-begin
-
-  Count := ParamCount;
-
-  for I := 1 to Count do
-  begin
-
-    ParamName := ParamStr(I);
-
-    FCmdParameters.Add(ParamName);
-
-  end;
-
-end;
-
 procedure TAlfred.Register(Cmd: TClass);
 var
   RttiContext: TRttiContext;
@@ -250,9 +182,8 @@ var
   Method: TRttiMethod;
   RttiMethods: TArray<TRttiMethod>;
   CmdAttrib: CommandAttribute;
-  ActionAttrib: ActionAttribute;
-  CmdInstance: TObject;
-  CmdRegister: ICommandRegister;
+  CommandsGroup: TDictionary<string, TCommandMetaData>;
+  CommandMetaData: TCommandMetaData;
 begin
 
   RttiContext := TRttiContext.Create;
@@ -264,19 +195,16 @@ begin
     if not RttiType.TryGetCustomAttribute<CommandAttribute>(CmdAttrib) then
       raise Exception.Create('Error command register');
 
-    CmdRegister := TCommandRegister.Create(CmdAttrib.Name, CmdAttrib.Description, Cmd, RttiType);
 
-    FCommands.Add(CmdAttrib.Name, CmdRegister);
+    if not FCommands.ContainsKey(CmdAttrib.GroupName) then
+      FCommands.Add(CmdAttrib.GroupName, TDictionary<string, TCommandMetaData>.Create());
 
-    RttiMethods := RttiType.GetMethods;
+    CommandsGroup := FCommands.Items[CmdAttrib.GroupName];
 
-    for Method in RttiMethods do
-    begin
+    CommandMetaData.CommandClass := Cmd;
+    CommandMetaData.CommandType := RttiType;
 
-      if Method.TryGetCustomAttribute<ActionAttribute>(ActionAttrib) then
-        CmdRegister.AddMethod(ActionAttrib.Name, ActionAttrib.Description, Method);
-
-    end;
+    CommandsGroup.Add(CmdAttrib.Name, CommandMetaData);
 
   finally
     RttiContext.Free;
@@ -292,21 +220,20 @@ end;
 
 procedure TAlfred.Run;
 var
-  Cmd: string;
+  GroupName, CommandName: string;
 begin
 
-  Cmd := ParamStr(1).ToUpper;
+  GroupName := ParamStr(1).ToLower;
+  CommandName := ParamStr(2).ToLower;
 
-  if not FCommands.ContainsKey(Cmd) then
+  if not FCommands.ContainsKey(GroupName) then
   begin
     Help;
     Exit;
   end;
 
-  LoadCmdParameters;
-
   try
-    Execute(Cmd);
+    Execute(GroupName, CommandName);
   except on E: EAlfredException do
     FConsoleIO.WriteError(E.Message);
   end;

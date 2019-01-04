@@ -9,7 +9,7 @@ uses
   Eagle.Alfred.Data;
 
 type
-  [Command('DELETE', 'Exclui units do projeto')]
+  [Command('remove', 'DELETE', 'Exclui units do projeto')]
   TDeleteCommand = class(TCommand)
   public
 
