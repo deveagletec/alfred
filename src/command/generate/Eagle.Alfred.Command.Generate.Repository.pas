@@ -19,7 +19,10 @@ implementation
 
 procedure TGenerateRepositoryCommand.Execute;
 begin
-  inherited;
+
+  FCodeGenerator.GenerateRepository(FModuleName, FName);
+
+  FConsoleIO.WriteInfo('Created Repository');
 
 end;
 

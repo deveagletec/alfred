@@ -4,6 +4,7 @@ interface
 uses
   Eagle.ConsoleIO,
   Eagle.Alfred.Data,
+  Eagle.Alfred.Attributes,
   Eagle.Alfred.Exceptions;
 
 type
@@ -17,11 +18,15 @@ type
     FCurrentPath: string;
     FConsoleIO: IConsoleIO;
     FPackage: TPackage;
+    FVerbose: Boolean;
 
     procedure Init; virtual;
   public
     constructor Create(const ACurrentPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);
     procedure Execute; virtual; abstract;
+
+    [OptionAttribute('verbose', 'v', 'Adds more details to output logging.')]
+    procedure Verbose;
   end;
 
 implementation
@@ -41,6 +46,11 @@ end;
 procedure TCommandAbstract.Init;
 begin
 
+end;
+
+procedure TCommandAbstract.Verbose;
+begin
+  FVerbose := True;
 end;
 
 end.

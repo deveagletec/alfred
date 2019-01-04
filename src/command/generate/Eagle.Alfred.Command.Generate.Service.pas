@@ -19,8 +19,17 @@ implementation
 
 procedure TGenerateServiceCommand.Execute;
 begin
-  inherited;
 
+  FCodeGenerator.GenerateService(FModuleName, FName);
+
+  FConsoleIO.WriteInfo('Created Service');
+
+  if FSkipTests then
+    Exit;
+
+  FCodeGenerator.GenerateTest(FModuleName, 'Service', FName);
+
+  FConsoleIO.WriteInfo('Created Service Test');
 end;
 
 initialization

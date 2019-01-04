@@ -23,7 +23,6 @@ type
     FForce: Boolean;
     FSkipTests: Boolean;
     FSkipPackageJson: Boolean;
-    FVerbose: Boolean;
 
     procedure CreateDirs;
     procedure CreateFiles;
@@ -50,9 +49,6 @@ type
 
     [OptionAttribute('skip-package-json', '', 'Do not add dependencies to package.json.')]
     procedure SkipPackageJson;
-
-    [OptionAttribute('verbose', 'v', 'Adds more details to output logging.')]
-    procedure Verbose;
 
   end;
 
@@ -317,11 +313,6 @@ end;
 procedure TNewProjectCommand.SkipTests;
 begin
   FSkipTests := True;
-end;
-
-procedure TNewProjectCommand.Verbose;
-begin
-  FVerbose := True;
 end;
 
 initialization

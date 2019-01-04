@@ -21,7 +21,19 @@ implementation
 
 procedure TGenerateModelCommand.Execute;
 begin
-  inherited;
+
+  FCodeGenerator.GenerateModel(FModuleName, FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created Model');
+
+  if FSkipTests then
+    Exit;
+
+  FCodeGenerator.GenerateTest(FModuleName, 'Entity', FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created Model Test');
 
 end;
 

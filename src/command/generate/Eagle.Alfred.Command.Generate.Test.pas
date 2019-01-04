@@ -9,8 +9,13 @@ uses
 type
   [Command('generate', 'test', 'Generates a Test')]
   TGenerateTestCommand = class(TGenerateCrudFileCommand)
+  private
+    FLayerName: string;
   public
     procedure Execute; override;
+
+    [ParamAttribute(3, 'Layer Name')]
+    procedure SetLayerName(const Value: string);
   end;
 
 implementation
@@ -19,8 +24,15 @@ implementation
 
 procedure TGenerateTestCommand.Execute;
 begin
-  inherited;
+  FCodeGenerator.GenerateTest(FModuleName, FLayerName, FName);
 
+  FConsoleIO.WriteInfo('Created Test');
+
+end;
+
+procedure TGenerateTestCommand.SetLayerName(const Value: string);
+begin
+  FLayerName := Value;
 end;
 
 initialization

@@ -19,7 +19,17 @@ implementation
 
 procedure TGenerateViewModelCommand.Execute;
 begin
-  inherited;
+
+  FCodeGenerator.GenerateViewModel(FModuleName, FName);
+
+  FConsoleIO.WriteInfo('Created ViewModel');
+
+  if FSkipTests then
+    Exit;
+
+  FCodeGenerator.GenerateTest(FModuleName, 'ViewModel', FName);
+
+  FConsoleIO.WriteInfo('Created ViewModel Test');
 
 end;
 

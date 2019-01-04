@@ -6,13 +6,11 @@ uses
 
   Eagle.Alfred,
   Eagle.Alfred.Attributes,
-  Eagle.Alfred.Core.Command;
+  Eagle.Alfred.Command.Generate.CrudFile;
 
 type
   [Command('generate', 'crud', 'Generates a Crud')]
-  TGenerateCrudCommand = class(TCommandAbstract)
-  private
-
+  TGenerateCrudCommand = class(TGenerateCrudFileCommand)
   public
     procedure Execute; override;
   end;
@@ -23,7 +21,40 @@ implementation
 
 procedure TGenerateCrudCommand.Execute;
 begin
-  inherited;
+  CheckProjectConfiguration;
+
+  FCodeGenerator.GenerateView(FModuleName, FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created View');
+
+  FCodeGenerator.GenerateViewModel(FModuleName, FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created ViewModel');
+
+  FCodeGenerator.GenerateModel(FModuleName, FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created Model');
+
+  FCodeGenerator.GenerateRepository(FModuleName, FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created Repository');
+
+  if FSkipTests then
+    Exit;
+
+  FCodeGenerator.GenerateTest(FModuleName, 'Entity', FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created Model Test');
+
+  FCodeGenerator.GenerateTest(FModuleName, 'ViewModel', FName);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created ViewModel Test');
 
 end;
 
