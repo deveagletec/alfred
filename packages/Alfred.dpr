@@ -38,7 +38,9 @@ uses
   Eagle.Alfred.Core.Exceptions in '..\src\core\Exception\Eagle.Alfred.Core.Exceptions.pas',
   Eagle.Alfred.Command.DB.MigrateExecute in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateExecute.pas',
   Eagle.Alfred.Migrate.Service.MigrateService in '..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas',
-  Eagle.Alfred.Core.Enums in '..\src\core\Eagle.Alfred.Core.Enums.pas';
+  Eagle.Alfred.Core.Enums in '..\src\core\Eagle.Alfred.Core.Enums.pas',
+  Eagle.Alfred.Commom.Utils.IOUtils in '..\src\commom\utils\Eagle.Alfred.Commom.Utils.IOUtils.pas',
+  Eagle.Alfred.Command.DB.MigrateRollback in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateRollback.pas';
 
 begin
 

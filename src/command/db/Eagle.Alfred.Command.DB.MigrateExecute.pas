@@ -20,7 +20,7 @@ uses
 
 type
 
-  [Command('db:migrate', 'run', 'Realiza a execução dos migrates no banco de dados')]
+  [Command('db:migrate', 'execute', 'Realiza a execução dos migrates no banco de dados')]
   TMigrateExecute = class(TCommandAbstract)
   private
 
