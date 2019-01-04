@@ -5,7 +5,7 @@ uses
   Eagle.ConsoleIO,
   Eagle.Alfred.Data,
   Eagle.Alfred.Attributes,
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Core.Exceptions;
 
 type
   ICommand = interface

@@ -8,7 +8,7 @@ uses
   Eagle.Alfred.Data,
   Eagle.Alfred.DprojParser,
   Eagle.Alfred.Utils,
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Core.Exceptions;
 
 type
 

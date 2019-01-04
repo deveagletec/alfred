@@ -8,7 +8,7 @@ uses
 
   Spring.Reflection,
 
-  Eagle.Alfred.Exceptions,
+ Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Attributes,
   Eagle.Alfred.Core.Command;
 

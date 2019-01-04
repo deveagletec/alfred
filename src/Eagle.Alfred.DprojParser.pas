@@ -5,7 +5,7 @@ uses
   System.SysUtils,System.Win.ComObj, XML.adomxmldom, ActiveX, XMLDoc, MSXML, MSXMLDOM, XMLIntf,
   System.IOUtils, System.Classes, System.Generics.Collections,
 
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Core.Exceptions;
 
 type
 

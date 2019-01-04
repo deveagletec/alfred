@@ -4,7 +4,7 @@ interface
 uses
   System.SysUtils,
 
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Core.Exceptions;
 
 type
 

@@ -83,8 +83,6 @@
         <DCCReference Include="..\src\Eagle.Alfred.Attributes.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Data.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.DprojParser.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Exceptions.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.MigrateService.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Utils.pas"/>
         <DCCReference Include="..\src\Eagle.ConsoleIO.pas"/>
@@ -134,6 +132,16 @@
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>git_ignore</ResourceId>
         </RcItem>
+        <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Migrate.pas"/>
+        <DCCReference Include="..\src\db\Eagle.Alfred.DB.Connection.pas"/>
+        <DCCReference Include="..\src\db\impl\Eagle.Alfred.DB.Impl.FiredacConnection.pas"/>
+        <DCCReference Include="..\src\migrate\model\Eagle.Alfred.Migrate.Model.Migrate.pas"/>
+        <DCCReference Include="..\src\migrate\repository\Eagle.Alfred.Migrate.Repository.MigrateRepository.pas"/>
+        <DCCReference Include="..\src\core\Exception\Eagle.Alfred.Core.Exceptions.pas"/>
+        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.MigrateExecute.pas"/>
+        <DCCReference Include="..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.Enums.pas"/>
+        <DCCReference Include="..\src\commom\utils\Eagle.Alfred.Commom.Utils.IOUtils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -157,8 +165,8 @@
                 <Excluded_Packages>
                     <Excluded_Packages Name="C:\development\components\ACBr\Lib\Delphi\LibD22\ACBr_Integrador.bpl">ACBrIntegrador</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclDataSnapNativeServer220.bpl">Embarcadero DBExpress DataSnap Native Server Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\16.0\bpl\LockBox3DD.bpl">TurboPack LockBox 3 designtime package</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="1">
@@ -561,7 +569,6 @@
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
-            </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>
             </Platforms>

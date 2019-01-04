@@ -11,11 +11,11 @@ uses
 
   XSuperJSON, XSuperObject,
 
+  Eagle.Alfred.Core.Exceptions,
   Eagle.ConsoleIO,
   Eagle.Alfred.Attributes,
   Eagle.Alfred.DprojParser,
   Eagle.Alfred.Data,
-  Eagle.Alfred.Exceptions,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.CommandRegister;
 var
