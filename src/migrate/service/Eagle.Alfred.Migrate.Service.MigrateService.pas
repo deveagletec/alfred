@@ -24,7 +24,7 @@ type
   IMigrateService = interface
     ['{A31CC6DC-9FE4-4FC1-9610-E476806C6D33}']
     function getMigratesByMigrationDir(const executionMode: TExecutionModeMigrate): TList<IMigrate>;
-    procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<IMigrate>);
+    procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<IMigrate>; const listMigratesExecuted: TList<String>);
   end;
 
   TMigrateService = class(TInterfacedObject, IMigrateService)
@@ -37,16 +37,14 @@ type
   public
     constructor Create(const package: TPackage);
     function getMigratesByMigrationDir(const executionMode: TExecutionModeMigrate): TList<IMigrate>;
-    procedure removeMigratesUnusableList(const executionMode:
-        TExecutionModeMigrate; var migrates: TList<IMigrate>; const
-        lastScriptExecuted: String = '');
+    procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<IMigrate>; const listMigratesExecuted: TList<String>);
   end;
 
 implementation
 
 constructor TMigrateService.Create(const package: TPackage);
 begin
-  inherited;
+  inherited Create();
   FPackage := package;
 end;
 
@@ -107,40 +105,34 @@ begin
 
 end;
 
-procedure TMigrateService.removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<IMigrate>; const lastScriptExecuted: String = '');
+procedure TMigrateService.removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<IMigrate>; const listMigratesExecuted: TList<String>);
 var
-  migrateName: String;
-  indexLasTScriptExecuted, limitCount: Integer;
-  migrate: IMigrate;
+  Migrate: IMigrate;
+  canRemove: Boolean;
+  index: Integer;
 begin
 
-  if lastScriptExecuted.Trim().IsEmpty then
+  if listMigratesExecuted.Count <= 0 then
     exit;
 
-  for migrate in migrates do
+  index := 0;
+
+  while index < migrates.Count do  
   begin
 
-    migrateName := Format('%%%', [migrate.UnixIdentifier, '_', migrate.IssueIdentifier]);
+    Migrate := migrates[index];
 
-    if migrateName.StartsWith(lastScriptExecuted) then
-      indexLasTScriptExecuted := migrates.IndexOf(migrate);
+    canRemove := False;
 
-  end;
+    if executionMode = TExecutionModeMigrate.TUp then
+      canRemove := listMigratesExecuted.Contains(Migrate.UnixIdentifier)
+    else
+      canRemove := not listMigratesExecuted.Contains(Migrate.UnixIdentifier);
 
-  if executionMode = TExecutionModeMigrate.TUp then
-  begin
-
-    limitCount := migrates.Count - (indexLasTScriptExecuted + 1);
-
-    while migrates.Count > limitCount do
-      migrates.Remove(migrates.First);
-
-  end
-  else
-  begin
-
-    while migrates.Count > (indexLasTScriptExecuted + 1) do
-      migrates.Remove(migrates[indexLasTScriptExecuted + 1]);
+    if canRemove then
+      migrates.Remove(Migrate)
+    else
+      Inc(index);
 
   end;
 

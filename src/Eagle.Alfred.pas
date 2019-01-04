@@ -1,6 +1,7 @@
 unit Eagle.Alfred;
 
 interface
+
 uses
   System.Classes,
   System.SysUtils,
@@ -45,7 +46,7 @@ type
     procedure SetOptions(Command: ICommand; CommandMetaData: TCommandMetaData);
     procedure SetParams(Command: ICommand; CommandMetaData: TCommandMetaData);
   public
-    class function GetInstance() : TAlfred;
+    class function GetInstance(): TAlfred;
     class procedure ReleaseInstance();
     constructor Create;
     destructor Destroy; override;
@@ -96,11 +97,11 @@ begin
     TValue.From<IConsoleIO>(FConsoleIO)
   ]).AsType<ICommand>;
 
-end;
+ end;
 
 procedure TAlfred.DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
 begin
-  Method.Invoke(TObject(Command), [ParamValue]);
+  Method.invoke(TObject(Command), [ParamValue]);
 end;
 
 procedure TAlfred.Execute(const GroupName, CommandName: string);
@@ -126,22 +127,33 @@ var
   Arg: string;
 begin
 
-  if Attrib.Index > 0 then
+  Result := EmptyStr;
+
+  if (Attrib.Index > 0) and ((Attrib.Index + 1) < FCommandArgs.Count) then
   begin
+
     Result := FCommandArgs.Items[Attrib.Index + 1];
+
     if Result.StartsWith('-') then
       raise Exception.Create('Error Message');
 
     Exit;
+
   end;
 
   for Arg in FCommandArgs.ToArray do
   begin
-    if not Arg.ToLower.StartsWith(Attrib.Name+'=') then
+    if not Arg.ToLower.StartsWith(Attrib.Name + '=') then
       Continue;
 
     Result := Arg.Split(['='])[1];
     Exit;
+  end;
+
+  if Attrib.Required then
+  begin
+    FConsoleIO.WriteError(Format('Parâmtro %s é obrigatório!', [Attrib.Name]));
+    abort;
   end;
 
 end;
@@ -149,7 +161,7 @@ end;
 class function TAlfred.GetInstance: TAlfred;
 begin
 
-  if FInstance =  nil then
+  if FInstance = nil then
     Self.FInstance := TAlfred.Create;
 
   Result := Self.FInstance;
@@ -233,7 +245,7 @@ end;
 
 function TAlfred.OptionExists(const OptionAttrib: OptionAttribute): Boolean;
 begin
-  Result := FCommandArgs.Contains('-' +OptionAttrib.Alias) or FCommandArgs.Contains('--' +OptionAttrib.Name);
+  Result := FCommandArgs.Contains('-' + OptionAttrib.Alias) or FCommandArgs.Contains('--' + OptionAttrib.Name);
 end;
 
 procedure TAlfred.Register(Cmd: TClass);
@@ -258,6 +270,7 @@ begin
   try
     Execute(GroupName, CommandName);
   except
+
     on E: ECommandGroupNotFoundException do
       Help;
     on E: ECommandNotFound do
@@ -266,6 +279,7 @@ begin
       HelpProjectInit;
     on E: EAlfredException do
       FConsoleIO.WriteError(#13 + E.Message);
+
   end;
 
 end;
@@ -277,7 +291,7 @@ begin
   for CommandOption in CommandMetaData.CommandOptions do
   begin
     if OptionExists(CommandOption.Attrib) then
-      CommandOption.Method.Invoke(TObject(Command), []);
+      CommandOption.Method.invoke(TObject(Command), []);
   end;
 end;
 
@@ -309,4 +323,5 @@ finalization
   elapsed := stop - start; //milliseconds
   Writeln('');
   Writeln('Duration: ' + String.Parse(elapsed) + ' milliseconds');
+
 end.

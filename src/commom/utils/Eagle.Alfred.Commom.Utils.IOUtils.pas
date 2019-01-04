@@ -11,8 +11,6 @@ type
   TIOUtils = class
   public
     class function FileIsEncodedUTF8(const fileIO: String): Boolean;
-    class function getFilesEncodedUTF8ByListDir(const baseDir: String; const listFiles: TList<String>): TList<String>;
-
   end;
 
 implementation
@@ -66,26 +64,6 @@ begin
   end;
 
   Result := YesSequences > NoSequences;
-
-end;
-
-function TIOUtils.getFilesEncodedUTF8ByListDir(const baseDir: String; const listFiles: TList<String>): TList<String>;
-var
-  index: Integer;
-  filesEncodedUTF8: TList<String>;
-begin
-
-  filesEncodedUTF8 := TList<String>.Create;
-
-  for index := 0 to Pred(listFiles.Count) do
-  begin
-
-    if FileIsEncodedUTF8(Format('%s%s', [baseDir, listFiles[index]])) then
-      filesEncodedUTF8.Add(listFiles[index]);
-
-  end;
-
-  Result := filesEncodedUTF8;
 
 end;
 

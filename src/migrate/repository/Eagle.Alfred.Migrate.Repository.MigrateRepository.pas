@@ -22,6 +22,7 @@ type
   IMigrateRepository = interface
     function getLastScriptExecuted: String;
     procedure executeFileScript(const Migrate: IMigrate; const executionMode: TExecutionModeMigrate);
+    function getListMigratesExecuted(): TList<String>;
   end;
 
   TMigrateRepository = class(TInterfacedObject, IMigrateRepository)
@@ -38,6 +39,7 @@ type
     destructor Destroy; override;
     procedure executeFileScript(const Migrate: IMigrate; const executionMode: TExecutionModeMigrate);
     function getLastScriptExecuted: String;
+    function getListMigratesExecuted(): TList<String>;
   end;
 
 implementation
@@ -122,6 +124,33 @@ end;
 procedure TMigrateRepository.deleteCodeMigrate(const migrateIdentifier: String);
 begin
   FDQuery.ExecSQL(Format('DELETE FROM MIGRATIONS MG WHERE MG.ID = %s;', [migrateIdentifier.QuotedString]));
+end;
+
+function TMigrateRepository.getListMigratesExecuted: TList<String>;
+var
+  listMigratesExecuted: TList<String>;
+  sql: String;
+begin
+
+  sql := 'SELECT * FROM MIGRATIONS';
+
+  FDQuery.Open(sql);
+
+  if FDQuery.IsEmpty then
+    exit(nil);
+
+  listMigratesExecuted := TList<String>.Create();
+
+  FDQuery.First;
+
+  while not FDQuery.Eof do
+  begin
+    listMigratesExecuted.Add(FDQuery.FieldByName('ID').AsString);
+    FDQuery.Next;
+  end;
+
+  Result := listMigratesExecuted;
+
 end;
 
 procedure TMigrateRepository.insertCodeMigrate(const migrateIdentifier: String);

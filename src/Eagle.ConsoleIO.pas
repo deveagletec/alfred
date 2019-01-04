@@ -10,12 +10,14 @@ type
       procedure WriteInfo(const Msg : string);
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string);
+      function ReadInfo(const Msg: String; Color: Byte = LightGray): String;
    end;
 
    TConsoleIO = class(TInterfacedObject, IConsoleIO)
    private
       procedure WriteColor(const Text: string; Color: Byte; const NewLine : Boolean = True);
    public
+      function ReadInfo(const Msg: String; Color: Byte = LightGray): String;
       procedure WriteInfo(const Msg : string);
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string);
@@ -23,12 +25,29 @@ type
 
 implementation
 
+function TConsoleIO.ReadInfo(const Msg: String; Color: Byte = LightGray): String;
+begin
+  WriteColor(Msg, Color);
+  Result := ReadKey;
+
+end;
+
 { TConsoleIO }
 
 procedure TConsoleIO.WriteColor(const Text: string; Color: Byte; const NewLine : Boolean = True);
 var
-  OldColor: Byte;begin
-  OldColor := TextColor;  TextColor(Color);  Write(Text);  if NewLine then    Writeln('');  TextColor(OldColor);
+  OldColor: Byte;
+begin
+
+  OldColor := TextColor;
+  TextColor(Color);
+
+  Write(Text);
+
+  if NewLine then
+    Writeln('');
+
+  TextColor(OldColor);
 
 end;
 

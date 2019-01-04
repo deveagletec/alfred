@@ -15,31 +15,41 @@ uses
 
   Eagle.Alfred.Migrate.Model.Migrate,
   Eagle.Alfred.Migrate.Service.MigrateService,
-  Eagle.Alfred.Migrate.Repository.MigrateRepository;
+  Eagle.Alfred.Migrate.Repository.MigrateRepository, Eagle.Alfred.Data,
+  Eagle.ConsoleIO;
 
 type
 
-  [Command('DB:Migrate', 'execute', 'Realiza a execução dos migrates no banco de dados')]
+  [Command('db:migrate', 'run', 'Realiza a execução dos migrates no banco de dados')]
   TMigrateExecute = class(TCommandAbstract)
   private
 
-    FInteractiveMode: Boolean;
+    FIsInteractiveMode: Boolean;
     FFilterTypeExecution: TMigrateFilterTypeExecution;
     FFilter: String;
 
     FMigrates: TList<IMigrate>;
+    FMigrateRepository: IMigrateRepository;
+    FMigrateService: IMigrateService;
 
     procedure checkFilesEncodedUFT8;
+    procedure executeMigrates;
 
   public
 
-    procedure execute; override;
+    constructor Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);
 
-    [ParamAttribute('version', 'Filtro de versão')]
+    procedure execute; override;
+    procedure help; override;
+
+    [ParamAttribute('version', 'Filtro de versão', False)]
     procedure setVersion(const version: String);
 
-    [ParamAttribute('migrate', 'Migrate limite de execução')]
+    [ParamAttribute('migrate', 'Migrate limite de execução', False)]
     procedure setMigrate(const Migrate: String);
+
+    [OptionAttribute('IsInteractiveMode', 'i', 'Informar se a execução será em modo interativo')]
+    procedure setInteractive;
 
   end;
 
@@ -47,6 +57,18 @@ const
   SIM = 'S';
 
 implementation
+
+constructor TMigrateExecute.Create(const AppPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);
+begin
+  inherited Create(AppPath, APackage, ConsoleIO);
+
+  FMigrateRepository := TMigrateRepository.Create();
+  FMigrateService := TMigrateService.Create(FPackage);
+
+  FIsInteractiveMode := False;
+  FFilterTypeExecution := TMigrateFilterTypeExecution.TAll;
+
+end;
 
 procedure TMigrateExecute.checkFilesEncodedUFT8;
 var
@@ -57,67 +79,89 @@ begin
 
   filesEncodedUTF8 := TList<String>.Create();
 
-  for Migrate in FMigrates do
-  begin
+  try
 
-    fileName := Format('%s%s%s%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, Migrate.UnixIdentifier, '_', Migrate.IssueIdentifier, '.json']);
+    for Migrate in FMigrates do
+    begin
 
-    if TIOUtils.FileIsEncodedUTF8(fileName) then
-      filesEncodedUTF8.Add(Format('%s%s%s', [Migrate.UnixIdentifier, '_', Migrate.IssueIdentifier]));
+      fileName := Format('%s%s%s%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, Migrate.UnixIdentifier, '_', Migrate.IssueIdentifier, '.json']);
 
+      if TIOUtils.FileIsEncodedUTF8(fileName) then
+        filesEncodedUTF8.Add(Format('%s%s%s', [Migrate.UnixIdentifier, '_', Migrate.IssueIdentifier]));
+
+    end;
+
+    if filesEncodedUTF8.Count <= 0 then
+      exit;
+
+    FConsoleIO.WriteInfo('Foram detectados arquivos codificados em UTF-8. Podendo gerar corrupção a dos metadatas do banco.');
+    FConsoleIO.WriteInfo('Arquivos codificados em UTF-8:');
+    FConsoleIO.WriteInfo('---------------------');
+
+    for fileEncodedUTF8 in filesEncodedUTF8 do
+      FConsoleIO.WriteInfo(' + ' + fileEncodedUTF8);
+
+    FConsoleIO.WriteInfo('---------------------');
+    answer := FConsoleIO.ReadInfo('Deseja continuar? <S>im | <N>ao');
+
+    if not answer.ToUpper.Equals(SIM) then
+      abort;
+
+  finally
+    filesEncodedUTF8.Free();
   end;
-
-  if filesEncodedUTF8.Count <= 0 then
-    exit;
-
-  FConsoleIO.WriteInfo('Foram detectados arquivos codificados em UTF-8. Podendo gerar corrupção a dos metadatas do banco.');
-  FConsoleIO.WriteInfo('Arquivos codificados em UTF-8:');
-  FConsoleIO.WriteInfo('---------------------');
-
-  for fileEncodedUTF8 in filesEncodedUTF8 do
-    FConsoleIO.WriteInfo(' + ' + fileEncodedUTF8);
-
-  FConsoleIO.WriteInfo('---------------------');
-  answer := FConsoleIO.ReadInfo('Deseja continuar? <S>im | <N>ao');
-
-  if not answer.ToUpper.Equals(SIM) then
-    abort;
 
 end;
 
 procedure TMigrateExecute.execute;
 var
-  MigrateService: IMigrateService;
-  MigrateRepository: IMigrateRepository;
-  Migrate: IMigrate;
-  answer, lastScriptExecuted: string;
-  canExecute: Boolean;
+  listMigratesExecuted: TList<String>;
 begin
 
-  MigrateService := TMigrateService.Create();
-  MigrateRepository := TMigrateRepository.Create();
+  FMigrateService := TMigrateService.Create(FPackage);
 
-  lastScriptExecuted := MigrateRepository.getLastScriptExecuted();
+  listMigratesExecuted := FMigrateRepository.getListMigratesExecuted();
 
-  FMigrates := MigrateService.getMigratesByMigrationDir(TExecutionModeMigrate.TUp);
+  try
 
-  MigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TUp, FMigrates, lastScriptExecuted);
+    FMigrates := FMigrateService.getMigratesByMigrationDir(TExecutionModeMigrate.TUp);
 
-  if FMigrates.Count = 0 then
-    exit(True);
+    if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) then
+      FMigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TUp, FMigrates, listMigratesExecuted);
 
-  checkFilesEncodedUFT8();
+    if FMigrates.Count = 0 then
+      exit;
+
+    checkFilesEncodedUFT8();
+
+    executeMigrates();
+
+  finally
+
+    if Assigned(listMigratesExecuted) then
+      listMigratesExecuted.Free();
+
+  end;
+
+end;
+
+procedure TMigrateExecute.executeMigrates;
+var
+  Migrate: IMigrate;
+  answer: string;
+  canExecute: Boolean;
+begin
 
   for Migrate in FMigrates do
   begin
 
-    if FInteractiveMode then
+    if FIsInteractiveMode then
     begin
 
       answer := FConsoleIO.ReadInfo(Format('Deseja executar o arquivo %s? <S>im | <N>ao', [Migrate.IssueIdentifier]));
 
       if not answer.ToUpper.Equals(SIM) then
-        exit(True);
+        exit;
 
     end;
 
@@ -129,7 +173,7 @@ begin
       canExecute := Migrate.version.Equals(FFilter)
     else
     begin
-      canExecute := Migrate.IssueIdentifier <= FFilter;
+      canExecute := Migrate.UnixIdentifier <= FFilter;
 
       if not canExecute then
         exit;
@@ -137,10 +181,21 @@ begin
     end;
 
     if canExecute then
-      MigrateRepository.executeFileScript(Migrate, TExecutionModeMigrate.TUp);
+      FMigrateRepository.executeFileScript(Migrate, TExecutionModeMigrate.TUp);
 
   end;
 
+end;
+
+procedure TMigrateExecute.help;
+begin
+  inherited;
+  // TODO -cMM: TMigrateExecute.help default body inserted
+end;
+
+procedure TMigrateExecute.setInteractive;
+begin
+  FIsInteractiveMode := True;
 end;
 
 procedure TMigrateExecute.setMigrate(const Migrate: String);
