@@ -61,8 +61,8 @@ end;
 
 constructor OptionAttribute.Create(const AName, AAlias, ADescription: string);
 begin
-  FName := AName.ToLower.Replace('-','', [rfReplaceAll]);
-  FAlias := AAlias.ToLower.Replace('-','', [rfReplaceAll]);
+  FName := AName.Replace('-','', [rfReplaceAll]);
+  FAlias := AAlias.Replace('-','', [rfReplaceAll]);
   FDescription := ADescription;
 end;
 

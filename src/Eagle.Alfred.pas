@@ -5,12 +5,10 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   System.Rtti,
-  System.TypInfo,
   System.IOUtils,
   System.RegularExpressions,
 
   XSuperJSON, XSuperObject,
-
 
   Eagle.ConsoleIO,
   Eagle.Alfred.Attributes,
@@ -86,7 +84,7 @@ function TAlfred.CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
 begin
 
   Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [
-    TValue.From<string>(FAppPath),
+    TValue.From<string>(FCurrentPath),
     TValue.From<TPackage>(FPackage),
     TValue.From<IConsoleIO>(FConsoleIO)
   ]).AsType<ICommand>;

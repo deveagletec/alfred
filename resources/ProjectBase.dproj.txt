@@ -1,14 +1,14 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{92FAFFEC-F8F0-4B28-829D-FD4A36CAE955}</ProjectGuid>
+        <ProjectGuid>{352C54D6-964B-4969-B643-44C973193588}</ProjectGuid>
         <ProjectVersion>17.2</ProjectVersion>
-        <FrameworkType>None</FrameworkType>
-        <MainSource>Alfred.dpr</MainSource>
+        <FrameworkType>VCL</FrameworkType>
+        <MainSource>{Project-Name}.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
-        <AppType>Console</AppType>
+        <AppType>Application</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -35,8 +35,9 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <SanitizedProjectName>Alfred</SanitizedProjectName>
-        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
+        <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
+        <SanitizedProjectName>{Project-Name}</SanitizedProjectName>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
@@ -46,17 +47,12 @@
         <DCC_K>false</DCC_K>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
-        <DCC_DcuOutput>..\build\$(Platform)\$(Config)\Alfred</DCC_DcuOutput>
-        <Debugger_RunParams>new project ERP -v</Debugger_RunParams>
-        <DCC_ExeOutput>..\build\$(Platform)\$(Config)</DCC_ExeOutput>
-        <DCC_BplOutput>..\build\$(Platform)\$(Config)\Alfred</DCC_BplOutput>
-        <Manifest_File>None</Manifest_File>
-        <DCC_DcpOutput>..\build\$(Platform)\$(Config)\Alfred</DCC_DcpOutput>
-        <DCC_UsePackage>MyComponents;ACBr_Convenio115;frxADO22;FireDACTDataDriver;ACBr_BoletoFR;FireDACSqliteDriver;FireDACDSDriver;ZComponent;DBXSqliteDriver;frxTee22;ACBr_BoletoRL;FireDACPgDriver;fmx;ACBr_Diversos;IndySystem;TeeDB;tethering;TP_LockBox3;ACBr_NFeDanfeFR;vclib;DBXInterBaseDriver;DataSnapClient;DataSnapServer;DataSnapCommon;ACBr_NFeDanfeESCPOS;ACBr_BlocoX;ACBr_synapse;fsIBX22;DataSnapProviderClient;DBXSybaseASEDriver;frxe22;DbxCommonDriver;ACBr_MDFeDamdfeFR;vclimg;DUnitXRuntime;fs22;dbxcds;OnGuardDR;DatasnapConnectorsFreePascal;ACBr_Comum;appanalytics;vcldb;vcldsnap;fsDB22;ACBr_MDFeDamdfeRL;AbbreviaVCLD;fmxFireDAC;DBXDb2Driver;frce;DBXOracleDriver;CustomIPTransport;ACBr_Serial;vclribbon;ACBr_SPED;dsnap;IndyIPServer;TDsharpComboBox;ACBr_MDFe;fmxase;vcl;IndyCore;ACBr_DFeComum;DBXMSSQLDriver;IndyIPCommon;CloudService;FmxTeeUI;FireDACIBDriver;spdNotaSegura_DXE8;ACBr_Boleto;CodeSiteExpressPkg;DataSnapFireDAC;FireDACDBXDriver;ACBr_Sintegra;soapserver;ACBr_CTeDacteFR;inetdbxpress;dsnapxml;FireDACInfxDriver;FireDACDb2Driver;ACBr_LFD;ACBR_DeSTDA;ACBr_PCNComum;adortl;frxDBX22;ACBr_TCP;FireDACASADriver;ACBr_SEF2;frx22;bindcompfmx;ACBr_PAF;FireDACODBCDriver;RESTBackendComponents;emsclientfiredac;ZDbc;rtl;dbrtl;DbxClientDriver;FireDACCommon;bindcomp;inetdb;ZPlain;ACBr_MTER;Tee;ACBr_NFe;DBXOdbcDriver;ACBr_CTe;ibmonitor;vclFireDAC;xmlrtl;DataSnapNativeClient;svnui;ibxpress;frxIBX22;ACBr_NFeDanfeRL;IndyProtocols;DBXMySQLDriver;fsTee22;FireDACCommonDriver;bindcompdbx;soaprtl;bindengine;vclactnband;FMXTee;TeeUI;bindcompvcl;ACBr_CTeDacteRL;vclie;fsADO22;ACBr_OpenSSL;frxDB22;FireDACADSDriver;vcltouch;ZCore;ACBr_TEFD;emsclient;VCLRESTComponents;FireDAC;VclSmp;DBXInformixDriver;FireDACMSSQLDriver;Intraweb;DataSnapConnectors;DataSnapServerMidas;dsnapcon;DBXFirebirdDriver;ACBr_TXTComum;inet;fmxobj;FireDACMySQLDriver;soapmidas;vclx;ZParseSql;spdGov16_DXE8;ACBr_SPEDImportar;svn;DBXSybaseASADriver;FireDACOracleDriver;fmxdae;RESTComponents;FireDACMSAccDriver;dbexpress;DataSnapIndy10ServerTransport;IndyIPClient;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_UsePackage>MyComponents;ACBr_Convenio115;frxADO22;FireDACTDataDriver;ACBr_BoletoFR;FireDACSqliteDriver;FireDACDSDriver;ZComponent;DBXSqliteDriver;frxTee22;Spring.Data;FireDACPgDriver;ACBr_BoletoRL;fmx;TreeViewPresenter;ACBr_Diversos;IndySystem;TeeDB;tethering;TP_LockBox3;ACBr_NFeDanfeFR;vclib;DBXInterBaseDriver;DataSnapClient;DataSnapServer;DataSnapCommon;fsIBX22;ACBr_NFeDanfeESCPOS;ACBr_synapse;ACBr_BlocoX;DataSnapProviderClient;DBXSybaseASEDriver;frxe22;DbxCommonDriver;ACBr_MDFeDamdfeFR;vclimg;DUnitXRuntime;fs22;dbxcds;OnGuardDR;DatasnapConnectorsFreePascal;ACBr_Comum;appanalytics;vcldb;vcldsnap;fsDB22;ACBr_MDFeDamdfeRL;AbbreviaVCLD;fmxFireDAC;DBXDb2Driver;frce;DBXOracleDriver;CustomIPTransport;ACBr_Serial;vclribbon;ACBr_SPED;dsnap;IndyIPServer;TDsharpComboBox;ACBr_MDFe;fmxase;vcl;IndyCore;ACBr_DFeComum;DBXMSSQLDriver;IndyIPCommon;CloudService;FmxTeeUI;FireDACIBDriver;spdNotaSegura_DXE8;CodeSiteExpressPkg;ACBr_Boleto;DataSnapFireDAC;FireDACDBXDriver;ACBr_Sintegra;soapserver;ACBr_CTeDacteFR;inetdbxpress;dsnapxml;FireDACInfxDriver;FireDACDb2Driver;ACBr_LFD;ACBR_DeSTDA;ACBr_PCNComum;adortl;frxDBX22;ACBr_TCP;DataBindingsVCL;FireDACASADriver;ACBr_SEF2;frx22;bindcompfmx;ACBr_PAF;FireDACODBCDriver;RESTBackendComponents;emsclientfiredac;ZDbc;rtl;dbrtl;DbxClientDriver;FireDACCommon;bindcomp;inetdb;ZPlain;ACBr_MTER;Tee;ACBr_NFe;DataBindings;DBXOdbcDriver;ACBr_CTe;ibmonitor;vclFireDAC;xmlrtl;DataSnapNativeClient;svnui;ibxpress;frxIBX22;fsTee22;IndyProtocols;DBXMySQLDriver;ACBr_NFeDanfeRL;FireDACCommonDriver;bindcompdbx;soaprtl;bindengine;vclactnband;FMXTee;TeeUI;bindcompvcl;ACBr_CTeDacteRL;vclie;fsADO22;ACBr_OpenSSL;frxDB22;FireDACADSDriver;vcltouch;ZCore;ACBr_TEFD;emsclient;VCLRESTComponents;FireDAC;VclSmp;DBXInformixDriver;FireDACMSSQLDriver;Intraweb;DataSnapConnectors;DataSnapServerMidas;dsnapcon;DBXFirebirdDriver;ACBr_TXTComum;inet;fmxobj;FireDACMySQLDriver;soapmidas;vclx;ZParseSql;spdGov16_DXE8;ACBr_SPEDImportar;svn;DBXSybaseASADriver;FireDACOracleDriver;fmxdae;RESTComponents;VirtualTreesR;FireDACMSAccDriver;dbexpress;DataSnapIndy10ServerTransport;IndyIPClient;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
-        <DCC_ConsoleTarget>true</DCC_ConsoleTarget>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -67,8 +63,6 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>generate view marca teste</Debugger_RunParams>
-        <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -81,57 +75,10 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\src\Eagle.Alfred.Attributes.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Data.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.DprojParser.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Exceptions.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.MigrateService.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Utils.pas"/>
-        <DCCReference Include="..\src\Eagle.ConsoleIO.pas"/>
-        <DCCReference Include="..\src\core\Eagle.Alfred.Core.Command.pas"/>
-        <DCCReference Include="..\libs\Console.pas"/>
-        <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Project.pas"/>
-        <DCCReference Include="..\src\core\Eagle.Alfred.Core.CommandRegister.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.View.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.ViewModel.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Model.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Service.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Repository.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Test.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas"/>
-        <DCCReference Include="..\src\core\Eagle.Alfred.Core.CodeGenerator.pas"/>
-        <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas"/>
-        <RcItem Include="..\resources\ProjectBase.dpr.txt">
-            <ContainerId>ResourceItem</ContainerId>
-            <ResourceType>RCDATA</ResourceType>
-            <ResourceId>project_base_dpr</ResourceId>
-        </RcItem>
-        <RcItem Include="..\resources\ProjectBase.dproj.txt">
-            <ContainerId>ResourceItem</ContainerId>
-            <ResourceType>RCDATA</ResourceType>
-            <ResourceId>project_base_dproj</ResourceId>
-        </RcItem>
-        <RcItem Include="..\resources\ProjectGroup.groupproj.txt">
-            <ContainerId>ResourceItem</ContainerId>
-            <ResourceType>RCDATA</ResourceType>
-            <ResourceId>project_group</ResourceId>
-        </RcItem>
-        <RcItem Include="..\resources\ProjectTest.dpr.txt">
-            <ContainerId>ResourceItem</ContainerId>
-            <ResourceType>RCDATA</ResourceType>
-            <ResourceId>project_test_dpr</ResourceId>
-        </RcItem>
-        <RcItem Include="..\resources\ProjectTest.dproj.txt">
-            <ContainerId>ResourceItem</ContainerId>
-            <ResourceType>RCDATA</ResourceType>
-            <ResourceId>project_test_dproj</ResourceId>
-        </RcItem>
-        <RcItem Include="..\resources\gitignore.txt">
-            <ContainerId>ResourceItem</ContainerId>
-            <ResourceType>RCDATA</ResourceType>
-            <ResourceId>git_ignore</ResourceId>
-        </RcItem>
+        <DCCReference Include="Unit1.pas">
+            <Form>Form1</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -150,29 +97,13 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">Alfred.dpr</Source>
+                    <Source Name="MainSource">{Project-Name}.dpr</Source>
                 </Source>
-                <Excluded_Packages>
-                    <Excluded_Packages Name="C:\development\components\ACBr\Lib\Delphi\LibD22\ACBr_Integrador.bpl">ACBrIntegrador</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\16.0\bpl\LockBox3DD.bpl">TurboPack LockBox 3 designtime package</Excluded_Packages>
-                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="1">
-                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="..\build\Win32\Debug\Alfred.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Debug\{Project-Name}.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>Alfred.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\iossim32\libcgunwind.1.0.dylib" Class="DependencyModule">
-                    <Platform Name="iOSSimulator">
+                        <RemoteName>{Project-Name}.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -552,11 +483,11 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>

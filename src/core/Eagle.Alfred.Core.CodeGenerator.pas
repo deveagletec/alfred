@@ -1,4 +1,4 @@
-unit Eagle.Alfred.CodeGenerator;
+unit Eagle.Alfred.Core.CodeGenerator;
 
 interface
 uses
