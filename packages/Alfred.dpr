@@ -28,7 +28,10 @@ uses
   Eagle.Alfred.Command.Generate.Test in '..\src\command\generate\Eagle.Alfred.Command.Generate.Test.pas',
   Eagle.Alfred.Command.Generate.Crud in '..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas',
   Eagle.Alfred.Core.CodeGenerator in '..\src\core\Eagle.Alfred.Core.CodeGenerator.pas',
-  Eagle.Alfred.Command.Generate.CrudFile in '..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas';
+  Eagle.Alfred.Command.Generate.CrudFile in '..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas',
+  Eagle.Alfred.Command.Delete.DeleteCrudFile in '..\src\command\delete\Eagle.Alfred.Command.Delete.DeleteCrudFile.pas',
+  Eagle.Alfred.Command.Delete.Model in '..\src\command\delete\Eagle.Alfred.Command.Delete.Model.pas',
+  Eagle.Alfred.Core.IOUtils in '..\src\core\Eagle.Alfred.Core.IOUtils.pas';
 
 begin
 

@@ -2,11 +2,14 @@ unit Eagle.Alfred.Utils;
 
 interface
 uses
-  System.SysUtils;
+  Windows,
+  System.SysUtils,
+  System.Classes;
 
 function Capitalize(const Str: string): string;
 procedure CreateDiretories(const Paths: array of string);
 function GuidCreate: string;
+function GetResource(const ResourceName: string): TStringList;
 
 implementation
 
@@ -56,6 +59,30 @@ begin
 
   Result := GUIDToString(ID);
 
+end;
+
+function GetResource(const ResourceName: string): TStringList;
+var
+  ResourceStream: TResourceStream;
+  StringList: TStringList;
+begin
+
+  ResourceStream := TResourceStream.Create(HInstance, ResourceName, RT_RCDATA);
+  try
+    StringList := TStringList.Create;
+    try
+      StringList.LoadFromStream(ResourceStream);
+    except on E: Exception do
+      begin
+        StringList.Free;
+        raise;
+      end;
+    end;
+  finally
+    ResourceStream.Free;
+  end;
+
+  Result := StringList;
 end;
 
 end.

@@ -12,6 +12,10 @@ type
 
   EAlfredPackageInvalidException = class(EAlfredException);
 
+  EAlfredCreateFileException = class(EAlfredException);
+
+  EAlfredCreateDirException = class(EAlfredException);
+
 implementation
 
 end.

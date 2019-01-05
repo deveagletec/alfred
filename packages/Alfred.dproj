@@ -67,7 +67,6 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>generate crud marca teste -S</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -102,6 +101,9 @@
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.CodeGenerator.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas"/>
+        <DCCReference Include="..\src\command\delete\Eagle.Alfred.Command.Delete.DeleteCrudFile.pas"/>
+        <DCCReference Include="..\src\command\delete\Eagle.Alfred.Command.Delete.Model.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.IOUtils.pas"/>
         <RcItem Include="..\resources\ProjectBase.dpr.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>

@@ -10,8 +10,10 @@ uses
   XSuperObject,
 
   Eagle.Alfred,
+  Eagle.Alfred.Utils,
   Eagle.Alfred.Data,
   Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.IOUtils,
   Eagle.Alfred.Core.Command;
 
 type
@@ -28,13 +30,9 @@ type
     procedure CreateFiles;
     procedure CreateGitIgnore;
     procedure CreatePackageJson;
-    procedure CreateProjectDpr;
-    procedure CreateProjectDproj;
-    procedure CreateProjectGroup;
-    procedure CreateProjectTestDpr;
-    procedure CreateProjectTestDproj;
-    procedure CreateReadMe;
-    function GetResource(ResourceName: string): TStringList;
+
+    procedure DoCreateProjectFile(const ResourceName, FileName: string);
+    procedure CreateFile(const Path, Contents: string);
   public
     procedure Execute; override;
 
@@ -54,14 +52,11 @@ type
 
 implementation
 
-{ TNewProjectCommand }
-
 procedure TNewProjectCommand.CreateDirs;
 var
   Value, Path: string;
   Paths: TArray<string>;
 begin
-
   Paths := ['\build','\ci\','\libs','\packages','\resources','\src','\tests'];
 
   for Value in Paths do
@@ -69,28 +64,42 @@ begin
 
     Path := FProjectDir + Value;
 
-    TDirectory.CreateDirectory(Path);
+    TIOUtils.CreateDir(Path, FForce);
 
     if FVerbose then
-      FConsoleIO.WriteInfo('Create '+ Value);
+      FConsoleIO.WriteInfo('Created .'+ Value);
 
   end;
+end;
+
+procedure TNewProjectCommand.CreateFile(const Path, Contents: string);
+begin
+
+  TIOUtils.CreateFile(FProjectDir + Path, Contents, FForce);
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Created .' + Path);
+
 end;
 
 procedure TNewProjectCommand.CreateFiles;
 begin
 
-  CreateReadMe;
+  CreateFile('\README.md', '#' + FName);
   CreateGitIgnore;
-  CreateProjectDpr;
-  CreateProjectDproj;
+
+  DoCreateProjectFile('project_base_dpr', FName + '.dpr');
+  DoCreateProjectFile('project_base_dproj', FName + '.dproj');
 
   if FSkipTests then
     Exit;
 
-  CreateProjectTestDpr;
-  CreateProjectTestDproj;
-  CreateProjectGroup;
+  DoCreateProjectFile('project_test_dpr', FName + 'Test.dpr');
+  DoCreateProjectFile('project_test_dproj', FName + 'Test.dproj');
+  DoCreateProjectFile('project_group', FName + 'Group.groupproj');
+
+  CreateFile('\ci\dcov_paths.lst', '');
+  CreateFile('\ci\dcov_units.lst', '');
 
 end;
 
@@ -108,7 +117,7 @@ begin
   end;
 
   if FVerbose then
-    FConsoleIO.WriteInfo('Create .gitignore');
+    FConsoleIO.WriteInfo('Created .\.gitignore');
 end;
 
 procedure TNewProjectCommand.CreatePackageJson;
@@ -141,124 +150,36 @@ begin
 
 end;
 
-procedure TNewProjectCommand.CreateProjectDpr;
+procedure TNewProjectCommand.DoCreateProjectFile(const ResourceName, FileName: string);
 var
   StringList: TStringList;
 begin
 
-  StringList := GetResource('project_base_dpr');
+  StringList := GetResource(ResourceName);
 
   try
 
     StringList.Text := StringList.Text.Replace('{Project-Name}', FName, [rfReplaceAll]);
 
-    StringList.SaveToFile(FProjectDir + '\packages\' + FName + '.dpr');
+    StringList.SaveToFile(FProjectDir + '\' + FPackage.PackagesDir + FileName);
   finally
     StringList.Free;
   end;
 
   if FVerbose then
-    FConsoleIO.WriteInfo('Create ' + FName + '.dpr');
+    FConsoleIO.WriteInfo('Created .\' + FileName);
 
-end;
-
-procedure TNewProjectCommand.CreateProjectDproj;
-var
-  StringList: TStringList;
-begin
-
-  StringList := GetResource('project_base_dproj');
-
-  try
-
-    StringList.Text := StringList.Text.Replace('{Project-Name}', FName, [rfReplaceAll]);
-
-    StringList.SaveToFile(FProjectDir + '\packages\' + FName + '.dproj');
-  finally
-    StringList.Free;
-  end;
-
-  if FVerbose then
-    FConsoleIO.WriteInfo('Create ' + FName + '.dproj');
-
-end;
-
-procedure TNewProjectCommand.CreateProjectGroup;
-var
-  StringList: TStringList;
-begin
-
-  StringList := GetResource('project_group');
-
-  try
-
-    StringList.Text := StringList.Text.Replace('{Project-Name}', FName, [rfReplaceAll]);
-
-    StringList.SaveToFile(FProjectDir + '\packages\' + FName + 'Group.groupproj');
-  finally
-    StringList.Free;
-  end;
-
-  if FVerbose then
-    FConsoleIO.WriteInfo('Create ' + FName + 'Group.groupproj');
-end;
-
-procedure TNewProjectCommand.CreateProjectTestDpr;
-var
-  StringList: TStringList;
-begin
-
-  StringList := GetResource('project_test_dpr');
-
-  try
-
-    StringList.Text := StringList.Text.Replace('{Project-Name}', FName, [rfReplaceAll]);
-
-    StringList.SaveToFile(FProjectDir + '\packages\' + FName + 'Test.dpr');
-  finally
-    StringList.Free;
-  end;
-
-  if FVerbose then
-    FConsoleIO.WriteInfo('Create ' + FName + 'Test.dpr');
-
-end;
-
-procedure TNewProjectCommand.CreateProjectTestDproj;
-var
-  StringList: TStringList;
-begin
-
-  StringList := GetResource('project_test_dproj');
-
-  try
-
-    StringList.Text := StringList.Text.Replace('{Project-Name}', FName, [rfReplaceAll]);
-
-    StringList.SaveToFile(FProjectDir + '\packages\' + FName + 'Test.dproj');
-  finally
-    StringList.Free;
-  end;
-
-  if FVerbose then
-    FConsoleIO.WriteInfo('Create ' + FName + 'Test.dproj');
-
-end;
-
-procedure TNewProjectCommand.CreateReadMe;
-begin
-  TFile.WriteAllText(FProjectDir + '\README.md', '#' + FName);
-
-  if FVerbose then
-    FConsoleIO.WriteInfo('Create README.md');
 end;
 
 procedure TNewProjectCommand.Execute;
 begin
 
-  FConsoleIO.WriteInfo('Creating ' + FName);
+  if FVerbose then
+    FConsoleIO.WriteInfo('Creating ' + FName + '... ')
+  else
+    FConsoleIO.WriteProcess('Creating ' + FName + '... ');
 
-  TDirectory.CreateDirectory(FCurrentPath + FName);
+  TIOUtils.CreateDir(FCurrentPath + FName, FForce);
 
   CreatePackageJson;
 
@@ -266,37 +187,16 @@ begin
 
   CreateFiles;
 
-  FConsoleIO.WriteInfo('Done');
+  if FVerbose then
+    FConsoleIO.WriteInfo('Done')
+  else
+    FConsoleIO.WriteProcess('Creating ' + FName + '... Done');
 
 end;
 
 procedure TNewProjectCommand.Force;
 begin
   FForce := True;
-end;
-
-function TNewProjectCommand.GetResource(ResourceName: string): TStringList;
-var
-  ResourceStream: TResourceStream;
-  StringList: TStringList;
-begin
-
-  ResourceStream := TResourceStream.Create(HInstance, ResourceName, RT_RCDATA);
-  try
-    StringList := TStringList.Create;
-    try
-      StringList.LoadFromStream(ResourceStream);
-    except on E: Exception do
-      begin
-        StringList.Free;
-        raise;
-      end;
-    end;
-  finally
-    ResourceStream.Free;
-  end;
-
-  Result := StringList;
 end;
 
 procedure TNewProjectCommand.SetName(const Name: string);
