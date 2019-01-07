@@ -25,6 +25,7 @@ type
   end;
 
   TCommandMetaData = record
+    CommandAttrib: CommandAttribute;
     CommandClass: TClass;
     CommandType: TRttiType;
     CommandParams: TArray<TCommandParam>;
@@ -36,21 +37,26 @@ type
     procedure AddCommand(CommandClass: TClass);
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
     function Contains(const GroupName, CommandName: string): Boolean;
+    //function GetCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
+    function GetGroupsCommand: TArray<string>;
+    function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
   end;
 
   TCommandRegister = class(TInterfacedObject, ICommandRegister)
   private
     FCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
-    function GetCommandOption(CommandOptionAttrib: OptionAttribute; Method:
-        TRttiMethod): TCommandOption;
-    function GetCommandParam(CommandParamAttrib: ParamAttribute; Method:
-        TRttiMethod): TCommandParam;
+
+    function GetCommandOption(CommandOptionAttrib: OptionAttribute; Method: TRttiMethod): TCommandOption;
+    function GetCommandParam(CommandParamAttrib: ParamAttribute; Method: TRttiMethod): TCommandParam;
   public
     constructor Create();
     destructor Destroy; override;
     procedure AddCommand(CommandClass: TClass);
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
     function Contains(const GroupName, CommandName: string): Boolean;
+    //function GetCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
+    function GetGroupsCommand: TArray<string>;
+    function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
   end;
 
 implementation
@@ -89,6 +95,7 @@ begin
 
     CommandsGroup := FCommands.Items[CmdAttrib.GroupName];
 
+    CommandMetaData.CommandAttrib := CmdAttrib;
     CommandMetaData.CommandClass := CommandClass;
     CommandMetaData.CommandType := RttiType;
 
@@ -145,21 +152,19 @@ begin
   inherited;
 end;
 
-function TCommandRegister.GetCommand(const GroupName, CommandName: string):
-    TCommandMetaData;
+function TCommandRegister.GetCommand(const GroupName, CommandName: string): TCommandMetaData;
 var
   CommandGroup: TDictionary<string, TCommandMetaData>;
-
   Command: ICommand;
 begin
+
+  if not FCommands.ContainsKey(GroupName) then
+    raise ECommandGroupNotFoundException.Create('Command Group not found');
 
   CommandGroup := FCommands.Items[GroupName];
 
   if not CommandGroup.ContainsKey(CommandName) then
-  begin
-   // Help;
-    Exit;
-  end;
+    raise ECommandNotFound.Create('Command not found');
 
   Result := CommandGroup.Items[CommandName];
 
@@ -183,6 +188,16 @@ begin
   CommandParam.Method := Method;
 
   Result := CommandParam;
+end;
+
+function TCommandRegister.GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
+begin
+  Result := FCommands.Items[GroupName];
+end;
+
+function TCommandRegister.GetGroupsCommand: TArray<string>;
+begin
+  Result := FCommands.Keys.ToArray;
 end;
 
 end.

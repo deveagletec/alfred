@@ -8,6 +8,7 @@ type
   CommandAttribute = class(TCustomAttribute)
   private
     FName: string;
+    FAlias: string;
     FGroupName: string;
     FGroupAlias: string;
     FDescription: string;
@@ -16,6 +17,7 @@ type
     property GroupName: string read FGroupName;
     property GroupAlias: string read FGroupAlias;
     property Name: string read FName;
+    property Alias: string read FAlias;
     property Description: string read FDescription;
   end;
 

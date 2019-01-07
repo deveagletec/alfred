@@ -16,6 +16,10 @@ type
 
   EAlfredCreateDirException = class(EAlfredException);
 
+  ECommandGroupNotFoundException = class(EAlfredException);
+
+  ECommandNotFound = class(EAlfredException);
+
 implementation
 
 end.

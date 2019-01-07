@@ -35,6 +35,7 @@ type
     procedure Execute(const GroupName, CommandName: string);
     function GetCommandParam(Attrib: ParamAttribute): string;
     procedure Help;
+    procedure HelpCommand(GroupName: string);
     procedure Init;
     procedure LoadCommandArgs;
     function OptionExists(const OptionAttrib: OptionAttribute): Boolean;
@@ -151,19 +152,37 @@ end;
 
 procedure TAlfred.Help;
 var
-  Par: TPair<string, TClass>;
+  Value: string;
 begin
 
-  FConsoleIO.WriteInfo('');
-  FConsoleIO.WriteInfo('         Alfred - Code Generate for Delphi');
-  FConsoleIO.WriteInfo('-----------------------------------------------------');
+  FConsoleIO.WriteInfo(sLineBreak + 'Usage: alfred <command>' + sLineBreak);
+  FConsoleIO.WriteInfo('Commands:');
 
-  FConsoleIO.WriteInfo('Para obter mais informações sobre um comando específico,');
-  FConsoleIO.WriteInfo('digite nome_do_comando HELP');
-  FConsoleIO.WriteInfo('');
+  for Value in FCommandRegister.GetGroupsCommand do
+    FConsoleIO.WriteInfo('  ' + Value);
 
- // for Par in FCommands.ToArray do
- //   FConsoleIO.WriteInfo(Par.Value.GetName.PadRight(15, ' ') + Par.Value.GetDescription);
+  FConsoleIO.WriteInfo(sLineBreak + 'alfred <command> [-h | --help]  Quick help on <command>');
+
+end;
+
+procedure TAlfred.HelpCommand(GroupName: string);
+var
+  Commands: TArray<TCommandMetaData>;
+  Command: TCommandMetaData;
+  CommandAttrib: CommandAttribute;
+begin
+
+  FConsoleIO.WriteInfo(sLineBreak + 'Usage: alfred ' + GroupName + ' <option>' + sLineBreak);
+
+  FConsoleIO.WriteInfo('Options:');
+
+  Commands := FCommandRegister.GetGroup(GroupName).Values.ToArray;
+
+  for Command in Commands do
+  begin
+    CommandAttrib := Command.CommandAttrib;
+    FConsoleIO.WriteInfo('   ' +CommandAttrib.Name.PadRight(15, ' ') + CommandAttrib.Description);
+  end;
 
 end;
 
@@ -223,16 +242,15 @@ begin
   GroupName := ParamStr(1).ToLower;
   CommandName := ParamStr(2).ToLower;
 
-  if not FCommandRegister.Contains(GroupName, CommandName) then
-  begin
-    Help;
-    Exit;
-  end;
-
   try
     Execute(GroupName, CommandName);
-  except on E: EAlfredException do
-    FConsoleIO.WriteError(E.Message);
+  except
+    on E: ECommandGroupNotFoundException do
+      Help;
+    on E: ECommandNotFound do
+      HelpCommand(GroupName);
+    on E: EAlfredException do
+      FConsoleIO.WriteError(E.Message);
   end;
 
 end;
