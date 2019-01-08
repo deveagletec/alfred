@@ -144,6 +144,9 @@ procedure TFireDacFirebirdConnection.Release;
 begin
   FreeAndNil(FConnection);
   FreeAndNil(FDDriverLink);
+
+  FRegistry.Free();
+
 end;
 
 end.

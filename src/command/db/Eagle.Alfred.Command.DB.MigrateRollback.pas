@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Command.DB.MigrateExecute;
+unit Eagle.Alfred.Command.DB.MigrateRollback;
 
 interface
 
@@ -6,9 +6,12 @@ uses
   System.SysUtils,
   System.Generics.Collections,
 
+  Eagle.ConsoleIO,
+
   Eagle.Alfred,
   Eagle.Alfred.Data,
   Eagle.Alfred.Attributes,
+
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Enums,
 
@@ -16,19 +19,18 @@ uses
 
   Eagle.Alfred.Migrate.Model.Migrate,
   Eagle.Alfred.Migrate.Service.MigrateService,
-  Eagle.Alfred.Migrate.Repository.MigrateRepository,
-  Eagle.ConsoleIO;
+  Eagle.Alfred.Migrate.Repository.MigrateRepository;
 
 type
 
-  [Command('db:migrate', 'up', 'Realiza a execução dos migrates no banco de dados')]
-  TMigrateExecute = class(TCommandAbstract)
+  [Command('db:migrate', 'down', 'Realiza a execução dos migrates no modo Down no banco de dados')]
+  TMigrateRollback = class(TCommandAbstract)
   private
 
     FIsInteractiveMode: Boolean;
+    FIsAutoCommit: Boolean;
     FFilterTypeExecution: TMigrateFilterTypeExecution;
     FFilter: String;
-    FIsAutoCommit: Boolean;
 
     FMigrates: TList<TMigrate>;
     FMigrateRepository: IMigrateRepository;
@@ -63,7 +65,7 @@ const
 
 implementation
 
-destructor TMigrateExecute.Destroy;
+destructor TMigrateRollback.Destroy;
 begin
 
   if Assigned(FMigrates) then
@@ -72,7 +74,7 @@ begin
   inherited;
 end;
 
-procedure TMigrateExecute.checkFilesEncodedUFT8;
+procedure TMigrateRollback.checkFilesEncodedUFT8;
 var
   filesEncodedUTF8: TList<String>;
   Migrate: TMigrate;
@@ -115,7 +117,7 @@ begin
 
 end;
 
-procedure TMigrateExecute.execute;
+procedure TMigrateRollback.execute;
 var
   listMigratesExecuted: TList<String>;
 begin
@@ -126,10 +128,10 @@ begin
 
   try
 
-    FMigrates := FMigrateService.getMigratesByMigrationDir(TExecutionModeMigrate.TUp);
+    FMigrates := FMigrateService.getMigratesByMigrationDir(TExecutionModeMigrate.TDown);
 
     if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) then
-      FMigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TUp, FMigrates, listMigratesExecuted);
+      FMigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TDown, FMigrates, listMigratesExecuted);
 
     if FMigrates.Count = 0 then
       exit;
@@ -151,16 +153,18 @@ begin
 
 end;
 
-procedure TMigrateExecute.executeMigrates;
+procedure TMigrateRollback.executeMigrates;
 var
   Migrate: TMigrate;
   answer: string;
   canExecute: Boolean;
-  teste: TArray<String>;
+  index: Integer;
 begin
 
-  for Migrate in FMigrates do
+  for index := FMigrates.Count - 1 downto 0 do
   begin
+
+    Migrate := FMigrates.Items[index];
 
     if FIsInteractiveMode then
     begin
@@ -180,7 +184,7 @@ begin
       canExecute := Migrate.version.Equals(FFilter)
     else
     begin
-      canExecute := Migrate.UnixIdentifier <= FFilter;
+      canExecute := Migrate.UnixIdentifier >= FFilter;
 
       if not canExecute then
         exit;
@@ -189,10 +193,7 @@ begin
 
     if canExecute then
     begin
-
-      teste := migrate.Up;
-
-      FMigrateRepository.executeMigrate(Migrate, TExecutionModeMigrate.TUp, FIsAutoCommit);
+      FMigrateRepository.executeMigrate(Migrate, TExecutionModeMigrate.TDown, FIsAutoCommit);
 
       FConsoleIO.WriteInfo(Format('| Migrate %s executed', [Migrate.UnixIdentifier]));
 
@@ -202,7 +203,7 @@ begin
 
 end;
 
-procedure TMigrateExecute.Init;
+procedure TMigrateRollback.Init;
 begin
   inherited;
 
@@ -215,17 +216,17 @@ begin
 
 end;
 
-procedure TMigrateExecute.setAutoCommit;
+procedure TMigrateRollback.setAutoCommit;
 begin
   FIsAutoCommit := True;
 end;
 
-procedure TMigrateExecute.setInteractive;
+procedure TMigrateRollback.setInteractive;
 begin
   FIsInteractiveMode := True;
 end;
 
-procedure TMigrateExecute.setMigrate(const Migrate: String);
+procedure TMigrateRollback.setMigrate(const Migrate: String);
 begin
 
   FFilterTypeExecution := TMigrateFilterTypeExecution.TByMigrate;
@@ -234,7 +235,7 @@ begin
 
 end;
 
-procedure TMigrateExecute.setVersion(const version: String);
+procedure TMigrateRollback.setVersion(const version: String);
 begin
 
   FFilterTypeExecution := TMigrateFilterTypeExecution.TByVersion;
@@ -245,6 +246,6 @@ end;
 
 initialization
 
-TAlfred.GetInstance.Register(TMigrateExecute);
+TAlfred.GetInstance.Register(TMigrateRollback);
 
 end.

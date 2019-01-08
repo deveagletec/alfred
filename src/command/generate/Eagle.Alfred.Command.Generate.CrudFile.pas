@@ -4,7 +4,7 @@ interface
 uses
   Eagle.Alfred,
   Eagle.Alfred.Attributes,
-  Eagle.Alfred.Exceptions,
+  Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.CodeGenerator;
 

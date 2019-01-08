@@ -21,7 +21,7 @@ type
 
   IMigrateRepository = interface
     function getLastScriptExecuted: String;
-    procedure executeFileScript(const Migrate: IMigrate; const executionMode: TExecutionModeMigrate);
+    procedure executeMigrate(const Migrate: TMigrate; const executionMode: TExecutionModeMigrate; const isAutoCommit: Boolean = False);
     function getListMigratesExecuted(): TList<String>;
   end;
 
@@ -37,7 +37,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure executeFileScript(const Migrate: IMigrate; const executionMode: TExecutionModeMigrate);
+    procedure executeMigrate(const Migrate: TMigrate; const executionMode: TExecutionModeMigrate; const isAutoCommit: Boolean = False);
     function getLastScriptExecuted: String;
     function getListMigratesExecuted(): TList<String>;
   end;
@@ -62,24 +62,33 @@ begin
   FDQuery.Free;
 end;
 
-procedure TMigrateRepository.executeFileScript(const Migrate: IMigrate; const executionMode: TExecutionModeMigrate);
+procedure TMigrateRepository.executeMigrate(const Migrate: TMigrate; const executionMode: TExecutionModeMigrate; const isAutoCommit: Boolean = False);
 var
+  SQLList: TArray<String>;
   SQL: String;
 begin
 
   if executionMode = TExecutionModeMigrate.TUp then
-    SQL := Migrate.Up
+    SQLList := Migrate.Up
   else
-    SQL := Migrate.Down;
-
-  if SQL.Trim().IsEmpty() then
-    exit;
+    SQLList := Migrate.Down;
 
   FFDConnection.GetConnection.StartTransaction;
 
   try
 
-    FDQuery.ExecSQL(SQL);
+    for SQL in SQLList do
+    begin
+
+      if SQL.Trim().IsEmpty() then
+        continue;
+
+      FDQuery.ExecSQL(SQL);
+
+      if isAutoCommit then
+        FFDConnection.GetConnection.Commit;
+
+    end;
 
     if executionMode = TExecutionModeMigrate.TUp then
       insertCodeMigrate(Migrate.UnixIdentifier)
@@ -129,12 +138,12 @@ end;
 function TMigrateRepository.getListMigratesExecuted: TList<String>;
 var
   listMigratesExecuted: TList<String>;
-  sql: String;
+  SQL: String;
 begin
 
-  sql := 'SELECT * FROM MIGRATIONS';
+  SQL := 'SELECT * FROM MIGRATIONS';
 
-  FDQuery.Open(sql);
+  FDQuery.Open(SQL);
 
   if FDQuery.IsEmpty then
     exit(nil);
