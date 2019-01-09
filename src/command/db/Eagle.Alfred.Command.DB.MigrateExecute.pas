@@ -12,8 +12,6 @@ uses
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Enums,
 
-  Eagle.Alfred.Commom.Utils.IOUtils,
-
   Eagle.Alfred.Migrate.Model.Migrate,
   Eagle.Alfred.Migrate.Service.MigrateService,
   Eagle.Alfred.Migrate.Repository.MigrateRepository,
@@ -34,7 +32,6 @@ type
     FMigrateRepository: IMigrateRepository;
     FMigrateService: IMigrateService;
 
-    procedure checkFilesEncodedUFT8;
     procedure executeMigrates;
 
   public
@@ -72,49 +69,6 @@ begin
   inherited;
 end;
 
-procedure TMigrateExecute.checkFilesEncodedUFT8;
-var
-  filesEncodedUTF8: TList<String>;
-  Migrate: TMigrate;
-  fileName, fileEncodedUTF8, answer: String;
-begin
-
-  filesEncodedUTF8 := TList<String>.Create();
-
-  try
-
-    for Migrate in FMigrates do
-    begin
-
-      fileName := Format('%s%s%s%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, Migrate.UnixIdentifier, '_', Migrate.IssueIdentifier, '.json']);
-
-      if TIOUtils.FileIsEncodedUTF8(fileName) then
-        filesEncodedUTF8.Add(Format('%s%s%s', [Migrate.UnixIdentifier, '_', Migrate.IssueIdentifier]));
-
-    end;
-
-    if filesEncodedUTF8.Count <= 0 then
-      exit;
-
-    FConsoleIO.WriteInfo('Foram detectados arquivos codificados em UTF-8. Podendo gerar corrupção a dos metadatas do banco.');
-    FConsoleIO.WriteInfo('Arquivos codificados em UTF-8:');
-    FConsoleIO.WriteInfo('---------------------');
-
-    for fileEncodedUTF8 in filesEncodedUTF8 do
-      FConsoleIO.WriteInfo(' + ' + fileEncodedUTF8);
-
-    FConsoleIO.WriteInfo('---------------------');
-    answer := FConsoleIO.ReadInfo('Deseja continuar? <S>im | <N>ao');
-
-    if not answer.ToUpper.Equals(SIM) then
-      abort;
-
-  finally
-    filesEncodedUTF8.Free();
-  end;
-
-end;
-
 procedure TMigrateExecute.execute;
 var
   listMigratesExecuted: TList<String>;
@@ -126,15 +80,18 @@ begin
 
   try
 
-    FMigrates := FMigrateService.getMigratesByMigrationDir(TExecutionModeMigrate.TUp);
+    FMigrates := FMigrateService.getMigratesByMigrationDir();
 
-    if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) then
+    if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) and (Assigned(FMigrates)) then
       FMigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TUp, FMigrates, listMigratesExecuted);
 
-    if FMigrates.Count = 0 then
+    if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
+    begin
+      FConsoleIO.WriteInfo('* ------- ');
+      FConsoleIO.WriteInfo('| None Migrate Founded! ');
+      FConsoleIO.WriteInfo('* ----------------------------------------------------- ');
       exit;
-
-    checkFilesEncodedUFT8();
+    end;
 
     executeMigrates();
 
@@ -156,7 +113,6 @@ var
   Migrate: TMigrate;
   answer: string;
   canExecute: Boolean;
-  teste: TArray<String>;
 begin
 
   for Migrate in FMigrates do
@@ -189,8 +145,6 @@ begin
 
     if canExecute then
     begin
-
-      teste := migrate.Up;
 
       FMigrateRepository.executeMigrate(Migrate, TExecutionModeMigrate.TUp, FIsAutoCommit);
 

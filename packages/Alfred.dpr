@@ -29,7 +29,6 @@ uses
   Eagle.Alfred.Command.Generate.CrudFile in '..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas',
   Eagle.Alfred.Command.Delete.DeleteCrudFile in '..\src\command\delete\Eagle.Alfred.Command.Delete.DeleteCrudFile.pas',
   Eagle.Alfred.Command.Delete.Model in '..\src\command\delete\Eagle.Alfred.Command.Delete.Model.pas',
-  Eagle.Alfred.Command.Generate.Migrate in '..\src\command\new\Eagle.Alfred.Command.Generate.Migrate.pas',
   Eagle.Alfred.DB.Connection in '..\src\db\Eagle.Alfred.DB.Connection.pas',
   Eagle.Alfred.DB.Impl.FiredacConnection in '..\src\db\impl\Eagle.Alfred.DB.Impl.FiredacConnection.pas',
   Eagle.Alfred.Migrate.Model.Migrate in '..\src\migrate\model\Eagle.Alfred.Migrate.Model.Migrate.pas',
@@ -38,8 +37,11 @@ uses
   Eagle.Alfred.Command.DB.MigrateExecute in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateExecute.pas',
   Eagle.Alfred.Migrate.Service.MigrateService in '..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas',
   Eagle.Alfred.Core.Enums in '..\src\core\Eagle.Alfred.Core.Enums.pas',
-  Eagle.Alfred.Commom.Utils.IOUtils in '..\src\commom\utils\Eagle.Alfred.Commom.Utils.IOUtils.pas',
-  Eagle.Alfred.Command.DB.MigrateRollback in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateRollback.pas';
+  Eagle.Alfred.Command.DB.MigrateRollback in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateRollback.pas',
+  Eagle.Alfred.Core.IOUtils in '..\src\core\Eagle.Alfred.Core.IOUtils.pas',
+  Eagle.Alfred.Command.Generate.Migrate in '..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas',
+  Eagle.Alfred.Command.DB.UpdateCheck in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateCheck.pas',
+  Eagle.Alfred.Update.Service.UpdateService in '..\src\update\service\Eagle.Alfred.Update.Service.UpdateService.pas';
 
 begin
 

@@ -12,6 +12,10 @@ type
 
   EAlfredPackageInvalidException = class(EAlfredException);
 
+  EAlfredCreateDirException = class(EAlfredException);
+
+  EAlfredCreateFileException = class(EAlfredException);
+
   EDataBaseException = class(EAlfredException);
   
   EFileNotFoundException = class(EAlfredException);

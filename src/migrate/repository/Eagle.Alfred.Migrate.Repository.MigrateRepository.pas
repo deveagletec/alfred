@@ -69,9 +69,9 @@ var
 begin
 
   if executionMode = TExecutionModeMigrate.TUp then
-    SQLList := Migrate.Up
+    SQLList := Migrate.up
   else
-    SQLList := Migrate.Down;
+    SQLList := Migrate.down;
 
   FFDConnection.GetConnection.StartTransaction;
 

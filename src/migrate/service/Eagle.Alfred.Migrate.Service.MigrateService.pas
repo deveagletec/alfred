@@ -19,15 +19,12 @@ uses
 
 type
 
-  migrateWrapper = record
-    Up: TArray<String>;
-  end;
-
   TExecuteMode = (TByVersion, TByMigrate, TAll);
 
   IMigrateService = interface
     ['{A31CC6DC-9FE4-4FC1-9610-E476806C6D33}']
-    function getMigratesByMigrationDir(const executionMode: TExecutionModeMigrate): TList<TMigrate>;
+    function getMigratesByMigrationDir(): TList<TMigrate>;
+    function getMigratesByVersion(const version: String): TList<TMigrate>;
     procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
   end;
 
@@ -36,11 +33,14 @@ type
 
     FPackage: TPackage;
 
+    procedure filterMigratesByVersion(var migrates: TList<TMigrate>; const version: String);
     function getListFilesMigrate: TList<String>;
 
   public
     constructor Create(const package: TPackage);
-    function getMigratesByMigrationDir(const executionMode: TExecutionModeMigrate): TList<TMigrate>;
+    function getMigratesByMigrationDir: TList<TMigrate>;
+    function getMigratesByVersion(const version: String): TList<TMigrate>;
+
     procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
   end;
 
@@ -50,6 +50,31 @@ constructor TMigrateService.Create(const package: TPackage);
 begin
   inherited Create();
   FPackage := package;
+end;
+
+procedure TMigrateService.filterMigratesByVersion(var migrates: TList<TMigrate>; const version: String);
+var
+  Migrate: TMigrate;
+  index: Integer;
+  canRemove: Boolean;
+begin
+
+  index := 0;
+
+  while index < migrates.Count do
+  begin
+
+    Migrate := migrates[index];
+
+    canRemove := not Migrate.version.Equals(version);
+
+    if canRemove then
+      migrates.Remove(Migrate)
+    else
+      Inc(index);
+
+  end;
+
 end;
 
 function TMigrateService.getListFilesMigrate: TList<String>;
@@ -75,18 +100,12 @@ begin
 
 end;
 
-function TMigrateService.getMigratesByMigrationDir(const executionMode: TExecutionModeMigrate): TList<TMigrate>;
+function TMigrateService.getMigratesByMigrationDir(): TList<TMigrate>;
 var
   listFiles: TList<String>;
-  search: TSearchRec;
-  index: Integer;
   listMigrates: TList<TMigrate>;
   Migrate: TMigrate;
   fileName, fileValue: String;
-  teste: TArray<String>;
-  teste2: String;
-  json: ISuperObject;
-  wrapper: migrateWrapper;
 begin
 
   listFiles := getListFilesMigrate();
@@ -105,11 +124,7 @@ begin
 
       fileValue := TFile.ReadAllText(Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, fileName]));
 
-      wrapper := TJson.Parse<migrateWrapper>(fileValue);
-
       Migrate := TJson.Parse<TMigrate>(fileValue);
-
-      teste := Migrate.Up;
 
       listMigrates.Add(Migrate);
 
@@ -120,9 +135,23 @@ begin
   finally
 
     if Assigned(listFiles) then
-      listFiles.Free();
+      FreeAndNil(listFiles);
 
   end;
+
+end;
+
+function TMigrateService.getMigratesByVersion(const version: String): TList<TMigrate>;
+var
+  migrates: TList<TMigrate>;
+begin
+
+  migrates := getMigratesByMigrationDir();
+
+  if Assigned(migrates) then
+    filterMigratesByVersion(migrates, version);
+
+  Result := migrates;
 
 end;
 

@@ -4,16 +4,15 @@ interface
 
 type
   TMigrate = record
-  public
 
-    IssueIdentifier: String;
-    UnixIdentifier: String;
-    Version: String;
-    Description: String;
-    Responsible: String;
-    IgnoredScripts: TArray<Integer>;
-    Up: TArray<String>;
-    Down: TArray<String>;
+    issueIdentifier: String;
+    unixIdentifier: String;
+    version: String;
+    dscription: String;
+    responsible: String;
+    ignoredScripts: TArray<Integer>;
+    up: TArray<String>;
+    down: TArray<String>;
 
   end;
 
