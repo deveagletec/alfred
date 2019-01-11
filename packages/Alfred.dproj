@@ -67,7 +67,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>db:update check 2018.006</Debugger_RunParams>
+        <Debugger_RunParams>db:Update run 2018.006</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -115,6 +115,9 @@
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas"/>
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateCheck.pas"/>
         <DCCReference Include="..\src\update\service\Eagle.Alfred.Update.Service.UpdateService.pas"/>
+        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas"/>
+        <DCCReference Include="..\src\commom\repository\Eagle.Alfred.Commom.Repository.pas"/>
+        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas"/>
         <RcItem Include="..\resources\ProjectBase.dpr.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
@@ -166,7 +169,6 @@
                     <Source Name="MainSource">Alfred.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\development\components\ACBr\Lib\Delphi\LibD22\ACBr_Integrador.bpl">ACBrIntegrador</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclDataSnapNativeServer220.bpl">Embarcadero DBExpress DataSnap Native Server Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
@@ -565,12 +567,12 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>

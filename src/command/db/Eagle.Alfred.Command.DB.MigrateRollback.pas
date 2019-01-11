@@ -6,8 +6,6 @@ uses
   System.SysUtils,
   System.Generics.Collections,
 
-  Eagle.ConsoleIO,
-
   Eagle.Alfred,
   Eagle.Alfred.Data,
   Eagle.Alfred.Attributes,
@@ -35,6 +33,9 @@ type
     FMigrateService: IMigrateService;
 
     procedure executeMigrates;
+    procedure showMessageNoneMigrateExecutedFounded;
+    procedure showMessageNoneMigrateFounded;
+    procedure showMessageSucessFull;
 
   public
 
@@ -82,6 +83,12 @@ begin
 
   try
 
+    if not(Assigned(listMigratesExecuted)) or (listMigratesExecuted.Count <= 0) then
+    begin
+      showMessageNoneMigrateExecutedFounded();
+      exit;
+    end;
+
     FMigrates := FMigrateService.getMigratesByMigrationDir();
 
     if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) and (Assigned(FMigrates)) then
@@ -89,17 +96,13 @@ begin
 
     if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
     begin
-      FConsoleIO.WriteInfo('* ------- ');
-      FConsoleIO.WriteInfo('| None Migrate Founded! ');
-      FConsoleIO.WriteInfo('* ----------------------------------------------------- ');
+      showMessageNoneMigrateFounded();
       exit;
     end;
 
     executeMigrates();
 
-    FConsoleIO.WriteInfo(' * ------- ');
-    FConsoleIO.WriteInfo(' | Migrates Executed Sucessfull ;) ');
-    FConsoleIO.WriteInfo(' * ----------------------------------------------------- ');
+    showMessageSucessFull();
 
   finally
 
@@ -117,6 +120,8 @@ var
   canExecute: Boolean;
   index: Integer;
 begin
+
+  FConsoleIO.WriteInfo('');
 
   for index := FMigrates.Count - 1 downto 0 do
   begin
@@ -152,7 +157,7 @@ begin
     begin
       FMigrateRepository.executeMigrate(Migrate, TExecutionModeMigrate.TDown, FIsAutoCommit);
 
-      FConsoleIO.WriteInfo(Format(' | Migrate %s executed', [Migrate.UnixIdentifier]));
+      FConsoleIO.WriteInfo(Format('| Migrate %s executed', [Migrate.UnixIdentifier]));
 
     end;
 
@@ -199,6 +204,33 @@ begin
 
   FFilter := version;
 
+end;
+
+procedure TMigrateRollback.showMessageNoneMigrateExecutedFounded;
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteInfo('* ------- ');
+  FConsoleIO.WriteInfo('| None Migrate Executed Founded! ');
+  FConsoleIO.WriteInfo('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
+end;
+
+procedure TMigrateRollback.showMessageNoneMigrateFounded;
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteInfo('* ------- ');
+  FConsoleIO.WriteInfo('| None Migrate Founded! ');
+  FConsoleIO.WriteInfo('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
+end;
+
+procedure TMigrateRollback.showMessageSucessFull;
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteSucess('* ------- ');
+  FConsoleIO.WriteSucess('| Migrates Executed Sucessfull ;) ');
+  FConsoleIO.WriteSucess('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
 end;
 
 initialization

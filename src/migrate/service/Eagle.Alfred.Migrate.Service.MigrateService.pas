@@ -10,9 +10,11 @@ uses
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
+  System.RegularExpressions,
 
   Eagle.Alfred.Data,
   Eagle.Alfred.Core.Enums,
+  Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Migrate.Model.Migrate,
 
   XSuperObject;
@@ -26,6 +28,7 @@ type
     function getMigratesByMigrationDir(): TList<TMigrate>;
     function getMigratesByVersion(const version: String): TList<TMigrate>;
     procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
+    procedure createNewMigrate(const migrate: TMigrate);
   end;
 
   TMigrateService = class(TInterfacedObject, IMigrateService)
@@ -38,6 +41,7 @@ type
 
   public
     constructor Create(const package: TPackage);
+    procedure createNewMigrate(const migrate: TMigrate);
     function getMigratesByMigrationDir: TList<TMigrate>;
     function getMigratesByVersion(const version: String): TList<TMigrate>;
 
@@ -52,9 +56,21 @@ begin
   FPackage := package;
 end;
 
+procedure TMigrateService.createNewMigrate(const migrate: TMigrate);
+var
+  fileValue, fileName: String;
+begin
+
+  fileValue := TJSON.Stringify(migrate, True);
+
+  fileName := Format('%s%s%s_%s.json', [FPackage.BaseDir, FPackage.MigrationDir, migrate.unixIdentifier, migrate.issueIdentifier]);
+
+  TFile.WriteAllText(fileName, fileValue);
+
+end;
+
 procedure TMigrateService.filterMigratesByVersion(var migrates: TList<TMigrate>; const version: String);
 var
-  Migrate: TMigrate;
   index: Integer;
   canRemove: Boolean;
 begin
@@ -64,12 +80,10 @@ begin
   while index < migrates.Count do
   begin
 
-    Migrate := migrates[index];
-
-    canRemove := not Migrate.version.Equals(version);
+    canRemove := not migrates[index].version.Equals(version);
 
     if canRemove then
-      migrates.Remove(Migrate)
+      migrates.Delete(index)
     else
       Inc(index);
 
@@ -104,7 +118,6 @@ function TMigrateService.getMigratesByMigrationDir(): TList<TMigrate>;
 var
   listFiles: TList<String>;
   listMigrates: TList<TMigrate>;
-  Migrate: TMigrate;
   fileName, fileValue: String;
 begin
 
@@ -114,19 +127,27 @@ begin
 
     listFiles.Sort();
 
-    if listFiles.Count = 0 then
+    if (listFiles.Count = 0) then
       exit(nil);
 
     listMigrates := TList<TMigrate>.Create();
 
-    for fileName in listFiles do
-    begin
+    try
 
-      fileValue := TFile.ReadAllText(Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, fileName]));
+      for fileName in listFiles do
+      begin
 
-      Migrate := TJson.Parse<TMigrate>(fileValue);
+        fileValue := TFile.ReadAllText(Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, fileName]));
+        fileValue := fileValue.Replace(#13#10, '');
 
-      listMigrates.Add(Migrate);
+        listMigrates.Add(TJson.Parse<TMigrate>(fileValue));
+
+      end;
+
+    except
+
+      on e: Exception do
+        raise EJSONReadException.Create(Format('Não foi possível carregar os arquivos JSON!Erro: %s', [e.Message]));
 
     end;
 
@@ -135,7 +156,7 @@ begin
   finally
 
     if Assigned(listFiles) then
-      FreeAndNil(listFiles);
+      listFiles.Free();
 
   end;
 
@@ -180,7 +201,7 @@ begin
       canRemove := not listMigratesExecuted.Contains(Migrate.UnixIdentifier);
 
     if canRemove then
-      migrates.Remove(Migrate)
+      migrates.Delete(index)
     else
       Inc(index);
 

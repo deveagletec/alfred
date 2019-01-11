@@ -34,6 +34,9 @@ type
 
   ECommandNotFound = class(EAlfredException);
 
+  EJSONReadException = class(EAlfredException);
+
+
 implementation
 
 end.

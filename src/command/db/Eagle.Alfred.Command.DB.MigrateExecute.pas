@@ -14,8 +14,7 @@ uses
 
   Eagle.Alfred.Migrate.Model.Migrate,
   Eagle.Alfred.Migrate.Service.MigrateService,
-  Eagle.Alfred.Migrate.Repository.MigrateRepository,
-  Eagle.ConsoleIO;
+  Eagle.Alfred.Migrate.Repository.MigrateRepository;
 
 type
 
@@ -33,6 +32,8 @@ type
     FMigrateService: IMigrateService;
 
     procedure executeMigrates;
+    procedure showMessageNoneMigrateFounded;
+    procedure showMessageSucessfull;
 
   public
 
@@ -87,17 +88,13 @@ begin
 
     if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
     begin
-      FConsoleIO.WriteInfo('* ------- ');
-      FConsoleIO.WriteInfo('| None Migrate Founded! ');
-      FConsoleIO.WriteInfo('* ----------------------------------------------------- ');
+      showMessageNoneMigrateFounded();
       exit;
     end;
 
     executeMigrates();
 
-    FConsoleIO.WriteInfo(' * ------- ');
-    FConsoleIO.WriteInfo(' | Migrates Executed Sucessfull ;) ');
-    FConsoleIO.WriteInfo(' * ----------------------------------------------------- ');
+    showMessageSucessfull();
 
   finally
 
@@ -114,6 +111,8 @@ var
   answer: string;
   canExecute: Boolean;
 begin
+
+  FConsoleIO.WriteInfo('');
 
   for Migrate in FMigrates do
   begin
@@ -195,6 +194,24 @@ begin
 
   FFilter := version;
 
+end;
+
+procedure TMigrateExecute.showMessageNoneMigrateFounded;
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteInfo('* ------- ');
+  FConsoleIO.WriteInfo('| None Migrate Founded! ');
+  FConsoleIO.WriteInfo('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
+end;
+
+procedure TMigrateExecute.showMessageSucessfull;
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteSucess('* ------- ');
+  FConsoleIO.WriteSucess('| Migrates Executed Sucessfull ;) ');
+  FConsoleIO.WriteSucess('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
 end;
 
 initialization

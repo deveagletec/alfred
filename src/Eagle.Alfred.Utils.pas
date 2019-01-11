@@ -1,6 +1,7 @@
 unit Eagle.Alfred.Utils;
 
 interface
+
 uses
   Windows,
   System.SysUtils,
@@ -32,7 +33,7 @@ begin
     else
       Result := Result + s[i];
 
-    flag := CharInSet(s[i], [' ', '[',']', '(', ')']);
+    flag := CharInSet(s[i], [' ', '[', ']', '(', ')']);
   end;
 
 end;
@@ -72,7 +73,8 @@ begin
     StringList := TStringList.Create;
     try
       StringList.LoadFromStream(ResourceStream);
-    except on E: Exception do
+    except
+      on E: Exception do
       begin
         StringList.Free;
         raise;

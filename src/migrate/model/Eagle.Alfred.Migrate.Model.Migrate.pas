@@ -8,7 +8,7 @@ type
     issueIdentifier: String;
     unixIdentifier: String;
     version: String;
-    dscription: String;
+    description: String;
     responsible: String;
     ignoredScripts: TArray<Integer>;
     up: TArray<String>;

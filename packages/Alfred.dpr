@@ -41,7 +41,10 @@ uses
   Eagle.Alfred.Core.IOUtils in '..\src\core\Eagle.Alfred.Core.IOUtils.pas',
   Eagle.Alfred.Command.Generate.Migrate in '..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas',
   Eagle.Alfred.Command.DB.UpdateCheck in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateCheck.pas',
-  Eagle.Alfred.Update.Service.UpdateService in '..\src\update\service\Eagle.Alfred.Update.Service.UpdateService.pas';
+  Eagle.Alfred.Update.Service.UpdateService in '..\src\update\service\Eagle.Alfred.Update.Service.UpdateService.pas',
+  Eagle.Alfred.Command.DB.UpdateJoin in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas',
+  Eagle.Alfred.Commom.Repository in '..\src\commom\repository\Eagle.Alfred.Commom.Repository.pas',
+  Eagle.Alfred.Command.DB.UpdateRun in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas';
 
 begin
 
