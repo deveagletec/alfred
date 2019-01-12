@@ -9,6 +9,7 @@ uses
   Eagle.Alfred.Command.Generate.CrudFile;
 
 type
+
   [Command('generate', 'crud', 'Generates a Crud')]
   TGenerateCrudCommand = class(TGenerateCrudFileCommand)
   public
@@ -21,7 +22,11 @@ implementation
 
 procedure TGenerateCrudCommand.Execute;
 begin
-  CheckProjectConfiguration;
+
+  if FVerbose then
+    FConsoleIO.WriteInfo('Creating Crud ' + FName + '... ')
+  else
+    FConsoleIO.WriteProcess('Creating Crud ' + FName + '... ');
 
   FCodeGenerator.GenerateView(FModuleName, FName);
 
@@ -56,6 +61,10 @@ begin
   if FVerbose then
     FConsoleIO.WriteInfo('Created ViewModel Test');
 
+  if FVerbose then
+    FConsoleIO.WriteInfo('Done')
+  else
+    FConsoleIO.WriteProcess('Creating Grud ' + FName + '... Done');
 end;
 
 initialization

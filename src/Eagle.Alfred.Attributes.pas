@@ -48,6 +48,8 @@ type
     property Required: Boolean read FRequired;
   end;
 
+  PackageRequiredAttribute = class(TCustomAttribute);
+
 implementation
 
 { CommandAttribute }

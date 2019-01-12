@@ -9,6 +9,8 @@ uses
   Eagle.Alfred.Core.CodeGenerator;
 
 type
+
+  [PackageRequired]
   TGenerateCrudFileCommand = class abstract(TCommandAbstract)
   protected
     FName: string;
@@ -18,8 +20,6 @@ type
     FSkipTests: Boolean;
 
     procedure Init; override;
-
-    procedure CheckProjectConfiguration;
   public
 
     [ParamAttribute(1, 'Class name')]
@@ -39,26 +39,16 @@ implementation
 
 { TGenerateCrudFileCommand }
 
-procedure TGenerateCrudFileCommand.CheckProjectConfiguration;
-begin
-  if not Assigned(FPackage) then
-    raise EAlfredException.Create('Projeto não configurado! Arquivo package.json não encontrado.');
-
-  FPackage.Validate;
-end;
-
 procedure TGenerateCrudFileCommand.Force;
 begin
   FForce := True;
+  FCodeGenerator.SetForceGenerate(FForce);
 end;
 
 procedure TGenerateCrudFileCommand.Init;
 begin
   inherited;
-  CheckProjectConfiguration;
-
   FCodeGenerator := TCodeGenerator.Create(FCurrentPath, FPackage);
-
 end;
 
 procedure TGenerateCrudFileCommand.SetModuleName(const Name: string);

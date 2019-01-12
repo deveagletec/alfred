@@ -2,6 +2,7 @@ unit Eagle.Alfred;
 
 interface
 uses
+  System.Classes,
   System.SysUtils,
   System.Generics.Collections,
   System.Rtti,
@@ -17,7 +18,8 @@ uses
   Eagle.Alfred.Exceptions,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.CommandRegister;
-
+var
+  start, stop, elapsed : cardinal;
 type
 
   TAlfred = class
@@ -36,6 +38,7 @@ type
     function GetCommandParam(Attrib: ParamAttribute): string;
     procedure Help;
     procedure HelpCommand(GroupName: string);
+    procedure HelpProjectInit;
     procedure Init;
     procedure LoadCommandArgs;
     function OptionExists(const OptionAttrib: OptionAttribute): Boolean;
@@ -83,6 +86,9 @@ end;
 
 function TAlfred.CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
 begin
+
+  if CommandMetaData.PackageRequired and not Assigned(FPackage) then
+    raise EPackageNotFoundException.Create('Package Not Found');
 
   Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [
     TValue.From<string>(FCurrentPath),
@@ -186,6 +192,11 @@ begin
 
 end;
 
+procedure TAlfred.HelpProjectInit;
+begin
+  FConsoleIO.WriteError('File Package.json not found!');
+end;
+
 procedure TAlfred.Init;
 var
   Data: string;
@@ -199,6 +210,8 @@ begin
   Data := TFile.ReadAllText('.\package.json');
 
   FPackage := TJSON.Parse<TPackage>(Data);
+
+  FPackage.Validate;
 
 end;
 
@@ -249,8 +262,10 @@ begin
       Help;
     on E: ECommandNotFound do
       HelpCommand(GroupName);
+    on E: EPackageNotFoundException do
+      HelpProjectInit;
     on E: EAlfredException do
-      FConsoleIO.WriteError(E.Message);
+      FConsoleIO.WriteError(#13 + E.Message);
   end;
 
 end;
@@ -284,8 +299,14 @@ begin
 end;
 
 initialization
+  start := TThread.GetTickCount;
   TAlfred.GetInstance;
 
 finalization
   TAlfred.ReleaseInstance;
+
+  stop := TThread.GetTickCount;
+  elapsed := stop - start; //milliseconds
+  Writeln('');
+  Writeln('Duration: ' + String.Parse(elapsed) + ' milliseconds');
 end.

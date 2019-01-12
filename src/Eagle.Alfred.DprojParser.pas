@@ -178,10 +178,10 @@ begin
   FDprFile := FPackagePath + ProjectName + '.dpr';
 
   if not FileExists(FDprojFile) then
-    raise EAlfredFileNotFoundException.Create('File ' + FDprojFile.QuotedString + ' not found');
+    raise EFileNotFoundException.Create('File ' + FDprojFile.QuotedString + ' not found');
 
   if not FileExists(FDprFile) then
-    raise EAlfredFileNotFoundException.Create('File ' + FDprFile.QuotedString + ' not found');
+    raise EFileNotFoundException.Create('File ' + FDprFile.QuotedString + ' not found');
 
   CoInitialize(nil);
 

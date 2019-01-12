@@ -53,7 +53,7 @@ procedure TPackage.Validate;
 begin
 
   if Id.IsEmpty then
-    raise EAlfredPackageInvalidException.Create('Package configuration Invalid! Please enter application ID');
+    raise EPackageInvalidException.Create('Package configuration Invalid! Please enter application ID');
 
 end;
 

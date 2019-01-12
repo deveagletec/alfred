@@ -20,6 +20,7 @@ type
     procedure GenerateService(const ModuleName, ModelName: string);
     procedure GenerateRepository(const ModuleName, ModelName: string);
     procedure GenerateTest(const ModuleName, LayerName, ModelName: string);
+    procedure SetForceGenerate(const Value: Boolean);
   end;
 
   TCodeGenerator = class(TInterfacedObject, ICodeGenerator)
@@ -33,6 +34,7 @@ type
     FNamespace: string;
     FFilePath: string;
     FSourceDir: string;
+    FForce: Boolean;
 
     FDprojParser : IDprojParser;
     FDprojTestParser : IDprojParser;
@@ -55,6 +57,7 @@ type
     procedure GenerateService(const ModuleName, ModelName: string);
     procedure GenerateRepository(const ModuleName, ModelName: string);
     procedure GenerateTest(const ModuleName, LayerName, ModelName: string);
+    procedure SetForceGenerate(const Value: Boolean);
   end;
 
 implementation
@@ -75,8 +78,10 @@ end;
 
 destructor TCodeGenerator.Destroy;
 begin
-  FDprojParser.Save;
-  FDprojTestParser.Save;
+  if Assigned(FDprojParser) then
+    FDprojParser.Save;
+  if Assigned(FDprojTestParser) then
+    FDprojTestParser.Save;
   inherited;
 end;
 
@@ -146,10 +151,13 @@ var
   TemplatePath: string;
 begin
 
+  if FileExists(FileName) and not FForce then
+    raise EFileAlwaysExistsException.Create('File ' + FileName.QuotedString + ' already exists');
+
   TemplatePath := FAppPath + 'templates\' + Template;
 
   if not FileExists(TemplatePath) then
-    raise EAlfredFileNotFoundException.Create('Template File ' + TemplatePath.QuotedString + ' not found');
+    raise EFileNotFoundException.Create('Template File ' + TemplatePath.QuotedString + ' not found');
 
   FStringList := TStringList.Create;
 
@@ -288,6 +296,11 @@ begin
 
   MountClassName;
 
+end;
+
+procedure TCodeGenerator.SetForceGenerate(const Value: Boolean);
+begin
+  FForce := Value;
 end;
 
 end.

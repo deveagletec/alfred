@@ -8,9 +8,13 @@ type
 
   EAlfredException = class(Exception);
 
-  EAlfredFileNotFoundException = class(EAlfredException);
+  EFileNotFoundException = class(EAlfredException);
 
-  EAlfredPackageInvalidException = class(EAlfredException);
+  EFileAlwaysExistsException = class(EAlfredException);
+
+  EPackageNotFoundException = class(EAlfredException);
+
+  EPackageInvalidException = class(EAlfredException);
 
   EAlfredCreateFileException = class(EAlfredException);
 

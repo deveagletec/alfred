@@ -25,6 +25,7 @@ type
   end;
 
   TCommandMetaData = record
+    PackageRequired: Boolean;
     CommandAttrib: CommandAttribute;
     CommandClass: TClass;
     CommandType: TRttiType;
@@ -37,7 +38,6 @@ type
     procedure AddCommand(CommandClass: TClass);
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
     function Contains(const GroupName, CommandName: string): Boolean;
-    //function GetCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
     function GetGroupsCommand: TArray<string>;
     function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
   end;
@@ -54,7 +54,6 @@ type
     procedure AddCommand(CommandClass: TClass);
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
     function Contains(const GroupName, CommandName: string): Boolean;
-    //function GetCommands: TDictionary<string, TDictionary<string, TCommandMetaData>>;
     function GetGroupsCommand: TArray<string>;
     function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
   end;
@@ -88,7 +87,9 @@ begin
     RttiType := RttiContext.GetType(CommandClass.ClassInfo);
 
     if not RttiType.TryGetCustomAttribute<CommandAttribute>(CmdAttrib) then
-      raise Exception.Create('Error command register');
+      raise Exception.Create('CommandAttribute Not Found');
+
+    CommandMetaData.PackageRequired := RttiType.HasCustomAttribute(PackageRequiredAttribute, True);
 
     if not FCommands.ContainsKey(CmdAttrib.GroupName) then
       FCommands.Add(CmdAttrib.GroupName, TDictionary<string, TCommandMetaData>.Create());
@@ -155,7 +156,6 @@ end;
 function TCommandRegister.GetCommand(const GroupName, CommandName: string): TCommandMetaData;
 var
   CommandGroup: TDictionary<string, TCommandMetaData>;
-  Command: ICommand;
 begin
 
   if not FCommands.ContainsKey(GroupName) then
@@ -167,7 +167,6 @@ begin
     raise ECommandNotFound.Create('Command not found');
 
   Result := CommandGroup.Items[CommandName];
-
 end;
 
 function TCommandRegister.GetCommandOption(CommandOptionAttrib: OptionAttribute; Method: TRttiMethod): TCommandOption;

@@ -20,8 +20,6 @@ implementation
 procedure TGenerateViewCommand.Execute;
 begin
 
-  CheckProjectConfiguration;
-
   FCodeGenerator.GenerateView(FModuleName, FName);
 
   FConsoleIO.WriteInfo('Created View');
