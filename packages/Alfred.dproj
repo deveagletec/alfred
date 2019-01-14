@@ -118,6 +118,7 @@
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas"/>
         <DCCReference Include="..\src\commom\repository\Eagle.Alfred.Commom.Repository.pas"/>
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas"/>
+        <DCCReference Include="..\src\command\Eagle.Alfred.Command.Init.pas"/>
         <RcItem Include="..\resources\ProjectBase.dpr.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
