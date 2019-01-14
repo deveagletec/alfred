@@ -13,6 +13,7 @@ type
     ['{995EE77F-1CD3-45A1-9F77-C718A86293D5}']
     procedure AddForm(const UnitName, FormName, Path: string);
     procedure AddUnit(const Name, Path: string);
+    procedure DeleteUnit(const Name, Path: string);
     procedure AddPathInUnitSearchPath(const Path: string);
     procedure DeleteUnit(const Name, Path: string);
     procedure DeletePathInUnitSearchPath(const Path: string);

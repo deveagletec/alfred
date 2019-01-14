@@ -11,8 +11,12 @@ uses
 type
 
   TDependency = class
+    Id : string;
     Name: string;
     Version: string;
+    Repo : string;
+    Version: string;
+    SrcDir : string;
   end;
 
   TDataBase = class
@@ -66,8 +70,8 @@ type
     [Alias('dependencies')]
     Dependencies: TArray<TDependency>;
 
-    [Alias('dependencies-dev')]
-    DependenciesDev: TArray<TDependency>;
+    [Alias('dev-dependencies')]
+    DevDependencies: TArray<TDependency>;
 
     destructor Destroy; override;
     procedure Validate;

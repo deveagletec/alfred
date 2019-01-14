@@ -47,7 +47,14 @@ uses
   Eagle.Alfred.Core.Exceptions in '..\src\core\Eagle.Alfred.Core.Exceptions.pas',
   Eagle.Alfred.Core.Attributes in '..\src\core\Eagle.Alfred.Core.Attributes.pas',
   Eagle.Alfred.Core.ConsoleIO in '..\src\core\Eagle.Alfred.Core.ConsoleIO.pas',
-  Eagle.Alfred.Command.DB.MigrateInit in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas';
+  Eagle.Alfred.Command.DB.MigrateInit in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas',
+  Eagle.Alfred.DependencyResolver in '..\src\Eagle.Alfred.DependencyResolver.pas',
+  Eagle.Alfred.Downloaders.BitbucketDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.BitbucketDownloader.pas',
+  Eagle.Alfred.Downloaders.Downloader in '..\src\downloaders\Eagle.Alfred.Downloaders.Downloader.pas',
+  Eagle.Alfred.Downloaders.GithubDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.GithubDownloader.pas',
+  Eagle.Alfred.Downloaders.GitlabDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.GitlabDownloader.pas',
+  Eagle.Alfred.Downloaders.SourceForgeDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.SourceForgeDownloader.pas',
+  Eagle.Alfred.Command.Install in '..\src\command\Eagle.Alfred.Command.Install.pas';
 
 var
   OldColor: Byte;
