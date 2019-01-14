@@ -13,6 +13,7 @@ uses
   System.RegularExpressions,
 
   Eagle.Alfred.Data,
+  Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Migrate.Model.Migrate,
@@ -28,7 +29,7 @@ type
     function getMigratesByMigrationDir(): TList<TMigrate>;
     function getMigratesByVersion(const version: String): TList<TMigrate>;
     procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
-    procedure createNewMigrate(const migrate: TMigrate);
+    procedure createNewMigrate(const Migrate: TMigrate);
   end;
 
   TMigrateService = class(TInterfacedObject, IMigrateService)
@@ -41,7 +42,7 @@ type
 
   public
     constructor Create(const package: TPackage);
-    procedure createNewMigrate(const migrate: TMigrate);
+    procedure createNewMigrate(const Migrate: TMigrate);
     function getMigratesByMigrationDir: TList<TMigrate>;
     function getMigratesByVersion(const version: String): TList<TMigrate>;
 
@@ -56,14 +57,16 @@ begin
   FPackage := package;
 end;
 
-procedure TMigrateService.createNewMigrate(const migrate: TMigrate);
+procedure TMigrateService.createNewMigrate(const Migrate: TMigrate);
 var
   fileValue, fileName: String;
 begin
 
-  fileValue := TJSON.Stringify(migrate, True);
+  CreateDiretories([FPackage.MigrationDir]);
 
-  fileName := Format('%s%s%s_%s.json', [FPackage.BaseDir, FPackage.MigrationDir, migrate.unixIdentifier, migrate.issueIdentifier]);
+  fileValue := TJSON.Stringify(Migrate, True);
+
+  fileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.unixIdentifier, Migrate.issueIdentifier]);
 
   TFile.WriteAllText(fileName, fileValue);
 
@@ -137,10 +140,10 @@ begin
       for fileName in listFiles do
       begin
 
-        fileValue := TFile.ReadAllText(Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, fileName]));
+        fileValue := TFile.ReadAllText(Format('%s%s', [FPackage.MigrationDir, fileName]));
         fileValue := fileValue.Replace(#13#10, '');
 
-        listMigrates.Add(TJson.Parse<TMigrate>(fileValue));
+        listMigrates.Add(TJSON.Parse<TMigrate>(fileValue));
 
       end;
 
@@ -196,9 +199,9 @@ begin
     canRemove := False;
 
     if executionMode = TExecutionModeMigrate.TUp then
-      canRemove := listMigratesExecuted.Contains(Migrate.UnixIdentifier)
+      canRemove := listMigratesExecuted.Contains(Migrate.unixIdentifier)
     else
-      canRemove := not listMigratesExecuted.Contains(Migrate.UnixIdentifier);
+      canRemove := not listMigratesExecuted.Contains(Migrate.unixIdentifier);
 
     if canRemove then
       migrates.Delete(index)

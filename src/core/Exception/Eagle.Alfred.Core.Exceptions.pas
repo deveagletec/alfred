@@ -1,6 +1,7 @@
 unit Eagle.Alfred.Core.Exceptions;
 
 interface
+
 uses
   System.SysUtils;
 
@@ -17,7 +18,7 @@ type
   EAlfredCreateFileException = class(EAlfredException);
 
   EDataBaseException = class(EAlfredException);
-  
+
   EFileNotFoundException = class(EAlfredException);
 
   EFileAlwaysExistsException = class(EAlfredException);
@@ -26,16 +27,11 @@ type
 
   EPackageInvalidException = class(EAlfredException);
 
-  EAlfredCreateFileException = class(EAlfredException);
-
-  EAlfredCreateDirException = class(EAlfredException);
-
   ECommandGroupNotFoundException = class(EAlfredException);
 
   ECommandNotFound = class(EAlfredException);
 
   EJSONReadException = class(EAlfredException);
-
 
 implementation
 
