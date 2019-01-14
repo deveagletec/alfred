@@ -33,6 +33,8 @@ type
 
   EJSONReadException = class(EAlfredException);
 
+  ERequiredParameterException = class(EAlfredException);
+
 implementation
 
 end.

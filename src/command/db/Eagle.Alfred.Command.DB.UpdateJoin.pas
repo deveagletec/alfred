@@ -21,7 +21,7 @@ uses
 
 type
 
-  [Command('db:update', 'join', 'Realiza a união de migrates')]
+  [Command('db:update', 'join', 'Join migrates by version')]
   TUpdateJoin = class(TCommandAbstract)
   private
 
@@ -34,26 +34,26 @@ type
 
     FScripts: TStringList;
 
-    procedure joinMigrates;
-    procedure mountBody;
-    procedure mountFooter;
-    procedure mountHeader;
-    procedure saveFileUpdate;
-    procedure showMessageFounded(conflictsMigrates: TDictionary < String, TList < String >> );
-    procedure showMessageMigratesNotFounded;
-    procedure showMessageSucessFull;
+    procedure JoinMigrates;
+    procedure MountBody;
+    procedure MountFooter;
+    procedure MountHeader;
+    procedure SaveFileUpdate;
+    procedure ShowMessageFounded(ConflictsMigrates: TDictionary<string,TList<string >> );
+    procedure ShowMessageMigratesNotFounded;
+    procedure ShowMessageSucessFull;
 
   public
     destructor Destroy; override;
 
-    procedure execute; override;
-    procedure init; override;
+    procedure Execute; override;
+    procedure Init; override;
 
-    [ParamAttribute(1, 'Versão atual')]
-    procedure setCurrentVersion(const version: String);
+    [ParamAttribute(1, 'Current version')]
+    procedure SetCurrentVersion(const Version: string);
 
-    [ParamAttribute(2, 'Versão a ser gerada')]
-    procedure setDestinyVersion(const version: String);
+    [ParamAttribute(2, 'Destiny version')]
+    procedure SetDestinyVersion(const Version: string);
 
   end;
 
@@ -70,45 +70,45 @@ begin
   inherited;
 end;
 
-procedure TUpdateJoin.execute;
+procedure TUpdateJoin.Execute;
 var
-  conflictsMigrates: TDictionary<String, TList<String>>;
+  ConflictsMigrates: TDictionary<String, TList<String>>;
 begin
 
-  FMigrates := FMigrateService.getMigratesByVersion(FDestinyVersion.Trim());
+  FMigrates := FMigrateService.GetMigratesByVersion(FDestinyVersion.Trim());
 
   if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
   begin
-    showMessageMigratesNotFounded();
-    exit;
+    ShowMessageMigratesNotFounded();
+    Exit;
   end;
 
-  conflictsMigrates := FUpdateService.getConflictMigrates(FMigrates);
+  ConflictsMigrates := FUpdateService.getConflictMigrates(FMigrates);
 
   try
 
-    if Assigned(conflictsMigrates) and (conflictsMigrates.Count > 0) then
+    if Assigned(ConflictsMigrates) and (ConflictsMigrates.Count > 0) then
     begin
-      showMessageFounded(conflictsMigrates);
-      exit;
+      ShowMessageFounded(ConflictsMigrates);
+      Exit;
     end;
 
-    joinMigrates();
+    JoinMigrates();
 
-    saveFileUpdate();
+    SaveFileUpdate();
 
-    showMessageSucessFull();
+    ShowMessageSucessFull();
 
   finally
 
     if Assigned(conflictsMigrates) then
-      conflictsMigrates.Free();
+      ConflictsMigrates.Free();
 
   end;
 
 end;
 
-procedure TUpdateJoin.init;
+procedure TUpdateJoin.Init;
 begin
   inherited;
 
@@ -119,28 +119,28 @@ begin
 
 end;
 
-procedure TUpdateJoin.joinMigrates;
+procedure TUpdateJoin.JoinMigrates;
 begin
 
-  mountHeader();
+  MountHeader();
 
-  mountBody();
+  MountBody();
 
-  mountFooter();
+  MountFooter();
 
 end;
 
-procedure TUpdateJoin.mountBody;
+procedure TUpdateJoin.MountBody;
 var
   Migrate: TMigrate;
-  index: Integer;
+  Index: Integer;
   SQL: String;
 begin
 
   for Migrate in FMigrates do
   begin
 
-    index := 0;
+    Index := 0;
 
     FScripts.Add('');
     FScripts.Add('/* *********************************************************************** */');
@@ -151,12 +151,12 @@ begin
     for SQL in Migrate.up do
     begin
 
-      if FUpdateService.indexIsIgnored(index, Migrate) then
+      if FUpdateService.indexIsIgnored(Index, Migrate) then
         continue;
 
       FScripts.Add(SQL);
 
-      Inc(index);
+      Inc(Index);
 
     end;
 
@@ -164,7 +164,7 @@ begin
 
 end;
 
-procedure TUpdateJoin.mountFooter;
+procedure TUpdateJoin.MountFooter;
 begin
 
   FScripts.Add('/*');
@@ -191,7 +191,7 @@ begin
 
 end;
 
-procedure TUpdateJoin.mountHeader;
+procedure TUpdateJoin.MountHeader;
 begin
 
   FScripts.Add('/*');
@@ -257,36 +257,36 @@ begin
 
 end;
 
-procedure TUpdateJoin.saveFileUpdate;
+procedure TUpdateJoin.SaveFileUpdate;
 var
-  path, fileName: String;
+  Path, FileName: String;
 begin
 
-  path := Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, 'Updates\']);
+  Path := Format('%s%s', [FPackage.MigrationDir, 'Updates\']);
 
   CreateDiretories([path]);
 
-  fileName := Format('update_%s', [FDestinyVersion]);
+  FileName := Format('update_%s', [FDestinyVersion]);
 
 
-  FScripts.SaveToFile(Format('%s%s%s', [path, fileName, '.sql']));
+  FScripts.SaveToFile(Format('%s%s%s', [Path, FileName, '.sql']));
 
 end;
 
-procedure TUpdateJoin.setCurrentVersion(const version: String);
+procedure TUpdateJoin.SetCurrentVersion(const Version: string);
 begin
-  FCurrentVersion := version;
+  FCurrentVersion := Version;
 end;
 
-procedure TUpdateJoin.setDestinyVersion(const version: String);
+procedure TUpdateJoin.SetDestinyVersion(const Version: string);
 begin
   FDestinyVersion := version;
 end;
 
-procedure TUpdateJoin.showMessageFounded(conflictsMigrates: TDictionary < String, TList < String >> );
+procedure TUpdateJoin.ShowMessageFounded(ConflictsMigrates: TDictionary<string, TList<string >>);
 var
-  key, listMigrates: String;
-  conflictMigrateList: TList<String>;
+  Key, ListMigrates: String;
+  ConflictMigrateList: TList<String>;
 begin
 
   FConsoleIO.WriteInfo(' ');
@@ -296,31 +296,31 @@ begin
 
   try
 
-    for key in conflictsMigrates.Keys do
+    for Key in ConflictsMigrates.Keys do
     begin
 
-      conflictsMigrates.TryGetValue(key, conflictMigrateList);
+      ConflictsMigrates.TryGetValue(key, ConflictMigrateList);
 
       if not conflictsMigrates.Count > 1 then
         continue;
 
-      listMigrates := String.Join(', ', conflictMigrateList.ToArray());
+      ListMigrates := String.Join(', ', ConflictMigrateList.ToArray());
 
-      FConsoleIO.WriteInfo(Format('| %s >>>> %s', [key, listMigrates]));
+      FConsoleIO.WriteInfo(Format('| %s >>>> %s', [Key, listMigrates]));
       FConsoleIO.WriteInfo('  --------------');
 
     end;
 
   finally
 
-    if Assigned(conflictMigrateList) then
-      conflictMigrateList.Free();
+    if Assigned(ConflictMigrateList) then
+      ConflictMigrateList.Free();
 
   end;
 
 end;
 
-procedure TUpdateJoin.showMessageMigratesNotFounded;
+procedure TUpdateJoin.ShowMessageMigratesNotFounded;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteInfo('* ------- ');
@@ -329,7 +329,7 @@ begin
   FConsoleIO.WriteInfo(' ');
 end;
 
-procedure TUpdateJoin.showMessageSucessFull;
+procedure TUpdateJoin.ShowMessageSucessFull;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteSucess('* ------- ');

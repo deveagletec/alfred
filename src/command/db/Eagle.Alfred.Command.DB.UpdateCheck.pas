@@ -20,7 +20,7 @@ uses
 
 type
 
-  [Command('db:update', 'check', 'Checa conflitos de SQL nos migrates de determinada versão')]
+  [Command('db:update', 'check', 'Check conflicts in migrates')]
   TUpdateCheck = class(TCommandAbstract)
   private
 
@@ -30,19 +30,20 @@ type
     FMigrateService: IMigrateService;
     FUpdateService: IUpdateService;
 
-    procedure showMessageError(const error: String);
-    procedure showMessageFounded(conflictsMigrates: TDictionary < String, TList < String >> );
-    procedure showMessageMigratesNotFounded;
-    procedure showMessageNotFounded;
+    procedure ShowMessageError(const error: String);
+    procedure ShowMessageFounded(ConflictsMigrates: TDictionary<string,TList<string
+        >>);
+    procedure ShowMessageMigratesNotFounded;
+    procedure ShowMessageNotFounded;
 
   public
     destructor Destroy; override;
 
-    procedure execute; override;
-    procedure init; override;
+    procedure Execute; override;
+    procedure Init; override;
 
-    [ParamAttribute(1, 'Filtro de versão')]
-    procedure setVersion(const version: String);
+    [ParamAttribute(1, 'Migrates version')]
+    procedure SetVersion(const version: String);
 
   end;
 
@@ -57,19 +58,19 @@ begin
   inherited;
 end;
 
-procedure TUpdateCheck.execute;
+procedure TUpdateCheck.Execute;
 var
   conflictsMigrates: TDictionary<String, TList<String>>;
 begin
 
   try
-    FMigrates := FMigrateService.getMigratesByVersion(FVersion.Trim());
+    FMigrates := FMigrateService.GetMigratesByVersion(FVersion.Trim());
   except
 
-    on e: EAlfredException do
+    on E: EAlfredException do
     begin
-      showMessageError(e.Message);
-      exit;
+      ShowMessageError(E.Message);
+      Exit;
     end
     else
       raise;
@@ -78,18 +79,18 @@ begin
 
   if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
   begin
-    showMessageMigratesNotFounded();
-    exit;
+    ShowMessageMigratesNotFounded();
+    Exit;
   end;
 
-  conflictsMigrates := FUpdateService.getConflictMigrates(FMigrates);
+  conflictsMigrates := FUpdateService.GetConflictMigrates(FMigrates);
 
   try
 
     if (not Assigned(conflictsMigrates)) or (conflictsMigrates.Count = 0) then
-      showMessageNotFounded()
+      ShowMessageNotFounded()
     else
-      showMessageFounded(conflictsMigrates);
+      ShowMessageFounded(conflictsMigrates);
 
   finally
 
@@ -100,7 +101,7 @@ begin
 
 end;
 
-procedure TUpdateCheck.init;
+procedure TUpdateCheck.Init;
 begin
   inherited;
 
@@ -109,12 +110,12 @@ begin
 
 end;
 
-procedure TUpdateCheck.setVersion(const version: String);
+procedure TUpdateCheck.SetVersion(const version: String);
 begin
   FVersion := version;
 end;
 
-procedure TUpdateCheck.showMessageError(const error: String);
+procedure TUpdateCheck.ShowMessageError(const error: String);
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteError('* ------- ');
@@ -123,10 +124,10 @@ begin
   FConsoleIO.WriteInfo(' ');
 end;
 
-procedure TUpdateCheck.showMessageFounded(conflictsMigrates: TDictionary < String, TList < String >> );
+procedure TUpdateCheck.ShowMessageFounded(ConflictsMigrates: TDictionary<string,TList<string >> );
 var
-  key, listMigrates: String;
-  conflictMigrateList: TList<String>;
+  Key, ListMigrates: String;
+  ConflictMigrateList: TList<String>;
 begin
 
   FConsoleIO.WriteInfo(' ');
@@ -136,31 +137,31 @@ begin
 
   try
 
-    for key in conflictsMigrates.Keys do
+    for Key in ConflictsMigrates.Keys do
     begin
 
-      conflictsMigrates.TryGetValue(key, conflictMigrateList);
+      ConflictsMigrates.TryGetValue(Key, ConflictMigrateList);
 
-      if not conflictsMigrates.Count > 1 then
+      if not ConflictsMigrates.Count > 1 then
         continue;
 
-      listMigrates := String.Join(', ', conflictMigrateList.ToArray());
+      ListMigrates := String.Join(', ', ConflictMigrateList.ToArray());
 
-      FConsoleIO.WriteInfo(Format('| %s >>>> %s', [key, listMigrates]));
+      FConsoleIO.WriteInfo(Format('| %s >>>> %s', [Key, ListMigrates]));
       FConsoleIO.WriteInfo('  --------------');
 
     end;
 
   finally
 
-    if Assigned(conflictMigrateList) then
-      conflictMigrateList.Free();
+    if Assigned(ConflictMigrateList) then
+      ConflictMigrateList.Free();
 
   end;
 
 end;
 
-procedure TUpdateCheck.showMessageMigratesNotFounded;
+procedure TUpdateCheck.ShowMessageMigratesNotFounded;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteInfo('* ------- ');
@@ -169,7 +170,7 @@ begin
   FConsoleIO.WriteInfo(' ');
 end;
 
-procedure TUpdateCheck.showMessageNotFounded;
+procedure TUpdateCheck.ShowMessageNotFounded;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteInfo('* ------- ');

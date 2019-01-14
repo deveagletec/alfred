@@ -19,8 +19,10 @@ uses
   Eagle.Alfred.Data,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.CommandRegister;
+
 var
-  start, stop, elapsed : cardinal;
+  start, stop, elapsed: cardinal;
+
 type
 
   TAlfred = class
@@ -45,6 +47,7 @@ type
     function OptionExists(const OptionAttrib: OptionAttribute): Boolean;
     procedure SetOptions(Command: ICommand; CommandMetaData: TCommandMetaData);
     procedure SetParams(Command: ICommand; CommandMetaData: TCommandMetaData);
+    procedure ShowMessageAlert(const Alert: string);
   public
     class function GetInstance(): TAlfred;
     class procedure ReleaseInstance();
@@ -69,7 +72,7 @@ begin
 
   FCommandRegister := TCommandRegister.Create;
 
-  Init;
+  Init();
 
 end;
 
@@ -91,13 +94,10 @@ begin
   if CommandMetaData.PackageRequired and not Assigned(FPackage) then
     raise EPackageNotFoundException.Create('Package Not Found');
 
-  Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [
-    TValue.From<string>(FCurrentPath),
-    TValue.From<TPackage>(FPackage),
-    TValue.From<IConsoleIO>(FConsoleIO)
-  ]).AsType<ICommand>;
+  Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [TValue.From<string>(FCurrentPath), TValue.From<TPackage>(FPackage),
+    TValue.From<IConsoleIO>(FConsoleIO)]).AsType<ICommand>;
 
- end;
+end;
 
 procedure TAlfred.DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
 begin
@@ -109,6 +109,9 @@ var
   Command: ICommand;
   CommandMetaData: TCommandMetaData;
 begin
+
+  if not Assigned(FPackage) then
+    raise EPackageInvalidException.Create('FPackage don''t has value!');
 
   CommandMetaData := FCommandRegister.GetCommand(GroupName, CommandName);
 
@@ -151,10 +154,7 @@ begin
   end;
 
   if Attrib.Required then
-  begin
-    FConsoleIO.WriteError(Format('Parâmtro %s é obrigatório!', [Attrib.Name]));
-    abort;
-  end;
+    raise ERequiredParameterException.CreateFmt('Required parameter %s!', [Attrib.Name]);
 
 end;
 
@@ -173,11 +173,15 @@ var
   Value: string;
 begin
 
-  FConsoleIO.WriteInfo(sLineBreak + 'Usage: alfred <command>' + sLineBreak);
-  FConsoleIO.WriteInfo('Commands:');
+  FConsoleIO.WriteAlert(sLineBreak + '| ' + 'Usage: alfred <command>');
+  FConsoleIO.WriteAlert('* -------------------------');
+  FConsoleIO.WriteAlert('| ' + 'COMMANDS:');
+  FConsoleIO.WriteAlert('* ----------------------------------------------------- ');
 
   for Value in FCommandRegister.GetGroupsCommand do
-    FConsoleIO.WriteInfo('  ' + Value);
+    FConsoleIO.WriteInfo('| ' + Value);
+
+  FConsoleIO.WriteInfo('* ----------------------------------------------------- ' + sLineBreak);
 
   FConsoleIO.WriteInfo(sLineBreak + 'alfred <command> [-h | --help]  Quick help on <command>');
 
@@ -190,23 +194,30 @@ var
   CommandAttrib: CommandAttribute;
 begin
 
-  FConsoleIO.WriteInfo(sLineBreak + 'Usage: alfred ' + GroupName + ' <option>' + sLineBreak);
-
-  FConsoleIO.WriteInfo('Options:');
+  FConsoleIO.WriteAlert(sLineBreak + '| Usage: alfred ' + GroupName + ' <option>');
+  FConsoleIO.WriteAlert('* -------------------------');
+  FConsoleIO.WriteAlert('| ' + 'OPTIONS:');
+  FConsoleIO.WriteAlert('* ----------------------------------------------------- ');
 
   Commands := FCommandRegister.GetGroup(GroupName).Values.ToArray;
 
   for Command in Commands do
   begin
     CommandAttrib := Command.CommandAttrib;
-    FConsoleIO.WriteInfo('   ' +CommandAttrib.Name.PadRight(15, ' ') + CommandAttrib.Description);
+
+    FConsoleIO.WriteInfo('| ' + CommandAttrib.Name.PadRight(15, ' ') + CommandAttrib.Description);
+
   end;
+
+  FConsoleIO.WriteInfo('* ----------------------------------------------------- ' + sLineBreak);
 
 end;
 
 procedure TAlfred.HelpProjectInit;
 begin
-  FConsoleIO.WriteError('File Package.json not found!');
+  FConsoleIO.WriteAlert(sLineBreak + '* ------- ');
+  FConsoleIO.WriteAlert('| File Package.json not found! ');
+  FConsoleIO.WriteAlert('* ----------------------------------------------------- ' + sLineBreak);
 end;
 
 procedure TAlfred.Init;
@@ -217,7 +228,7 @@ begin
   LoadCommandArgs;
 
   if not FileExists('.\package.json') then
-    Exit;
+    Exit();
 
   Data := TFile.ReadAllText('.\package.json');
 
@@ -273,12 +284,18 @@ begin
 
     on E: ECommandGroupNotFoundException do
       Help;
+
     on E: ECommandNotFound do
       HelpCommand(GroupName);
+
     on E: EPackageNotFoundException do
       HelpProjectInit;
+
+    on E: ERequiredParameterException do
+      ShowMessageAlert(E.Message);
+
     on E: EAlfredException do
-      FConsoleIO.WriteError(#13 + E.Message);
+      ShowMessageAlert(E.Message);
 
   end;
 
@@ -312,16 +329,25 @@ begin
 
 end;
 
+procedure TAlfred.ShowMessageAlert(const Alert: string);
+begin
+  FConsoleIO.WriteAlert(sLineBreak + '* ------- ');
+  FConsoleIO.WriteAlert(Format('| %s ', [Alert]));
+  FConsoleIO.WriteAlert('* ----------------------------------------------------- ' + sLineBreak);
+end;
+
 initialization
-  start := TThread.GetTickCount;
-  TAlfred.GetInstance;
+
+start := TThread.GetTickCount;
+TAlfred.GetInstance;
 
 finalization
-  TAlfred.ReleaseInstance;
 
-  stop := TThread.GetTickCount;
-  elapsed := stop - start; //milliseconds
-  Writeln('');
-  Writeln('Duration: ' + String.Parse(elapsed) + ' milliseconds');
+TAlfred.ReleaseInstance;
+
+stop := TThread.GetTickCount;
+elapsed := stop - start; // milliseconds
+Writeln('');
+Writeln('Duration: ' + String.Parse(elapsed) + ' milliseconds');
 
 end.

@@ -26,10 +26,10 @@ type
 
   IMigrateService = interface
     ['{A31CC6DC-9FE4-4FC1-9610-E476806C6D33}']
-    function getMigratesByMigrationDir(): TList<TMigrate>;
-    function getMigratesByVersion(const version: String): TList<TMigrate>;
-    procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
-    procedure createNewMigrate(const Migrate: TMigrate);
+    function GetMigratesByMigrationDir(): TList<TMigrate>;
+    function GetMigratesByVersion(const Version: string): TList<TMigrate>;
+    procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
+    procedure CreateNewMigrate(const Migrate: TMigrate);
   end;
 
   TMigrateService = class(TInterfacedObject, IMigrateService)
@@ -37,176 +37,183 @@ type
 
     FPackage: TPackage;
 
-    procedure filterMigratesByVersion(var migrates: TList<TMigrate>; const version: String);
-    function getListFilesMigrate: TList<String>;
+    procedure FilterMigratesByVersion(var Migrates: TList<TMigrate>; const Version: string);
+    function GetListFilesMigrate: TList<string>;
 
   public
-    constructor Create(const package: TPackage);
-    procedure createNewMigrate(const Migrate: TMigrate);
-    function getMigratesByMigrationDir: TList<TMigrate>;
-    function getMigratesByVersion(const version: String): TList<TMigrate>;
+    constructor Create(const Package: TPackage);
+    procedure CreateNewMigrate(const Migrate: TMigrate);
+    function GetMigratesByMigrationDir: TList<TMigrate>;
+    function GetMigratesByVersion(const Version: string): TList<TMigrate>;
 
-    procedure removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
+    procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
   end;
 
 implementation
 
-constructor TMigrateService.Create(const package: TPackage);
+constructor TMigrateService.Create(const Package: TPackage);
 begin
   inherited Create();
   FPackage := package;
 end;
 
-procedure TMigrateService.createNewMigrate(const Migrate: TMigrate);
+procedure TMigrateService.CreateNewMigrate(const Migrate: TMigrate);
 var
-  fileValue, fileName: String;
+  FileValue, FileName: String;
 begin
 
-  CreateDiretories([FPackage.MigrationDir]);
+  try
+    CreateDiretories([FPackage.MigrationDir + '\']);
+  except
 
-  fileValue := TJSON.Stringify(Migrate, True);
+    on E: Exception do
+      raise EAlfredCreateDirException.CreateFmt('Not is possible create the directory %s! | Error: %s', [FPackage.MigrationDir, E.Message]);
 
-  fileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.unixIdentifier, Migrate.issueIdentifier]);
+  end;
 
-  TFile.WriteAllText(fileName, fileValue);
+  FileValue := TJSON.Stringify(Migrate, True);
+
+  FileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.unixIdentifier, Migrate.issueIdentifier]);
+
+  TFile.WriteAllText(FileName, FileValue);
 
 end;
 
-procedure TMigrateService.filterMigratesByVersion(var migrates: TList<TMigrate>; const version: String);
+procedure TMigrateService.FilterMigratesByVersion(var Migrates: TList<TMigrate>; const Version: string);
 var
-  index: Integer;
-  canRemove: Boolean;
+  Index: Integer;
+  CanRemove: Boolean;
 begin
 
-  index := 0;
+  Index := 0;
 
-  while index < migrates.Count do
+  while index < Migrates.Count do
   begin
 
-    canRemove := not migrates[index].version.Equals(version);
+    CanRemove := not Migrates[Index].Version.Equals(Version);
 
-    if canRemove then
-      migrates.Delete(index)
+    if CanRemove then
+      Migrates.Delete(index)
     else
-      Inc(index);
+      Inc(Index);
 
   end;
 
 end;
 
-function TMigrateService.getListFilesMigrate: TList<String>;
+function TMigrateService.GetListFilesMigrate: TList<string>;
 var
-  listFiles: TList<String>;
-  search: TSearchRec;
-  index: Integer;
+  ListFiles: TList<String>;
+  Search: TSearchRec;
+  Index: Integer;
 begin
 
-  listFiles := TList<String>.Create;
+  ListFiles := TList<String>.Create;
 
-  index := FindFirst(Format('%s%s*.json', [FPackage.BaseDir, FPackage.MigrationDir]), faAnyFile, search);
+  Index := FindFirst(Format('%s%s*.json', [FPackage.BaseDir, FPackage.MigrationDir]), faAnyFile, Search);
 
-  while index = 0 do
+  while Index = 0 do
   begin
 
-    listFiles.Add(search.Name);
-    index := FindNext(search);
+    ListFiles.Add(Search.Name);
+    index := FindNext(Search);
 
   end;
 
-  Result := listFiles;
+  Result := ListFiles;
 
 end;
 
-function TMigrateService.getMigratesByMigrationDir(): TList<TMigrate>;
+function TMigrateService.GetMigratesByMigrationDir: TList<TMigrate>;
 var
-  listFiles: TList<String>;
-  listMigrates: TList<TMigrate>;
-  fileName, fileValue: String;
+  ListFiles: TList<String>;
+  ListMigrates: TList<TMigrate>;
+  FileName, FileValue: String;
 begin
 
-  listFiles := getListFilesMigrate();
+  ListFiles := GetListFilesMigrate();
 
   try
 
-    listFiles.Sort();
+    ListFiles.Sort();
 
-    if (listFiles.Count = 0) then
-      exit(nil);
+    if (ListFiles.Count = 0) then
+      Exit(nil);
 
-    listMigrates := TList<TMigrate>.Create();
+    ListMigrates := TList<TMigrate>.Create();
 
     try
 
-      for fileName in listFiles do
+      for FileName in ListFiles do
       begin
 
-        fileValue := TFile.ReadAllText(Format('%s%s', [FPackage.MigrationDir, fileName]));
-        fileValue := fileValue.Replace(#13#10, '');
+        FileValue := TFile.ReadAllText(Format('%s%s', [FPackage.MigrationDir, FileName]));
+        FileValue := FileValue.Replace(#13#10, '');
 
-        listMigrates.Add(TJSON.Parse<TMigrate>(fileValue));
+        ListMigrates.Add(TJSON.Parse<TMigrate>(FileValue));
 
       end;
 
     except
 
-      on e: Exception do
-        raise EJSONReadException.Create(Format('Não foi possível carregar os arquivos JSON!Erro: %s', [e.Message]));
+      on E: Exception do
+        raise EJSONReadException.CreateFmt('Not is possible create the files JSON! Error: %s', [E.Message]);
 
     end;
 
-    Result := listMigrates;
+    Result := ListMigrates;
 
   finally
 
-    if Assigned(listFiles) then
-      listFiles.Free();
+    if Assigned(ListFiles) then
+      ListFiles.Free();
 
   end;
 
 end;
 
-function TMigrateService.getMigratesByVersion(const version: String): TList<TMigrate>;
+function TMigrateService.GetMigratesByVersion(const Version: string): TList<TMigrate>;
 var
-  migrates: TList<TMigrate>;
+  Migrates: TList<TMigrate>;
 begin
 
-  migrates := getMigratesByMigrationDir();
+  Migrates := GetMigratesByMigrationDir();
 
-  if Assigned(migrates) then
-    filterMigratesByVersion(migrates, version);
+  if Assigned(Migrates) then
+    FilterMigratesByVersion(Migrates, Version);
 
-  Result := migrates;
+  Result := Migrates;
 
 end;
 
-procedure TMigrateService.removeMigratesUnusableList(const executionMode: TExecutionModeMigrate; var migrates: TList<TMigrate>; const listMigratesExecuted: TList<String>);
+procedure TMigrateService.RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
 var
   Migrate: TMigrate;
-  canRemove: Boolean;
-  index: Integer;
+  CanRemove: Boolean;
+  Index: Integer;
 begin
 
-  if listMigratesExecuted.Count <= 0 then
-    exit;
+  if ListMigratesExecuted.Count <= 0 then
+    Exit;
 
-  index := 0;
+  Index := 0;
 
-  while index < migrates.Count do
+  while Index < Migrates.Count do
   begin
 
-    Migrate := migrates[index];
+    Migrate := Migrates[Index];
 
-    canRemove := False;
+    CanRemove := False;
 
-    if executionMode = TExecutionModeMigrate.TUp then
-      canRemove := listMigratesExecuted.Contains(Migrate.unixIdentifier)
+    if ExecutionMode = TExecutionModeMigrate.TUp then
+      CanRemove := ListMigratesExecuted.Contains(Migrate.unixIdentifier)
     else
-      canRemove := not listMigratesExecuted.Contains(Migrate.unixIdentifier);
+      CanRemove := not ListMigratesExecuted.Contains(Migrate.unixIdentifier);
 
-    if canRemove then
-      migrates.Delete(index)
+    if CanRemove then
+      Migrates.Delete(Index)
     else
-      Inc(index);
+      Inc(Index);
 
   end;
 

@@ -19,7 +19,7 @@ uses
 
 type
 
-  [Command('db:migrate', 'down', 'Realiza a execução dos migrates no modo Down no banco de dados')]
+  [Command('db:migrate', 'down', 'Execute the migrates in database on Down Mode')]
   TMigrateRollback = class(TCommandAbstract)
   private
 
@@ -32,34 +32,35 @@ type
     FMigrateRepository: IMigrateRepository;
     FMigrateService: IMigrateService;
 
-    procedure executeMigrates;
-    procedure showMessageNoneMigrateExecutedFounded;
-    procedure showMessageNoneMigrateFounded;
-    procedure showMessageSucessFull;
+    procedure ExecuteMigrates;
+    procedure ShowMessageError(const error: String);
+    procedure ShowMessageNoneMigrateExecutedFounded;
+    procedure ShowMessageNoneMigrateFounded;
+    procedure ShowMessageSucessFull;
 
   public
 
     destructor Destroy; override;
 
-    procedure execute; override;
+    procedure Execute; override;
     procedure Init; override;
 
-    [ParamAttribute('version', 'Filtro de versão', False)]
-    procedure setVersion(const version: String);
+    [ParamAttribute('version', 'Version filter', False)]
+    procedure SetVersion(const Version: string);
 
-    [ParamAttribute('migrate', 'Migrate limite de execução', False)]
-    procedure setMigrate(const Migrate: String);
+    [ParamAttribute('migrate', 'Limit execution migrate', False)]
+    procedure SetMigrate(const Migrate: string);
 
-    [OptionAttribute('IsInteractiveMode', 'i', 'Informar se a execução será em modo interativo')]
-    procedure setInteractive;
+    [OptionAttribute('IsInteractiveMode', 'i', 'Execution in interactive mode')]
+    procedure SetInteractive;
 
-    [OptionAttribute('IsAutoCommit', 'c', 'Commit cadas script do migrate automaticamente')]
-    procedure setAutoCommit;
+    [OptionAttribute('IsAutoCommit', 'c', 'Auto Commit')]
+    procedure SetAutoCommit;
 
   end;
 
 const
-  SIM = 'S';
+  SIM = 'Y';
 
 implementation
 
@@ -72,90 +73,99 @@ begin
   inherited;
 end;
 
-procedure TMigrateRollback.execute;
+procedure TMigrateRollback.Execute;
 var
-  listMigratesExecuted: TList<String>;
+  ListMigratesExecuted: TList<String>;
 begin
 
   FMigrateService := TMigrateService.Create(FPackage);
 
-  listMigratesExecuted := FMigrateRepository.getListMigratesExecuted();
-
   try
 
-    if not(Assigned(listMigratesExecuted)) or (listMigratesExecuted.Count <= 0) then
-    begin
-      showMessageNoneMigrateExecutedFounded();
-      exit;
+    try
+
+      ListMigratesExecuted := FMigrateRepository.GetListMigratesExecuted();
+
+      if not(Assigned(ListMigratesExecuted)) or (ListMigratesExecuted.Count <= 0) then
+      begin
+        ShowMessageNoneMigrateExecutedFounded();
+        exit;
+      end;
+
+      FMigrates := FMigrateService.GetMigratesByMigrationDir();
+
+      if (Assigned(ListMigratesExecuted)) and (ListMigratesExecuted.Count > 0) and (Assigned(FMigrates)) then
+        FMigrateService.RemoveMigratesUnusableList(TExecutionModeMigrate.TDown, FMigrates, ListMigratesExecuted);
+
+      if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
+      begin
+        ShowMessageNoneMigrateFounded();
+        exit;
+      end;
+
+      ExecuteMigrates();
+
+      ShowMessageSucessFull();
+
+    except
+
+      on E: Exception do
+        ShowMessageError(E.Message);
+
     end;
-
-    FMigrates := FMigrateService.getMigratesByMigrationDir();
-
-    if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) and (Assigned(FMigrates)) then
-      FMigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TDown, FMigrates, listMigratesExecuted);
-
-    if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
-    begin
-      showMessageNoneMigrateFounded();
-      exit;
-    end;
-
-    executeMigrates();
-
-    showMessageSucessFull();
 
   finally
 
-    if Assigned(listMigratesExecuted) then
-      listMigratesExecuted.Free();
+    if Assigned(ListMigratesExecuted) then
+      ListMigratesExecuted.Free();
 
   end;
 
 end;
 
-procedure TMigrateRollback.executeMigrates;
+procedure TMigrateRollback.ExecuteMigrates;
 var
   Migrate: TMigrate;
-  answer: string;
-  canExecute: Boolean;
-  index: Integer;
+  Answer: string;
+  CanExecute: Boolean;
+  Index: Integer;
 begin
 
   FConsoleIO.WriteInfo('');
 
-  for index := FMigrates.Count - 1 downto 0 do
+  for Index := FMigrates.Count - 1 downto 0 do
   begin
 
-    Migrate := FMigrates.Items[index];
+    Migrate := FMigrates.Items[Index];
 
     if FIsInteractiveMode then
     begin
 
-      answer := FConsoleIO.ReadInfo(Format('Deseja executar o arquivo %s? <S>im | <N>ao', [Migrate.IssueIdentifier]));
+      Answer := FConsoleIO.ReadInfo(Format('Wish execute the file %s? <Y>es | <N>o', [Migrate.IssueIdentifier]));
 
-      if not answer.ToUpper.Equals(SIM) then
+      if not Answer.ToUpper.Equals(SIM) then
         exit;
 
     end;
 
-    canExecute := True;
+    CanExecute := True;
 
     if FFilterTypeExecution = TMigrateFilterTypeExecution.TAll then
-      canExecute := True
+      CanExecute := True
     else if FFilterTypeExecution = TMigrateFilterTypeExecution.TByVersion then
-      canExecute := Migrate.version.Equals(FFilter)
+      CanExecute := Migrate.Version.Equals(FFilter)
     else
     begin
-      canExecute := Migrate.UnixIdentifier >= FFilter;
+      CanExecute := Migrate.UnixIdentifier >= FFilter;
 
-      if not canExecute then
+      if not CanExecute then
         exit;
 
     end;
 
-    if canExecute then
+    if CanExecute then
     begin
-      FMigrateRepository.executeMigrate(Migrate, TExecutionModeMigrate.TDown, FIsAutoCommit);
+      FMigrateRepository.ExecuteMigrate(Migrate, TExecutionModeMigrate.TDown, FIsAutoCommit);
 
       FConsoleIO.WriteInfo(Format('| Migrate %s executed', [Migrate.UnixIdentifier]));
 
@@ -169,7 +179,7 @@ procedure TMigrateRollback.Init;
 begin
   inherited;
 
-  FMigrateRepository := TMigrateRepository.Create();
+  FMigrateRepository := TMigrateRepository.Create(FPackage);
   FMigrateService := TMigrateService.Create(FPackage);
 
   FIsInteractiveMode := False;
@@ -178,17 +188,17 @@ begin
 
 end;
 
-procedure TMigrateRollback.setAutoCommit;
+procedure TMigrateRollback.SetAutoCommit;
 begin
   FIsAutoCommit := True;
 end;
 
-procedure TMigrateRollback.setInteractive;
+procedure TMigrateRollback.SetInteractive;
 begin
   FIsInteractiveMode := True;
 end;
 
-procedure TMigrateRollback.setMigrate(const Migrate: String);
+procedure TMigrateRollback.SetMigrate(const Migrate: string);
 begin
 
   FFilterTypeExecution := TMigrateFilterTypeExecution.TByMigrate;
@@ -197,16 +207,25 @@ begin
 
 end;
 
-procedure TMigrateRollback.setVersion(const version: String);
+procedure TMigrateRollback.SetVersion(const Version: string);
 begin
 
   FFilterTypeExecution := TMigrateFilterTypeExecution.TByVersion;
 
-  FFilter := version;
+  FFilter := Version;
 
 end;
 
-procedure TMigrateRollback.showMessageNoneMigrateExecutedFounded;
+procedure TMigrateRollback.ShowMessageError(const error: String);
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteError('* ------- ');
+  FConsoleIO.WriteError(Format('| %s :( ', [error]));
+  FConsoleIO.WriteError('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
+end;
+
+procedure TMigrateRollback.ShowMessageNoneMigrateExecutedFounded;
 begin
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('* ------- ');
@@ -215,7 +234,7 @@ begin
   FConsoleIO.WriteInfo('');
 end;
 
-procedure TMigrateRollback.showMessageNoneMigrateFounded;
+procedure TMigrateRollback.ShowMessageNoneMigrateFounded;
 begin
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('* ------- ');
@@ -224,7 +243,7 @@ begin
   FConsoleIO.WriteInfo('');
 end;
 
-procedure TMigrateRollback.showMessageSucessFull;
+procedure TMigrateRollback.ShowMessageSucessFull;
 begin
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteSucess('* ------- ');

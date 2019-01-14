@@ -12,13 +12,14 @@ uses
   Eagle.Alfred,
   Eagle.Alfred.Attributes,
   Eagle.Alfred.Core.Command,
+  Eagle.Alfred.Core.Exceptions,
 
   Eagle.Alfred.Migrate.Service.MigrateService,
   Eagle.Alfred.Migrate.Model.Migrate;
 
 type
 
-  [Command('generate', 'migrate', 'Cria um novo arquivo de migrate')]
+  [Command('generate', 'migrate', 'Generate a Migrate')]
   TGenerateMigrateCommand = class(TCommandAbstract)
   private
 
@@ -26,6 +27,7 @@ type
     FVersion: String;
 
     FMigrateService: IMigrateService;
+    procedure showMessageError(const error: String);
     procedure showMessageSucessfull;
 
   public
@@ -33,10 +35,10 @@ type
     procedure Execute; override;
     procedure init; override;
 
-    [ParamAttribute(1, 'Nome do migrate')]
+    [ParamAttribute(1, 'Migrate Name')]
     procedure setName(const name: String);
 
-    [ParamAttribute(2, 'Versão em que o migrate deverá ser executado', False)]
+    [ParamAttribute(2, 'Migrate Version', False)]
     procedure setVersion(const version: String);
 
   end;
@@ -58,9 +60,20 @@ begin
   Migrate.version := FVersion;
   Migrate.unixIdentifier := TimeStamp;
 
-  FMigrateService.createNewMigrate(Migrate);
+  try
 
-  showMessageSucessfull();
+    FMigrateService.createNewMigrate(Migrate);
+
+    showMessageSucessfull();
+
+  except
+
+    on e: EAlfredException do
+      showMessageError(e.Message)
+    else
+      raise;
+
+  end;
 
 end;
 
@@ -80,6 +93,15 @@ end;
 procedure TGenerateMigrateCommand.setVersion(const version: String);
 begin
   FVersion := version;
+end;
+
+procedure TGenerateMigrateCommand.showMessageError(const error: String);
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteError('* ------- ');
+  FConsoleIO.WriteError(Format('| %s :( ', [error]));
+  FConsoleIO.WriteError('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
 end;
 
 procedure TGenerateMigrateCommand.showMessageSucessfull;

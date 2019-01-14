@@ -15,7 +15,7 @@ uses
 
 type
 
-  [Command('db:update', 'run', 'Executa arquivos de atualização de banco')]
+  [Command('db:update', 'run', 'Run update file')]
   TUpdateRun = class(TCommandAbstract)
   private
 
@@ -23,19 +23,19 @@ type
 
     FRepository: IRepository;
 
-    procedure showMessageFileNotFound;
-    procedure showMessageError(const error: String);
-    procedure showMessageSucessFull;
-    procedure showMessageWait;
+    procedure ShowMessageFileNotFound;
+    procedure ShowMessageError(const error: String);
+    procedure ShowMessageSucessFull;
+    procedure ShowMessageWait;
 
   public
     destructor Destroy; override;
 
-    procedure execute; override;
-    procedure init; override;
+    procedure Execute; override;
+    procedure Init; override;
 
-    [ParamAttribute(1, 'Versão atual')]
-    procedure setVersion(const version: String);
+    [ParamAttribute(1, 'version')]
+    procedure SetVersion(const Version: string);
 
   end;
 
@@ -47,54 +47,53 @@ begin
   inherited;
 end;
 
-procedure TUpdateRun.execute;
+procedure TUpdateRun.Execute;
 var
-  fileName, filePath: String;
+  FileName, FilePath: String;
   SQL: String;
 begin
   inherited;
 
-  filePath := Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, 'Updates\']);
+  FilePath := Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, 'Updates\']);
 
-  fileName := Format('%s%s%s', ['Update_', FVersion, '.sql']);
+  FileName := Format('%s%s%s', ['Update_', FVersion, '.sql']);
 
-  if not FileExists(filePath + fileName) then
+  if not FileExists(FilePath + FileName) then
   begin
-    showMessageFileNotFound();
+    ShowMessageFileNotFound();
     exit;
   end;
 
-  showMessageWait();
+  ShowMessageWait();
 
   try
 
-    FRepository.runFile(filePath + fileName);
+    FRepository.RunFile(filePath + fileName);
 
-    showMessageSucessFull();
+    ShowMessageSucessFull();
 
   except
 
-    on e: Exception do
-      showMessageError(e.Message);
+    on E: Exception do
+      ShowMessageError(E.Message);
 
   end;
 
 end;
 
-procedure TUpdateRun.init;
+procedure TUpdateRun.Init;
 begin
   inherited;
 
-  FRepository := TRepository.Create();
-
+  FRepository := TRepository.Create(FPackage);
 end;
 
-procedure TUpdateRun.setVersion(const version: String);
+procedure TUpdateRun.SetVersion(const Version: string);
 begin
-  FVersion := version;
+  FVersion := Version;
 end;
 
-procedure TUpdateRun.showMessageFileNotFound;
+procedure TUpdateRun.ShowMessageFileNotFound;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteAlert('* ------- ');
@@ -103,7 +102,7 @@ begin
   FConsoleIO.WriteInfo(' ');
 end;
 
-procedure TUpdateRun.showMessageError(const error: String);
+procedure TUpdateRun.ShowMessageError(const error: String);
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteError('* ------- ');
@@ -112,7 +111,7 @@ begin
   FConsoleIO.WriteInfo(' ');
 end;
 
-procedure TUpdateRun.showMessageSucessFull;
+procedure TUpdateRun.ShowMessageSucessFull;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteSucess('* ------- ');
@@ -121,7 +120,7 @@ begin
   FConsoleIO.WriteInfo('');
 end;
 
-procedure TUpdateRun.showMessageWait;
+procedure TUpdateRun.ShowMessageWait;
 begin
   FConsoleIO.WriteInfo(' ');
   FConsoleIO.WriteInfo('* ------- ');

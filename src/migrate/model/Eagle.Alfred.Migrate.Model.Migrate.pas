@@ -2,17 +2,35 @@ unit Eagle.Alfred.Migrate.Model.Migrate;
 
 interface
 
+uses
+  XSuperObject;
+
 type
   TMigrate = record
 
-    issueIdentifier: String;
-    unixIdentifier: String;
-    version: String;
-    description: String;
-    responsible: String;
-    ignoredScripts: TArray<Integer>;
-    up: TArray<String>;
-    down: TArray<String>;
+    [Alias('issueIdentifier')]
+    IssueIdentifier: string;
+
+    [Alias('unixIdentifier')]
+    UnixIdentifier: string;
+
+    [Alias('version')]
+    Version: string;
+
+    [Alias('description')]
+    description: string;
+
+    [Alias('responsible')]
+    Responsible: string;
+
+    [Alias('ignoredScripts')]
+    IgnoredScripts: TArray<integer>;
+
+    [Alias('up')]
+    Up: TArray<string>;
+
+    [Alias('down')]
+    Down: TArray<string>;
 
   end;
 

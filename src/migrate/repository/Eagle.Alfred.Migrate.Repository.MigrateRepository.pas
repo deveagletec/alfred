@@ -11,6 +11,7 @@ uses
   FireDAC.UI.Intf,
   FireDAC.Comp.ScriptCommands,
 
+  Eagle.Alfred.Data,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Migrate.Model.Migrate,
@@ -20,9 +21,9 @@ uses
 type
 
   IMigrateRepository = interface
-    function getLastScriptExecuted: String;
-    procedure executeMigrate(const Migrate: TMigrate; const executionMode: TExecutionModeMigrate; const isAutoCommit: Boolean = False);
-    function getListMigratesExecuted(): TList<String>;
+    function GetLastScriptExecuted: String;
+    procedure ExecuteMigrate(const Migrate: TMigrate; const ExecutionMode: TExecutionModeMigrate; const IsAutoCommit: Boolean = False);
+    function GetListMigratesExecuted(): TList<String>;
   end;
 
   TMigrateRepository = class(TInterfacedObject, IMigrateRepository)
@@ -30,25 +31,40 @@ type
     FDQuery: TFDQuery;
     FFDConnection: IConnection;
 
-    procedure consoleLog(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);
-    procedure deleteCodeMigrate(const migrateIdentifier: String);
-    procedure insertCodeMigrate(const migrateIdentifier: String);
+    FPackage: TPackage;
+
+    procedure ConsoleLog(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);
+    procedure DeleteCodeMigrate(const MigrateIdentifier: string);
+    procedure InsertCodeMigrate(const MigrateIdentifier: string);
 
   public
-    constructor Create;
+    constructor Create(APackage: TPackage);
     destructor Destroy; override;
-    procedure executeMigrate(const Migrate: TMigrate; const executionMode: TExecutionModeMigrate; const isAutoCommit: Boolean = False);
-    function getLastScriptExecuted: String;
-    function getListMigratesExecuted(): TList<String>;
+    procedure ExecuteMigrate(const Migrate: TMigrate; const ExecutionMode: TExecutionModeMigrate; const IsAutoCommit: Boolean = False);
+    function GetLastScriptExecuted: string;
+    function GetListMigratesExecuted(): TList<string>;
   end;
 
 implementation
 
-constructor TMigrateRepository.Create;
+constructor TMigrateRepository.Create(APackage: TPackage);
+var
+  DataBase, HostName, UserName, Password, Port: String;
 begin
-  inherited;
+  inherited Create();
 
-  FFDConnection := TFireDacFirebirdConnection.Create;
+  if not Assigned(APackage.DataBase) then
+    raise EPackageInvalidException.Create('DataBase property not found in Package File!');
+
+  FPackage := APackage;
+
+  DataBase := FPackage.DataBase.DataBase;
+  HostName := FPackage.DataBase.HostName;
+  UserName := FPackage.DataBase.UserName;
+  Password := FPackage.DataBase.Password;
+  Port := FPackage.DataBase.Port;
+
+  FFDConnection := TFireDacFirebirdConnection.Create(HostName, DataBase, UserName, Password, Port);
 
   FDQuery := TFDQuery.Create(nil);
   FDQuery.Connection := FFDConnection.GetConnection;
@@ -62,13 +78,13 @@ begin
   FDQuery.Free;
 end;
 
-procedure TMigrateRepository.executeMigrate(const Migrate: TMigrate; const executionMode: TExecutionModeMigrate; const isAutoCommit: Boolean = False);
+procedure TMigrateRepository.ExecuteMigrate(const Migrate: TMigrate; const ExecutionMode: TExecutionModeMigrate; const IsAutoCommit: Boolean = False);
 var
   SQLList: TArray<String>;
   SQL: String;
 begin
 
-  if executionMode = TExecutionModeMigrate.TUp then
+  if ExecutionMode = TExecutionModeMigrate.TUp then
     SQLList := Migrate.up
   else
     SQLList := Migrate.down;
@@ -85,36 +101,32 @@ begin
 
       FDQuery.ExecSQL(SQL);
 
-      if isAutoCommit then
+      if IsAutoCommit then
         FFDConnection.GetConnection.Commit;
 
     end;
 
-    if executionMode = TExecutionModeMigrate.TUp then
-      insertCodeMigrate(Migrate.UnixIdentifier)
+    if ExecutionMode = TExecutionModeMigrate.TUp then
+      InsertCodeMigrate(Migrate.UnixIdentifier)
     else
-      deleteCodeMigrate(Migrate.UnixIdentifier);
+      DeleteCodeMigrate(Migrate.UnixIdentifier);
 
     FFDConnection.GetConnection.Commit;
 
   except
 
-    on e: Exception do
+    on E: Exception do
     begin
       FFDConnection.GetConnection.Rollback;
-      raise EDataBaseException.Create(Format('Erro ao executar arquivo %s! ||| %s', [Migrate.UnixIdentifier, e.Message]));
+      raise EDataBaseException.Create(Format('Erro ao executar arquivo %s! ||| %s', [Migrate.UnixIdentifier, E.Message]));
     end;
 
   end;
 
 end;
 
-function TMigrateRepository.getLastScriptExecuted: String;
-var
-  status: Boolean;
+function TMigrateRepository.GetLastScriptExecuted: string;
 begin
-
-  status := FDQuery.Connection.Connected;
 
   FDQuery.Open('SELECT MAX(ID) AS ID FROM MIGRATIONS');
 
@@ -122,7 +134,7 @@ begin
 
 end;
 
-procedure TMigrateRepository.consoleLog(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);
+procedure TMigrateRepository.ConsoleLog(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);
 begin
 
   if AKind = SoError then
@@ -130,14 +142,14 @@ begin
 
 end;
 
-procedure TMigrateRepository.deleteCodeMigrate(const migrateIdentifier: String);
+procedure TMigrateRepository.DeleteCodeMigrate(const MigrateIdentifier: string);
 begin
-  FDQuery.ExecSQL(Format('DELETE FROM MIGRATIONS MG WHERE MG.ID = %s;', [migrateIdentifier.QuotedString]));
+  FDQuery.ExecSQL(Format('DELETE FROM MIGRATIONS MG WHERE MG.ID = %s;', [MigrateIdentifier.QuotedString]));
 end;
 
-function TMigrateRepository.getListMigratesExecuted: TList<String>;
+function TMigrateRepository.GetListMigratesExecuted: TList<string>;
 var
-  listMigratesExecuted: TList<String>;
+  ListMigratesExecuted: TList<String>;
   SQL: String;
 begin
 
@@ -148,23 +160,23 @@ begin
   if FDQuery.IsEmpty then
     exit(nil);
 
-  listMigratesExecuted := TList<String>.Create();
+  ListMigratesExecuted := TList<String>.Create();
 
   FDQuery.First;
 
   while not FDQuery.Eof do
   begin
-    listMigratesExecuted.Add(FDQuery.FieldByName('ID').AsString);
+    ListMigratesExecuted.Add(FDQuery.FieldByName('ID').AsString);
     FDQuery.Next;
   end;
 
-  Result := listMigratesExecuted;
+  Result := ListMigratesExecuted;
 
 end;
 
-procedure TMigrateRepository.insertCodeMigrate(const migrateIdentifier: String);
+procedure TMigrateRepository.InsertCodeMigrate(const MigrateIdentifier: string);
 begin
-  FDQuery.ExecSQL(Format('INSERT INTO MIGRATIONS VALUES (%s);', [migrateIdentifier.QuotedString]));
+  FDQuery.ExecSQL(Format('INSERT INTO MIGRATIONS VALUES (%s);', [MigrateIdentifier.QuotedString]));
 end;
 
 end.

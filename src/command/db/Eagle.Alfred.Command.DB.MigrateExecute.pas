@@ -18,7 +18,7 @@ uses
 
 type
 
-  [Command('db:migrate', 'up', 'Realiza a execução dos migrates no banco de dados')]
+  [Command('db:migrate', 'up', 'Execute the migrates in database on Up Mode')]
   TMigrateExecute = class(TCommandAbstract)
   private
 
@@ -31,33 +31,35 @@ type
     FMigrateRepository: IMigrateRepository;
     FMigrateService: IMigrateService;
 
-    procedure executeMigrates;
-    procedure showMessageNoneMigrateFounded;
-    procedure showMessageSucessfull;
+    procedure ExecuteMigrates;
+    procedure ShowMessageError(const error: String);
+    procedure ShowMessageNoneMigrateFounded;
+    procedure ShowMessageSucessfull;
+
 
   public
 
     destructor Destroy; override;
 
-    procedure execute; override;
+    procedure Execute; override;
     procedure Init; override;
 
-    [ParamAttribute('version', 'Filtro de versão', False)]
-    procedure setVersion(const version: String);
+    [ParamAttribute('version', 'Version filter', False)]
+    procedure SetVersion(const version: string);
 
-    [ParamAttribute('migrate', 'Migrate limite de execução', False)]
-    procedure setMigrate(const Migrate: String);
+    [ParamAttribute('migrate', 'Limit execution migrate', False)]
+    procedure SetMigrate(const Migrate: string);
 
-    [OptionAttribute('IsInteractiveMode', 'i', 'Informar se a execução será em modo interativo')]
-    procedure setInteractive;
+    [OptionAttribute('IsInteractiveMode', 'i', 'Execution in interactive mode')]
+    procedure SetInteractive;
 
-    [OptionAttribute('IsAutoCommit', 'c', 'Commit cadas script do migrate automaticamente')]
-    procedure setAutoCommit;
+    [OptionAttribute('IsAutoCommit', 'c', 'Auto Commit')]
+    procedure SetAutoCommit;
 
   end;
 
 const
-  SIM = 'S';
+  SIM = 'Y';
 
 implementation
 
@@ -70,46 +72,55 @@ begin
   inherited;
 end;
 
-procedure TMigrateExecute.execute;
+procedure TMigrateExecute.Execute;
 var
-  listMigratesExecuted: TList<String>;
+  ListMigratesExecuted: TList<String>;
 begin
 
   FMigrateService := TMigrateService.Create(FPackage);
 
-  listMigratesExecuted := FMigrateRepository.getListMigratesExecuted();
-
   try
 
-    FMigrates := FMigrateService.getMigratesByMigrationDir();
+    try
 
-    if (Assigned(listMigratesExecuted)) and (listMigratesExecuted.Count > 0) and (Assigned(FMigrates)) then
-      FMigrateService.removeMigratesUnusableList(TExecutionModeMigrate.TUp, FMigrates, listMigratesExecuted);
+      ListMigratesExecuted := FMigrateRepository.GetListMigratesExecuted();
 
-    if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
-    begin
-      showMessageNoneMigrateFounded();
-      exit;
+      FMigrates := FMigrateService.getMigratesByMigrationDir();
+
+      if (Assigned(ListMigratesExecuted)) and (ListMigratesExecuted.Count > 0) and (Assigned(FMigrates)) then
+        FMigrateService.RemoveMigratesUnusableList(TExecutionModeMigrate.TUp, FMigrates, ListMigratesExecuted);
+
+      if (not Assigned(FMigrates)) or (FMigrates.Count = 0) then
+      begin
+        ShowMessageNoneMigrateFounded();
+        Exit;
+      end;
+
+      ExecuteMigrates();
+
+      ShowMessageSucessfull();
+
+    except
+
+      on E: Exception do
+        ShowMessageError(E.Message);
+
     end;
-
-    executeMigrates();
-
-    showMessageSucessfull();
 
   finally
 
-    if Assigned(listMigratesExecuted) then
-      listMigratesExecuted.Free();
+    if Assigned(ListMigratesExecuted) then
+      ListMigratesExecuted.Free();
 
   end;
 
 end;
 
-procedure TMigrateExecute.executeMigrates;
+procedure TMigrateExecute.ExecuteMigrates;
 var
   Migrate: TMigrate;
-  answer: string;
-  canExecute: Boolean;
+  Answer: string;
+  CanExecute: Boolean;
 begin
 
   FConsoleIO.WriteInfo('');
@@ -120,32 +131,32 @@ begin
     if FIsInteractiveMode then
     begin
 
-      answer := FConsoleIO.ReadInfo(Format('Deseja executar o arquivo %s? <S>im | <N>ao', [Migrate.IssueIdentifier]));
+      Answer := FConsoleIO.ReadInfo(Format('Wish execute the file %s? <Y>es | <N>o', [Migrate.IssueIdentifier]));
 
-      if not answer.ToUpper.Equals(SIM) then
-        exit;
+      if not Answer.ToUpper.Equals(SIM) then
+        Exit;
 
     end;
 
-    canExecute := True;
+    CanExecute := True;
 
     if FFilterTypeExecution = TMigrateFilterTypeExecution.TAll then
-      canExecute := True
+      CanExecute := True
     else if FFilterTypeExecution = TMigrateFilterTypeExecution.TByVersion then
-      canExecute := Migrate.version.Equals(FFilter)
+      CanExecute := Migrate.version.Equals(FFilter)
     else
     begin
-      canExecute := Migrate.UnixIdentifier <= FFilter;
+      CanExecute := Migrate.UnixIdentifier <= FFilter;
 
-      if not canExecute then
-        exit;
+      if not CanExecute then
+        Exit;
 
     end;
 
-    if canExecute then
+    if CanExecute then
     begin
 
-      FMigrateRepository.executeMigrate(Migrate, TExecutionModeMigrate.TUp, FIsAutoCommit);
+      FMigrateRepository.ExecuteMigrate(Migrate, TExecutionModeMigrate.TUp, FIsAutoCommit);
 
       FConsoleIO.WriteInfo(Format('| Migrate %s executed', [Migrate.UnixIdentifier]));
 
@@ -159,7 +170,7 @@ procedure TMigrateExecute.Init;
 begin
   inherited;
 
-  FMigrateRepository := TMigrateRepository.Create();
+  FMigrateRepository := TMigrateRepository.Create(FPackage);
   FMigrateService := TMigrateService.Create(FPackage);
 
   FIsInteractiveMode := False;
@@ -168,17 +179,17 @@ begin
 
 end;
 
-procedure TMigrateExecute.setAutoCommit;
+procedure TMigrateExecute.SetAutoCommit;
 begin
   FIsAutoCommit := True;
 end;
 
-procedure TMigrateExecute.setInteractive;
+procedure TMigrateExecute.SetInteractive;
 begin
   FIsInteractiveMode := True;
 end;
 
-procedure TMigrateExecute.setMigrate(const Migrate: String);
+procedure TMigrateExecute.SetMigrate(const Migrate: string);
 begin
 
   FFilterTypeExecution := TMigrateFilterTypeExecution.TByMigrate;
@@ -187,7 +198,7 @@ begin
 
 end;
 
-procedure TMigrateExecute.setVersion(const version: String);
+procedure TMigrateExecute.SetVersion(const version: string);
 begin
 
   FFilterTypeExecution := TMigrateFilterTypeExecution.TByVersion;
@@ -196,7 +207,16 @@ begin
 
 end;
 
-procedure TMigrateExecute.showMessageNoneMigrateFounded;
+procedure TMigrateExecute.ShowMessageError(const error: String);
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteError('* ------- ');
+  FConsoleIO.WriteError(Format('| %s :( ', [error]));
+  FConsoleIO.WriteError('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
+end;
+
+procedure TMigrateExecute.ShowMessageNoneMigrateFounded;
 begin
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteInfo('* ------- ');
@@ -205,7 +225,7 @@ begin
   FConsoleIO.WriteInfo('');
 end;
 
-procedure TMigrateExecute.showMessageSucessfull;
+procedure TMigrateExecute.ShowMessageSucessfull;
 begin
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteSucess('* ------- ');

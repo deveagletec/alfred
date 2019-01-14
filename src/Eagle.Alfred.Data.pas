@@ -8,6 +8,15 @@ uses
 
 type
 
+  TDatabase = class
+  public
+    DataBase: string;
+    HostName: string;
+    UserName: string;
+    Password:string;
+    Port: string;
+  end;
+
   TDependency = class
     Name: string;
     Version: string;
@@ -17,7 +26,7 @@ type
   public
     Id: string;
     Version: string;
-    DataBase: string;
+    DataBase: TDatabase;
     BaseDir: string;
     MigrationDir: string;
     PackagesDir: string;
@@ -39,6 +48,9 @@ destructor TPackage.Destroy;
 var
   Dependency: TDependency;
 begin
+
+  if Assigned(DataBase) then
+    DataBase.Free();
 
   for Dependency in Dependencies do
   begin
