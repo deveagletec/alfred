@@ -48,9 +48,11 @@ implementation
 { TUninstallCommand }
 
 procedure TUninstallCommand.Execute;
+var
+  Dependency: TDependency;
 begin
   inherited;
-
+  FDependencyResolver.Uninstall(Dependency);
 end;
 
 procedure TUninstallCommand.Force;

@@ -128,6 +128,7 @@
         <DCCReference Include="..\src\downloaders\Eagle.Alfred.Downloaders.SourceForgeDownloader.pas"/>
         <DCCReference Include="..\src\command\Eagle.Alfred.Command.Install.pas"/>
 		<DCCReference Include="..\src\command\Eagle.Alfred.Command.Uninstall.pas"/>
+        <DCCReference Include="..\src\command\Eagle.Alfred.Command.Update.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>

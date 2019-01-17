@@ -55,7 +55,8 @@ uses
   Eagle.Alfred.Downloaders.GitlabDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.GitlabDownloader.pas',
   Eagle.Alfred.Downloaders.SourceForgeDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.SourceForgeDownloader.pas',
   Eagle.Alfred.Command.Install in '..\src\command\Eagle.Alfred.Command.Install.pas',
-  Eagle.Alfred.Command.Uninstall in '..\src\command\Eagle.Alfred.Command.Uninstall.pas';
+  Eagle.Alfred.Command.Uninstall in '..\src\command\Eagle.Alfred.Command.Uninstall.pas',
+  Eagle.Alfred.Command.Update in '..\src\command\Eagle.Alfred.Command.Update.pas';
 
 var
   OldColor: Byte;
