@@ -12,6 +12,7 @@ type
     FGroupName: string;
     FGroupAlias: string;
     FDescription: string;
+    FSingle: Boolean;
   public
     constructor Create(const AGroup, AName, ADescription: string);
     property GroupName: string read FGroupName;
@@ -19,6 +20,7 @@ type
     property Name: string read FName;
     property Alias: string read FAlias;
     property Description: string read FDescription;
+    property IsSingle: Boolean read FSingle;
   end;
 
   OptionAttribute = class(TCustomAttribute)
@@ -55,10 +57,18 @@ implementation
 { CommandAttribute }
 
 constructor CommandAttribute.Create(const AGroup, AName, ADescription: string);
+var
+  Aux: TArray<string>;
 begin
-  FGroupName := AGroup;
+  Aux := AGroup.Split(['|']);
+
+  FGroupName := Aux[0].Trim;
+  if Length(Aux) > 1 then
+    FGroupAlias := Aux[0].Trim;
+
   FName := AName;
   FDescription := ADescription;
+  FSingle := AName.IsEmpty;
 end;
 
 { OptionAttribute }

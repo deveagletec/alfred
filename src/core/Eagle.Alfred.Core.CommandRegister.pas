@@ -96,6 +96,9 @@ begin
 
     CommandsGroup := FCommands.Items[CmdAttrib.GroupName];
 
+    if not CmdAttrib.GroupAlias.IsEmpty then
+      FCommands.Add(CmdAttrib.GroupAlias, CommandsGroup);
+
     CommandMetaData.CommandAttrib := CmdAttrib;
     CommandMetaData.CommandClass := CommandClass;
     CommandMetaData.CommandType := RttiType;
@@ -154,6 +157,8 @@ begin
 end;
 
 function TCommandRegister.GetCommand(const GroupName, CommandName: string): TCommandMetaData;
+const
+  SINGLE_CMD = '';
 var
   CommandGroup: TDictionary<string, TCommandMetaData>;
 begin
@@ -162,6 +167,12 @@ begin
     raise ECommandGroupNotFoundException.Create('Command Group not found');
 
   CommandGroup := FCommands.Items[GroupName];
+
+  if CommandGroup.ContainsKey(SINGLE_CMD) then
+  begin
+    Result := CommandGroup.Items[SINGLE_CMD];
+    Exit;
+  end;
 
   if not CommandGroup.ContainsKey(CommandName) then
     raise ECommandNotFound.Create('Command not found');

@@ -23,6 +23,9 @@ type
       ['{BBA5E2B9-98CC-4C23-9772-3F009020E746}']
       procedure Resolver(Dependency: TDependency);
       procedure ResolverAll;
+      procedure UpdateAll;
+      procedure Install(Dependency: TDependency);
+      procedure Uninstall(Dependency: TDependency);
    end;
 
    TDependencyResolver = class(TInterfacedObject ,IDependencyResolver)
@@ -50,6 +53,9 @@ type
       destructor Destroy(); override;
       procedure Resolver(Dependency: TDependency);
       procedure ResolverAll;
+      procedure UpdateAll;
+      procedure Install(Dependency: TDependency);
+      procedure Uninstall(Dependency: TDependency);
    end;
 
 implementation
@@ -119,6 +125,11 @@ begin
    RootSourcePath := FVendorDir + Dependency.Id + '\' + Dependency.SrcDir;
 
    ScanSourceDirectory(RootSourcePath);
+end;
+
+procedure TDependencyResolver.Install(Dependency: TDependency);
+begin
+
 end;
 
 procedure TDependencyResolver.LoadFileLock;
@@ -228,6 +239,16 @@ begin
     if not Exists then
       FRemovedDependencies.Add(Dependency);
   end;
+end;
+
+procedure TDependencyResolver.Uninstall(Dependency: TDependency);
+begin
+
+end;
+
+procedure TDependencyResolver.UpdateAll;
+begin
+
 end;
 
 procedure TDependencyResolver.UpdateLibraryPath;

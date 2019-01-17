@@ -5,6 +5,7 @@ interface
 uses
   System.Classes,
   System.SysUtils,
+  System.Math,
   System.Generics.Collections,
   System.Rtti,
   System.IOUtils,
@@ -37,9 +38,11 @@ type
     FCommandArgs: TList<string>;
     FCommandRegister: ICommandRegister;
     function CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
+    function DoGetCommandParamByName(Attrib: ParamAttribute): string;
+    function DoGetCommandParamByPosition(Attrib: ParamAttribute; const IsSingle: Boolean): string;
     procedure DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
     procedure Execute(const GroupName, CommandName: string);
-    function GetCommandParam(Attrib: ParamAttribute): string;
+    function GetCommandParam(Attrib: ParamAttribute; const IsSingle: Boolean): string;
     procedure Help;
     procedure HelpCommand(GroupName: string);
     procedure HelpProjectInit;
@@ -106,6 +109,43 @@ begin
 
 end;
 
+function TAlfred.DoGetCommandParamByName(Attrib: ParamAttribute): string;
+var
+  Arg: string;
+begin
+  Result := EmptyStr;
+
+  for Arg in FCommandArgs.ToArray do
+  begin
+    if not Arg.ToLower.StartsWith(Attrib.Name+'=') then
+      Continue;
+
+    Result := Arg.Split(['='])[1];
+
+    if Result.IsEmpty then
+      raise Exception.Create('Value Required Parameter Not Found');
+  end;
+
+end;
+
+function TAlfred.DoGetCommandParamByPosition(Attrib: ParamAttribute; const IsSingle: Boolean): string;
+var
+  Shift: Integer;
+begin
+  Result := EmptyStr;
+
+  Shift := IfThen(IsSingle, 0, 1);
+
+  if (Attrib.Index > 0) and (Attrib.Index + Shift < FCommandArgs.Count) then
+  begin
+    Result := FCommandArgs.Items[Attrib.Index + Shift];
+    if Result.StartsWith('-') then
+      Result := EmptyStr;
+
+  end;
+
+end;
+
 procedure TAlfred.DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
 begin
   Method.invoke(TObject(Command), [ParamValue]);
@@ -129,33 +169,16 @@ begin
 
 end;
 
-function TAlfred.GetCommandParam(Attrib: ParamAttribute): string;
-var
-  Arg: string;
+function TAlfred.GetCommandParam(Attrib: ParamAttribute; const IsSingle: Boolean): string;
 begin
 
-  Result := EmptyStr;
+  Result := DoGetCommandParamByPosition(Attrib, IsSingle);
 
-  if (Attrib.Index > 0) and ((Attrib.Index + 1) < FCommandArgs.Count) then
-  begin
+  if Result.IsEmpty then
+    Result := DoGetCommandParamByName(Attrib);
 
-    Result := FCommandArgs.Items[Attrib.Index + 1];
-
-    if Result.StartsWith('-') then
-      raise Exception.Create('Error Message');
-
-    Exit;
-
-  end;
-
-  for Arg in FCommandArgs.ToArray do
-  begin
-    if not Arg.ToLower.StartsWith(Attrib.Name + '=') then
-      Continue;
-
-    Result := Arg.Split(['='])[1];
-    Exit;
-  end;
+  if Attrib.Required and Result.IsEmpty then
+    raise Exception.Create('Required Parameter Not Found');
 
   if Attrib.Required then
     raise ERequiredParameterException.CreateFmt('Required parameter %s!', [Attrib.Name]);
@@ -358,7 +381,7 @@ begin
 
   for CommandParam in CommandMetaData.CommandParams do
   begin
-    ParamValue := GetCommandParam(CommandParam.Attrib);
+    ParamValue := GetCommandParam(CommandParam.Attrib, CommandMetaData.CommandAttrib.IsSingle);
     if ParamValue.IsEmpty then
       Continue;
 

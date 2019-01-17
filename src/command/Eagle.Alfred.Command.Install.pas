@@ -2,6 +2,7 @@ unit Eagle.Alfred.Command.Install;
 
 interface
 uses
+  System.SysUtils,
   System.IOUtils,
 
   XSuperObject,
@@ -19,6 +20,8 @@ type
   private
     FDependencyResolver : IDependencyResolver;
     FDependency: string;
+    FSaveProd: Boolean;
+    FSaveDev: Boolean;
     FForce: Boolean;
     FGlobal: Boolean;
 
@@ -26,8 +29,14 @@ type
   public
     procedure Execute; override;
 
-    //[ParamAttribute(1, 'Dependency')]
+    [ParamAttribute(1, 'Dependency', False)]
     procedure SetDependency(const Name: string);
+
+    [OptionAttribute('save-prod', '-P', 'Package will appear in your dependencies.')]
+    procedure SaveProd;
+
+    [OptionAttribute('save-dev', '-D', 'Package will appear in your devDependencies.')]
+    procedure SaveDev;
 
     [OptionAttribute('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
@@ -43,7 +52,10 @@ implementation
 procedure TInstallCommand.Execute;
 begin
 
-  FDependencyResolver.ResolverAll;
+  if FDependency.IsEmpty then
+    FDependencyResolver.ResolverAll
+ // else
+ //   FDependencyResolver.Install(FDependency);
 
 end;
 
@@ -61,6 +73,17 @@ procedure TInstallCommand.Init;
 begin
   inherited;
   FDependencyResolver := TDependencyResolver.Create(FPackage, FConsoleIO);
+  FSaveProd := True;
+end;
+
+procedure TInstallCommand.SaveDev;
+begin
+  FSaveDev := True;
+end;
+
+procedure TInstallCommand.SaveProd;
+begin
+  FSaveProd := True;
 end;
 
 procedure TInstallCommand.SetDependency(const Name: string);
