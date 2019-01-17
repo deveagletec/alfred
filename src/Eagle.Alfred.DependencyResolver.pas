@@ -9,8 +9,8 @@ uses
 
     XSuperObject,
 
-   Eagle.Alfred.Data,
-   Eagle.ConsoleIO,
+   Eagle.Alfred.Core.Types,
+   Eagle.Alfred.Core.ConsoleIO,
    Eagle.Alfred.DprojParser,
    Eagle.Alfred.Downloaders.Downloader,
    Eagle.Alfred.Downloaders.GithubDownloader,
@@ -37,8 +37,8 @@ type
       FBitbucketDownloader : IDownloader;
       FGitlabDownloader : IDownloader;
       FPaths : TList<string>;
-      FInstalledDependencies: TList<TDependency>;
-      FRemovedDependencies: TList<TDependency>;
+      FInstalledDependencies: TList<TInstalledDependency>;
+      FRemovedDependencies: TList<TInstalledDependency>;
       FMainProject: IDprojParser;
       FTestProject: IDprojParser;
 
@@ -78,12 +78,12 @@ begin
    FGitlabDownloader := TGitlabDownloader.Create(aIO, FVendorDir);
 
    FPaths := TList<string>.Create;
-   FInstalledDependencies := TList<TDependency>.Create;
-   FRemovedDependencies := TList<TDependency>.Create;
+   FInstalledDependencies := TList<TInstalledDependency>.Create;
+   FRemovedDependencies := TList<TInstalledDependency>.Create;
 
-   FMainProject := TDprojParser.Create(APackage.PackagesDir, APackage.Id);
+   FMainProject := TDprojParser.Create(APackage.PackagesDir, APackage.Name);
 
-   FTestProject := TDprojParser.Create(APackage.PackagesDir, APackage.Id + 'Test');
+   FTestProject := TDprojParser.Create(APackage.PackagesDir, APackage.Name + 'Test');
 
    LoadFileLock;
 
@@ -125,6 +125,8 @@ begin
    RootSourcePath := FVendorDir + Dependency.Id + '\' + Dependency.SrcDir;
 
    ScanSourceDirectory(RootSourcePath);
+
+
 end;
 
 procedure TDependencyResolver.Install(Dependency: TDependency);
@@ -140,7 +142,7 @@ begin
   try
     Data := TFile.ReadAllText('package.lock');
 
-    FInstalledDependencies.AddRange(TJSON.Parse<TArray<TDependency>>(Data));
+    FInstalledDependencies.AddRange(TJSON.Parse<TArray<TInstalledDependency>>(Data));
   except on E: Exception do
     raise Exception.Create('Error load package.lock + ' + E.Message);
   end;
@@ -173,13 +175,12 @@ end;
 
 procedure TDependencyResolver.SaveFileLock;
 var
-  Dependencies: TArray<TDependency>;
+  Dependencies: TArray<TInstalledDependency>;
   Data: string;
 begin
+  Dependencies := FInstalledDependencies.ToArray;
 
-  Dependencies := Concat(FPackage.Dependencies, FPackage.DevDependencies);
-
-  Data := TJSON.Stringify<TArray<TDependency>>(Dependencies);
+  Data := TJSON.Stringify<TArray<TInstalledDependency>>(Dependencies);
 
   TFile.WriteAllText('package.lock', Data);
 end;
@@ -216,7 +217,8 @@ end;
 
 procedure TDependencyResolver.SeparateRemovedDependencies;
 var
-  Dependency, Aux: TDependency;
+  Dependency: TInstalledDependency;
+  Aux: TDependency;
   Dependencies: TArray<TDependency>;
   Exists: Boolean;
 begin

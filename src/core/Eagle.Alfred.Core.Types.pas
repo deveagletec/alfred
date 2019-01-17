@@ -15,8 +15,16 @@ type
     Name: string;
     Version: string;
     Repo : string;
-    Version: string;
     SrcDir : string;
+  end;
+  
+  TInstalledDependency = record
+    [Alias('name')]
+    Name: string;
+    [Alias('version')]
+    Version: string;
+    [Alias('paths')]
+    Paths: TArray<string>;
   end;
 
   TDataBase = class
@@ -64,6 +72,9 @@ type
     [Alias('migration-dir')]
     MigrationDir: string;
 
+    [Alias('vendor-dir')]
+    VendorDir: string;
+
     [Alias('db')]
     DataBase: TDataBase;
 
@@ -103,6 +114,9 @@ type
     [Alias('migration-dir')]
     MigrationDir: string;
 
+    [Alias('vendor-dir')]
+    VendorDir: string;
+
     [Alias('db-host')]
     DBHost: string;
     [Alias('db-user')]
@@ -136,7 +150,7 @@ begin
       Dependency.Free;
   end;
 
-  for Dependency in DependenciesDev do
+  for Dependency in DevDependencies do
   begin
     if Assigned(Dependency) then
       Dependency.Free;
@@ -162,6 +176,7 @@ begin
   SourceDir := 'src\';
   TestsDir := 'tests\';
   MigrationDir := 'migrations\';
+  VendorDir := 'vendor\';
   Namespace := '';
   Version := '1.0.0';
   Modular := False;

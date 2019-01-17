@@ -8,8 +8,8 @@ uses
   XSuperObject,
 
   Eagle.Alfred,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.DependencyResolver;
 

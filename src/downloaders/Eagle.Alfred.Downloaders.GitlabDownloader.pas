@@ -1,7 +1,7 @@
 unit Eagle.Alfred.Downloaders.GitlabDownloader;
 
 interface
-uses Eagle.Alfred.Downloaders.Downloader, Eagle.Alfred.Data;
+uses Eagle.Alfred.Downloaders.Downloader, Eagle.Alfred.Core.Types;
 
 type
 
