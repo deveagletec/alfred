@@ -21,6 +21,11 @@ type
     procedure ReadProjectName;
 
     procedure Init; override;
+    procedure ReadDBFile;
+    procedure ReadDBHost;
+    procedure ReadDBPass;
+    procedure ReadDBPort;
+    procedure ReadDBUser;
     function ReadDir(const Msg: string): string;
     procedure ReadProjectBaseDir;
     procedure ReadProjectDBConfig;
@@ -32,6 +37,7 @@ type
     procedure ReadProjectSourceDir;
     procedure ReadProjectTestsDir;
     procedure ReadProjectVersion;
+    function ReadRequiredData(const Msg, Default, Alert: string): string;
     procedure ShowGenerationConfirmation;
   public
     destructor Destroy; override;
@@ -97,6 +103,74 @@ begin
   FPackage.Modular := False;
 end;
 
+procedure TInitCommand.ReadDBFile;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('file: ', FPackage.DataBase.&File);
+
+  Value := ReadRequiredData(Msg, FPackage.DataBase.&File, 'File required!');
+
+  if not Value.IsEmpty then
+    FPackage.DataBase.&File := Value;
+end;
+
+procedure TInitCommand.ReadDBHost;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('host: ', FPackage.DataBase.Host);
+
+  Value := ReadRequiredData(Msg, FPackage.DataBase.Host, 'Host required!');
+
+  if not Value.IsEmpty then
+    FPackage.DataBase.Host := Value;
+end;
+
+procedure TInitCommand.ReadDBPass;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('Password: ', FPackage.DataBase.Pass);
+
+  Value := ReadRequiredData(Msg, FPackage.DataBase.Pass, 'Password required!');
+
+  if not Value.IsEmpty then
+    FPackage.DataBase.Pass := Value;
+end;
+
+procedure TInitCommand.ReadDBPort;
+var
+  Msg, Value: string;
+  Port: Integer;
+begin
+  Msg := CreateMessage('Port: ', string.Parse(FPackage.DataBase.Port));
+
+  repeat
+    Value := ReadRequiredData(Msg, FPackage.DataBase.Pass, 'Port required!');
+
+    if Value.IsEmpty or Integer.TryParse(Value, Port) then
+      Break;
+
+    FConsoleIO.WriteError('Port invalid!');
+  until (False);
+
+  if not Value.IsEmpty then
+    FPackage.DataBase.Port := Integer.Parse(Value);
+end;
+
+procedure TInitCommand.ReadDBUser;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('user: ', FPackage.DataBase.User);
+
+  Value := ReadRequiredData(Msg, FPackage.DataBase.Pass, 'User required!');
+
+  if not Value.IsEmpty then
+    FPackage.DataBase.User := Value;
+end;
+
 function TInitCommand.ReadDir(const Msg: string): string;
 begin
   repeat
@@ -125,11 +199,27 @@ procedure TInitCommand.ReadProjectDBConfig;
 var
   Answer: Boolean;
 begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteInfo('Define DB configuration');
+  FConsoleIO.WriteInfo('');
+
   Answer := FConsoleIO.ReadBoolean('Would you like to define your DB config (yes)? ', True);
 
   if not Answer then
     Exit;
 
+  FPackage.DataBase := TDataBase.Create;
+
+  FPackage.DataBase.Host := 'localhost';
+  FPackage.DataBase.User := 'sysdba';
+  FPackage.DataBase.Pass := 'masterkey';
+  FPackage.DataBase.Port := 3050;
+
+  ReadDBHost;
+  ReadDBFile;
+  ReadDBUser;
+  ReadDBPass;
+  ReadDBPort;
 end;
 
 procedure TInitCommand.ReadProjectDescription;
@@ -239,6 +329,18 @@ begin
 
   if not Value.IsEmpty then
     FPackage.Version := Value;
+end;
+
+function TInitCommand.ReadRequiredData(const Msg, Default, Alert: string): string;
+begin
+  repeat
+    Result := FConsoleIO.ReadData(Msg).Trim;
+
+    if not (Default.IsEmpty and Result.IsEmpty) then
+      Break;
+
+    FConsoleIO.WriteError(Alert);
+  until (False);
 end;
 
 procedure TInitCommand.ShowGenerationConfirmation;

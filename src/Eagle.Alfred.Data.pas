@@ -11,18 +11,22 @@ uses
 
 type
 
-  TDatabase = class
-  public
-    DataBase: string;
-    HostName: string;
-    UserName: string;
-    Password:string;
-    Port: string;
-  end;
-
   TDependency = class
     Name: string;
     Version: string;
+  end;
+
+  TDataBase = class
+    [Alias('host')]
+    Host: string;
+    [Alias('file')]
+    &File: string;
+    [Alias('user')]
+    User: string;
+    [Alias('pass')]
+    Pass: string;
+    [Alias('port')]
+    Port: Integer;
   end;
 
   TPackage = class
@@ -58,7 +62,7 @@ type
     MigrationDir: string;
 
     [Alias('db')]
-    DataBase: string;
+    DataBase: TDataBase;
 
     Dependencies: TArray<TDependency>;
 
@@ -76,7 +80,7 @@ var
 begin
 
   if Assigned(DataBase) then
-    DataBase.Free();
+    DataBase.Free;
 
   for Dependency in Dependencies do
   begin
