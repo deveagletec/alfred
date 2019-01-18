@@ -29,6 +29,7 @@ type
   private
     class var FInstance: TAlfred;
   private
+    FConfiguration: TConfiguration;
     FCurrentPath: string;
     FAppPath: string;
     FConsoleIO: IConsoleIO;
@@ -44,6 +45,7 @@ type
     procedure HelpProjectInit;
     procedure Init;
     procedure LoadCommandArgs;
+    procedure LoadConfiguration;
     function OptionExists(const OptionAttrib: OptionAttribute): Boolean;
     procedure SetOptions(Command: ICommand; CommandMetaData: TCommandMetaData);
     procedure SetParams(Command: ICommand; CommandMetaData: TCommandMetaData);
@@ -79,6 +81,9 @@ end;
 destructor TAlfred.Destroy;
 begin
 
+  if Assigned(FConfiguration) then
+    FreeAndNil(FConfiguration);
+
   if Assigned(FCommandArgs) then
     FreeAndNil(FCommandArgs);
 
@@ -94,8 +99,12 @@ begin
   if CommandMetaData.PackageRequired and not Assigned(FPackage) then
     raise EPackageNotFoundException.Create('Package Not Found');
 
-  Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [TValue.From<string>(FCurrentPath), TValue.From<TPackage>(FPackage),
-    TValue.From<IConsoleIO>(FConsoleIO)]).AsType<ICommand>;
+  Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [
+    TValue.From<string>(FCurrentPath),
+    TValue.From<TConfiguration>(FConfiguration),
+    TValue.From<TPackage>(FPackage),
+    TValue.From<IConsoleIO>(FConsoleIO)
+  ]).AsType<ICommand>;
 
 end;
 
@@ -225,6 +234,8 @@ var
   Data: string;
 begin
 
+  LoadConfiguration;
+
   LoadCommandArgs;
 
   if not FileExists('.\package.json') then
@@ -252,6 +263,25 @@ begin
     FCommandArgs.Add(ParamName);
   end;
 
+end;
+
+procedure TAlfred.LoadConfiguration;
+var
+  Data: string;
+begin
+
+  if FileExists(FAppPath + '\alfred.conf') then
+    Data := TFile.ReadAllText(FAppPath + '\alfred.conf');
+
+  if not Data.IsEmpty then
+  begin
+    FConfiguration := TJSON.Parse<TConfiguration>(Data);
+    Exit;
+  end;
+
+  FConfiguration := TConfiguration.Create;
+  Data := TJSON.Stringify<TConfiguration>(FConfiguration, True);
+  TFile.WriteAllText(FAppPath + '\alfred.conf', Data);
 end;
 
 function TAlfred.OptionExists(const OptionAttrib: OptionAttribute): Boolean;

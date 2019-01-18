@@ -17,12 +17,13 @@ type
   protected
     FCurrentPath: string;
     FConsoleIO: IConsoleIO;
+    FConfiguration: TConfiguration;
     FPackage: TPackage;
     FVerbose: Boolean;
 
     procedure Init; virtual;
   public
-    constructor Create(const ACurrentPath: string; APackage: TPackage; ConsoleIO: IConsoleIO);
+    constructor Create(const ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
     procedure Execute; virtual; abstract;
 
     [OptionAttribute('verbose', 'v', 'Adds more details to output logging.')]
@@ -33,12 +34,13 @@ implementation
 
 { TCommandAbstract }
 
-constructor TCommandAbstract.Create(const ACurrentPath: string; APackage:
-    TPackage; ConsoleIO: IConsoleIO);
+constructor TCommandAbstract.Create(const ACurrentPath: string; AConfig:
+    TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
 begin
   FCurrentPath := ACurrentPath + '\';
   FConsoleIO := ConsoleIO;
   FPackage := APackage;
+  FConfiguration := AConfig;
 
   Init;
 end;

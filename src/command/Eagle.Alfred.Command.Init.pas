@@ -93,14 +93,14 @@ procedure TInitCommand.Init;
 begin
   inherited;
   FPackage := TPackage.Create;
-  FPackage.Version := '1.0.0';
-  FPackage.BaseDir := '.\';
-  FPackage.MigrationDir := 'migrations\';
-  FPackage.PackagesDir := 'packages\';
-  FPackage.SourceDir := 'src\';
-  FPackage.TestsDir := 'tests\';
-  FPackage.Namespace := 'Eagle';
-  FPackage.Modular := False;
+  FPackage.Version := FConfiguration.Version;
+  FPackage.BaseDir := FConfiguration.BaseDir;
+  FPackage.MigrationDir := FConfiguration.MigrationDir;
+  FPackage.PackagesDir := FConfiguration.PackagesDir;
+  FPackage.SourceDir := FConfiguration.SourceDir;
+  FPackage.TestsDir := FConfiguration.TestsDir;
+  FPackage.Namespace := FConfiguration.Namespace;
+  FPackage.Modular := FConfiguration.Modular;
 end;
 
 procedure TInitCommand.ReadDBFile;
@@ -210,10 +210,10 @@ begin
 
   FPackage.DataBase := TDataBase.Create;
 
-  FPackage.DataBase.Host := 'localhost';
-  FPackage.DataBase.User := 'sysdba';
-  FPackage.DataBase.Pass := 'masterkey';
-  FPackage.DataBase.Port := 3050;
+  FPackage.DataBase.Host := FConfiguration.DBHost;
+  FPackage.DataBase.User := FConfiguration.DBUser;
+  FPackage.DataBase.Pass := FConfiguration.DBPass;
+  FPackage.DataBase.Port := FConfiguration.DBPort;
 
   ReadDBHost;
   ReadDBFile;

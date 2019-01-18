@@ -45,7 +45,8 @@ uses
   Eagle.Alfred.Command.DB.UpdateJoin in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas',
   Eagle.Alfred.Commom.Repository in '..\src\commom\repository\Eagle.Alfred.Commom.Repository.pas',
   Eagle.Alfred.Command.DB.UpdateRun in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas',
-  Eagle.Alfred.Command.Init in '..\src\command\Eagle.Alfred.Command.Init.pas';
+  Eagle.Alfred.Command.Init in '..\src\command\Eagle.Alfred.Command.Init.pas',
+  Eagle.Alfred.Command.Config.Edit in '..\src\command\config\Eagle.Alfred.Command.Config.Edit.pas';
 
 begin
 
