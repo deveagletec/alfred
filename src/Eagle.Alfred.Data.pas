@@ -109,6 +109,9 @@ type
     [Alias('db-port')]
     DBPort: Integer;
 
+    [Alias('default-editor')]
+    DefaultEditor: string;
+
     constructor Create;
   end;
 

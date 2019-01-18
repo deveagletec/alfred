@@ -28,7 +28,11 @@ begin
   inherited;
   FileName := ExtractFilePath(ParamStr(0)) + 'alfred.conf';
 
-  ShellExecute(0, nil, PChar(FileName), nil, nil, SW_SHOWNORMAL)
+  if FConfiguration.DefaultEditor.IsEmpty then
+    ShellExecute(0, nil, PChar(FileName), nil, nil, SW_SHOWNORMAL)
+  else
+   ShellExecute(0, nil, PChar(FConfiguration.DefaultEditor), PChar(FileName), nil, SW_SHOWNORMAL);
+
 end;
 
 initialization

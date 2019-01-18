@@ -60,7 +60,10 @@ begin
 
   except
     on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
+    begin
+      TextColor(Red);
+      Writeln(E.Message);
+    end;
   end;
 
 end.

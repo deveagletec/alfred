@@ -4,6 +4,7 @@ interface
 uses
   System.SysUtils,
   System.IOUtils,
+  System.StrUtils,
 
   XSuperObject,
 
@@ -248,9 +249,9 @@ procedure TInitCommand.ReadProjectModular;
 var
   Msg, Value: string;
 begin
-  Msg := CreateMessage('modular: ', 'no');
+  Msg := CreateMessage('modular: ', IfThen(FConfiguration.Modular, 'yes', 'no'));
 
-  FPackage.Modular := FConsoleIO.ReadBoolean(Msg, False);
+  FPackage.Modular := FConsoleIO.ReadBoolean(Msg, FConfiguration.Modular);
 end;
 
 procedure TInitCommand.ReadProjectName;

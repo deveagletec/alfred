@@ -74,8 +74,6 @@ begin
 
   FCommandRegister := TCommandRegister.Create;
 
-  Init();
-
 end;
 
 destructor TAlfred.Destroy;
@@ -275,7 +273,12 @@ begin
 
   if not Data.IsEmpty then
   begin
-    FConfiguration := TJSON.Parse<TConfiguration>(Data);
+    try
+      FConfiguration := TJSON.Parse<TConfiguration>(Data);
+    except on E: Exception do
+      raise EAlfredException.Create('Global configuration invalid! ' + E.Message);
+    end;
+
     Exit;
   end;
 
@@ -309,6 +312,8 @@ begin
   CommandName := ParamStr(2).ToLower;
 
   try
+    Init;
+
     Execute(GroupName, CommandName);
   except
 
