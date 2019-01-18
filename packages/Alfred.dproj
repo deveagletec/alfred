@@ -67,7 +67,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <Manifest_File>None</Manifest_File>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -119,6 +118,8 @@
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Exceptions.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Attributes.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.ConsoleIO.pas"/>
+        <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Project.pas"/>
+        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
@@ -170,10 +171,10 @@
                     <Source Name="MainSource">Alfred.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\development\components\ACBr\Lib\Delphi\LibD22\ACBr_Integrador.bpl">ACBrIntegrador</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclDataSnapNativeServer220.bpl">Embarcadero DBExpress DataSnap Native Server Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\16.0\bpl\LockBox3DD.bpl">TurboPack LockBox 3 designtime package</Excluded_Packages>
+                    <Excluded_Packages Name="C:\development\components\ACBr\Lib\Delphi\LibD22\ACBr_Integrador.bpl">ACBrIntegrador</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="1">

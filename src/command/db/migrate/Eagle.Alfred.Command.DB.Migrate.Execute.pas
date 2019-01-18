@@ -18,7 +18,7 @@ uses
 
 type
 
-  [Command('db:migrate', 'up', 'Execute the migrates in database on Up Mode')]
+  [Command('db:migrate', 'up', 'Execute Migrates on Up Mode')]
   TMigrateExecute = class(TCommandAbstract)
   private
 

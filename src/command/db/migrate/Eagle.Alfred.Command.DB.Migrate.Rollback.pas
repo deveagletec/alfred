@@ -19,7 +19,7 @@ uses
 
 type
 
-  [Command('db:migrate', 'down', 'Execute the migrates in database on Down Mode')]
+  [Command('db:migrate', 'down', 'Execute Migrates on Down Mode')]
   TMigrateRollback = class(TCommandAbstract)
   private
 

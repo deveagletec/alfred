@@ -24,6 +24,8 @@ type
     function GetLastScriptExecuted: String;
     procedure ExecuteMigrate(const Migrate: TMigrate; const ExecutionMode: TExecutionModeMigrate; const IsAutoCommit: Boolean = False);
     function GetListMigratesExecuted(): TList<String>;
+    function TableMigrateExists: Boolean;
+    procedure CreateTableMigrate();
   end;
 
   TMigrateRepository = class(TInterfacedObject, IMigrateRepository)
@@ -40,9 +42,12 @@ type
   public
     constructor Create(APackage: TPackage);
     destructor Destroy; override;
+    procedure CreateTableMigrate;
     procedure ExecuteMigrate(const Migrate: TMigrate; const ExecutionMode: TExecutionModeMigrate; const IsAutoCommit: Boolean = False);
     function GetLastScriptExecuted: string;
     function GetListMigratesExecuted(): TList<string>;
+    function TableMigrateExists: Boolean;
+
   end;
 
 implementation
@@ -74,6 +79,8 @@ end;
 destructor TMigrateRepository.Destroy;
 begin
   inherited;
+
+  FFDConnection.GetConnection.Connected := False;
 
   FDQuery.Free;
 end;
@@ -142,6 +149,28 @@ begin
 
 end;
 
+procedure TMigrateRepository.CreateTableMigrate;
+const
+  SQL = 'CREATE TABLE MIGRATIONS(ID VARCHAR(50), CONSTRAINT PK_MIGRATION PRIMARY KEY(ID));';
+begin
+
+  FFDConnection.GetConnection.StartTransaction;
+
+  try
+    FDQuery.ExecSQL(SQL);
+    FFDConnection.GetConnection.Commit;
+  except
+
+    on E: Exception do
+    begin
+      FFDConnection.GetConnection.Rollback;
+      raise EDataBaseException.Create(Format('Not wass possible created Migrations Table ||| %s', [E.Message]));
+    end;
+
+  end;
+
+end;
+
 procedure TMigrateRepository.DeleteCodeMigrate(const MigrateIdentifier: string);
 begin
   FDQuery.ExecSQL(Format('DELETE FROM MIGRATIONS MG WHERE MG.ID = %s;', [MigrateIdentifier.QuotedString]));
@@ -177,6 +206,28 @@ end;
 procedure TMigrateRepository.InsertCodeMigrate(const MigrateIdentifier: string);
 begin
   FDQuery.ExecSQL(Format('INSERT INTO MIGRATIONS VALUES (%s);', [MigrateIdentifier.QuotedString]));
+end;
+
+function TMigrateRepository.TableMigrateExists: Boolean;
+var
+  TablesNameList: TStringList;
+  TableMigrateExists: Boolean;
+begin
+
+  TablesNameList := TStringList.Create();
+
+  try
+
+    FFDConnection.GetConnection.GetTableNames('', '', '', TablesNameList);
+
+    TableMigrateExists := TablesNameList.IndexOf('MIGRATIONS') > 0;
+
+  finally
+    TablesNameList.Free();
+  end;
+
+  Result := TableMigrateExists;
+
 end;
 
 end.

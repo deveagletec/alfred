@@ -46,7 +46,9 @@ uses
   Eagle.Alfred.Command.DB.Common.FiredacConnection in '..\src\command\db\common\Eagle.Alfred.Command.DB.Common.FiredacConnection.pas',
   Eagle.Alfred.Core.Exceptions in '..\src\core\Eagle.Alfred.Core.Exceptions.pas',
   Eagle.Alfred.Core.Attributes in '..\src\core\Eagle.Alfred.Core.Attributes.pas',
-  Eagle.Alfred.Core.ConsoleIO in '..\src\core\Eagle.Alfred.Core.ConsoleIO.pas';
+  Eagle.Alfred.Core.ConsoleIO in '..\src\core\Eagle.Alfred.Core.ConsoleIO.pas',
+  Eagle.Alfred.Command.New.Project in '..\src\command\new\Eagle.Alfred.Command.New.Project.pas',
+  Eagle.Alfred.Command.DB.MigrateInit in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas';
 
 var
   OldColor: Byte;

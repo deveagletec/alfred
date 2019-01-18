@@ -30,6 +30,8 @@ type
     function GetMigratesByVersion(const Version: string): TList<TMigrate>;
     procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
     procedure CreateNewMigrate(const Migrate: TMigrate);
+    procedure CreateMigrateDirectory();
+    function MigrateDirectoryExists: Boolean;
   end;
 
   TMigrateService = class(TInterfacedObject, IMigrateService)
@@ -42,9 +44,11 @@ type
 
   public
     constructor Create(const Package: TPackage);
+    procedure CreateMigrateDirectory;
     procedure CreateNewMigrate(const Migrate: TMigrate);
     function GetMigratesByMigrationDir: TList<TMigrate>;
     function GetMigratesByVersion(const Version: string): TList<TMigrate>;
+    function MigrateDirectoryExists: Boolean;
 
     procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
   end;
@@ -57,9 +61,7 @@ begin
   FPackage := package;
 end;
 
-procedure TMigrateService.CreateNewMigrate(const Migrate: TMigrate);
-var
-  FileValue, FileName: String;
+procedure TMigrateService.CreateMigrateDirectory;
 begin
 
   try
@@ -70,6 +72,15 @@ begin
       raise EAlfredCreateDirException.CreateFmt('Not is possible create the directory %s! | Error: %s', [FPackage.MigrationDir, E.Message]);
 
   end;
+
+end;
+
+procedure TMigrateService.CreateNewMigrate(const Migrate: TMigrate);
+var
+  FileValue, FileName: String;
+begin
+
+  CreateMigrateDirectory();
 
   FileValue := TJSON.Stringify(Migrate, True);
 
@@ -184,6 +195,11 @@ begin
 
   Result := Migrates;
 
+end;
+
+function TMigrateService.MigrateDirectoryExists: Boolean;
+begin
+  Result := DirectoryExists(FPackage.MigrationDir + '\');
 end;
 
 procedure TMigrateService.RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
