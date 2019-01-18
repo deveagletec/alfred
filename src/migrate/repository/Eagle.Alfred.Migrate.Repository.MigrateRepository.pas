@@ -58,11 +58,11 @@ begin
 
   FPackage := APackage;
 
-  DataBase := FPackage.DataBase.DataBase;
-  HostName := FPackage.DataBase.HostName;
-  UserName := FPackage.DataBase.UserName;
-  Password := FPackage.DataBase.Password;
-  Port := FPackage.DataBase.Port;
+  DataBase := FPackage.DataBase.&File;
+  HostName := FPackage.DataBase.Host;
+  UserName := FPackage.DataBase.User;
+  Password := FPackage.DataBase.Pass;
+  Port := string.Parse(FPackage.DataBase.Port);
 
   FFDConnection := TFireDacFirebirdConnection.Create(HostName, DataBase, UserName, Password, Port);
 

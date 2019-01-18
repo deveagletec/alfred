@@ -5,7 +5,7 @@ uses
   System.SysUtils,
   Eagle.ConsoleIO,
   Eagle.Alfred.Data,
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Core.Exceptions;
 
 type
 

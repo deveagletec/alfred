@@ -6,7 +6,7 @@ uses
 
   XSuperObject,
 
-  Eagle.Alfred.Exceptions;
+  Eagle.Alfred.Core.Exceptions;
 
 
 type

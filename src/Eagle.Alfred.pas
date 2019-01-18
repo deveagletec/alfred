@@ -117,9 +117,6 @@ var
   CommandMetaData: TCommandMetaData;
 begin
 
-  if not Assigned(FPackage) then
-    raise EPackageInvalidException.Create('FPackage don''t has value!');
-
   CommandMetaData := FCommandRegister.GetCommand(GroupName, CommandName);
 
   Command := CreateCommand(CommandMetaData);

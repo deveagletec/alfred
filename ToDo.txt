@@ -1,0 +1,6 @@
+[X] - Criar arquivo Alfred.conf para armazenar as configurações locais de cada desenvolvedor. Ex.: Nome do editor de migrations.
+[ ] - Criar comando para adicionar suporte a migrations no banco de dados.
+[ ] - Ao executar uma migration exibir o nome completo ao invés de apenas o timestamp.
+[ ] - Adicionar opção de abertura do arquivo de migration após a geração
+[ ] - Criar comando para listar as migrations. Lista nome e descrição. A operação padrão deve listar as migrations da versão corrente, caso o usuário queira poderá informa opção para listar todas. A listagem deverá distacar as migrations já executadas.
+[ ] - Criar comando "db:migrate refresh" com comportamento igual à https://laravel.com/docs/5.7/migrations
