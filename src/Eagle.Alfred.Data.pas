@@ -4,7 +4,10 @@ interface
 uses
   System.SysUtils,
 
-  Eagle.Alfred.Core.Exceptions;
+  XSuperObject,
+
+  Eagle.Alfred.Exceptions;
+
 
 type
 
@@ -24,16 +27,39 @@ type
 
   TPackage = class
   public
-    Id: string;
+    [Alias('name')]
+    Name: string;
+
+    [Alias('namespace')]
+    Namespace: string;
+
+    [Alias('description')]
+    Description: string;
+
+    [Alias('version')]
     Version: string;
-    DataBase: TDatabase;
-    BaseDir: string;
-    MigrationDir: string;
-    PackagesDir: string;
-    SourceDir: string;
-    TestsDir: string;
-    AppNamespace: string;
+
+    [Alias('modular')]
     Modular: Boolean;
+
+    [Alias('base-dir')]
+    BaseDir: string;
+
+    [Alias('package-dir')]
+    PackagesDir: string;
+
+    [Alias('source-dir')]
+    SourceDir: string;
+
+    [Alias('tests-dir')]
+    TestsDir: string;
+
+    [Alias('migration-dir')]
+    MigrationDir: string;
+
+    [Alias('db')]
+    DataBase: string;
+
     Dependencies: TArray<TDependency>;
 
     destructor Destroy; override;
@@ -64,8 +90,8 @@ end;
 procedure TPackage.Validate;
 begin
 
-  if Id.IsEmpty then
-    raise EPackageInvalidException.Create('Package configuration Invalid! Please enter application ID');
+  if Name.IsEmpty then
+    raise EPackageInvalidException.Create('Package configuration Invalid! Please enter application name');
 
 end;
 

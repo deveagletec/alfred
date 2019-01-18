@@ -1,7 +1,10 @@
 unit Eagle.ConsoleIO;
 
 interface
-uses Console;
+uses
+  System.SysUtils,
+  System.StrUtils,
+  Console;
 
 type
 
@@ -13,6 +16,8 @@ type
       procedure WriteSucess(const Msg: string);
       function ReadInfo(const Msg: String; Color: Byte = LightGray): String;
       procedure WriteAlert(const msg: String);
+	  function ReadData(const Msg: string): string;
+      function ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
    end;
 
    TConsoleIO = class(TInterfacedObject, IConsoleIO)
@@ -25,9 +30,37 @@ type
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string);
       procedure WriteSucess(const Msg: string);
+	  function ReadData(const Msg: string): string;
+      function ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
    end;
 
 implementation
+
+function TConsoleIO.ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
+var
+  Value: string;
+begin
+
+  repeat
+    Value := ReadData(Msg).Trim.ToLower;
+
+    if MatchStr(Value, ['', 'yes', 'y', 'no', 'n']) then
+      Break;
+
+     WriteColor('Please answer yes, y, no or n', Red);
+  until (False);
+
+  if Value.IsEmpty then
+    Exit(Default);
+
+  Result := Value.StartsWith('y');
+end;
+
+function TConsoleIO.ReadData(const Msg: string): string;
+begin
+  WriteColor(Msg, LightGray, False);
+  Readln(Result);
+end;
 
 function TConsoleIO.ReadInfo(const Msg: String; Color: Byte = LightGray): String;
 begin

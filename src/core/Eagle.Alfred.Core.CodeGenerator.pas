@@ -70,9 +70,9 @@ begin
   FAppPath := AppPath;
   FPackage := APackage;
 
-  FDprojParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Id);
+  FDprojParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Name);
 
-  FDprojTestParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Id + 'Test');
+  FDprojTestParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Name + 'Test');
 
 end;
 
@@ -279,7 +279,7 @@ begin
     LayerDir := 'model\' + LayerDir;
   end;
 
-  FNamespace := FPackage.AppNamespace + '.' + FPackage.Id + '.' + ModuleName + LayerName;
+  FNamespace := FPackage.Namespace + '.' + FPackage.Name + '.' + ModuleName + LayerName;
 
   FFilePath := FSourceDir + ModuleDir + LayerDir;
 

@@ -297,6 +297,8 @@ begin
     on E: EAlfredException do
       ShowMessageAlert(E.Message);
 
+    on E: EAbort do
+      FConsoleIO.WriteError('Command aborted');
   end;
 
 end;

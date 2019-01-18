@@ -128,14 +128,14 @@ begin
 
   Package := TPackage.Create;
 
-  Package.Id := FName;
+  Package.Name := FName;
   Package.Version := String.Parse(CurrentYear) + '.00#';
   Package.BaseDir := '.\';
   Package.MigrationDir := 'migrations\';
   Package.PackagesDir := 'packages\';
   Package.SourceDir := 'src\';
   Package.TestsDir := 'tests\';
-  Package.AppNamespace := 'Eagle';
+  Package.Namespace := 'Eagle';
   Package.Modular := False;
 
   try
