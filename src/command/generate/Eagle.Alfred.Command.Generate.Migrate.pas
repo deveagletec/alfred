@@ -19,7 +19,7 @@ uses
 
 type
 
-  [Command('generate', 'migrate', 'Generate a Migrate')]
+  [Command('generate', 'migrate', 'Generates a Migrate')]
   TGenerateMigrateCommand = class(TCommandAbstract)
   private
 

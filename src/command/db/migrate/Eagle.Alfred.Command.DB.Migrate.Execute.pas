@@ -158,7 +158,7 @@ begin
 
       FMigrateRepository.ExecuteMigrate(Migrate, TExecutionModeMigrate.TUp, FIsAutoCommit);
 
-      FConsoleIO.WriteInfo(Format('| Migrate %s executed', [Migrate.UnixIdentifier]));
+      FConsoleIO.WriteInfo(Format('| Migrate %s_%s executed', [Migrate.UnixIdentifier, Migrate.IssueIdentifier]));
 
     end;
 
