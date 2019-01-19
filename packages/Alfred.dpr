@@ -10,10 +10,8 @@ uses
   System.SysUtils,
   Console in '..\libs\Console.pas',
   Eagle.Alfred.Attributes in '..\src\Eagle.Alfred.Attributes.pas',
-  Eagle.Alfred.Command in '..\src\Eagle.Alfred.Command.pas',
   Eagle.Alfred.Data in '..\src\Eagle.Alfred.Data.pas',
   Eagle.Alfred.DprojParser in '..\src\Eagle.Alfred.DprojParser.pas',
-  Eagle.Alfred.MigrateService in '..\src\Eagle.Alfred.MigrateService.pas',
   Eagle.Alfred in '..\src\Eagle.Alfred.pas',
   Eagle.Alfred.Utils in '..\src\Eagle.Alfred.Utils.pas',
   Eagle.ConsoleIO in '..\src\Eagle.ConsoleIO.pas',
@@ -37,8 +35,6 @@ uses
   Eagle.Alfred.Command.DB.UpdateCheck in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateCheck.pas',
   Eagle.Alfred.Command.DB.UpdateJoin in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas',
   Eagle.Alfred.Command.DB.UpdateRun in '..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas',
-  Eagle.Alfred.Command.Delete.DeleteCrudFile in '..\src\command\delete\Eagle.Alfred.Command.Delete.DeleteCrudFile.pas',
-  Eagle.Alfred.Command.Delete.Model in '..\src\command\delete\Eagle.Alfred.Command.Delete.Model.pas',
   Eagle.Alfred.Command.Generate.Crud in '..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas',
   Eagle.Alfred.Command.Generate.CrudFile in '..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas',
   Eagle.Alfred.Command.Generate.Migrate in '..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas',
@@ -48,10 +44,14 @@ uses
   Eagle.Alfred.Command.Generate.Test in '..\src\command\generate\Eagle.Alfred.Command.Generate.Test.pas',
   Eagle.Alfred.Command.Generate.View in '..\src\command\generate\Eagle.Alfred.Command.Generate.View.pas',
   Eagle.Alfred.Command.Generate.ViewModel in '..\src\command\generate\Eagle.Alfred.Command.Generate.ViewModel.pas',
-  Eagle.Alfred.Command.New.Project in '..\src\command\new\Eagle.Alfred.Command.New.Project.pas';
+  Eagle.Alfred.Command.New.Project in '..\src\command\new\Eagle.Alfred.Command.New.Project.pas',
+  Eagle.Alfred.Command.Destroy in '..\src\command\destroy\Eagle.Alfred.Command.Destroy.pas',
+  Eagle.Alfred.Command.Destroy.Model in '..\src\command\destroy\Eagle.Alfred.Command.Destroy.Model.pas';
 
+var
+  OldColor: Byte;
 begin
-   {$IFDEF DEBUG}
+  {$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;
 	{$ENDIF}
 
@@ -62,8 +62,10 @@ begin
   except
     on E: Exception do
     begin
+      OldColor := TextColor;
       TextColor(Red);
       Writeln(E.Message);
+      TextColor(OldColor);
     end;
   end;
 end.

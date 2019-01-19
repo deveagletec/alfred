@@ -236,9 +236,13 @@ begin
   if not FileExists('.\package.json') then
     Exit();
 
-  Data := TFile.ReadAllText('.\package.json');
+  Data := TFile.ReadAllText('.\package.json').Replace('null', '{}');
 
-  FPackage := TJSON.Parse<TPackage>(Data);
+  try
+    FPackage := TJSON.Parse<TPackage>(Data);
+  except on E: Exception do
+    raise EAlfredException.Create('Package configuration invalid! ' + E.Message);
+  end;
 
   FPackage.Validate;
 

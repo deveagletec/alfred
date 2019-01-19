@@ -82,10 +82,8 @@
         </DelphiCompile>
         <DCCReference Include="..\libs\Console.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Attributes.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Command.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Data.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.DprojParser.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.MigrateService.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Utils.pas"/>
         <DCCReference Include="..\src\Eagle.ConsoleIO.pas"/>
@@ -109,8 +107,6 @@
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateCheck.pas"/>
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas"/>
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas"/>
-        <DCCReference Include="..\src\command\delete\Eagle.Alfred.Command.Delete.DeleteCrudFile.pas"/>
-        <DCCReference Include="..\src\command\delete\Eagle.Alfred.Command.Delete.Model.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas"/>
@@ -121,6 +117,8 @@
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.View.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.ViewModel.pas"/>
         <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Project.pas"/>
+        <DCCReference Include="..\src\command\destroy\Eagle.Alfred.Command.Destroy.pas"/>
+        <DCCReference Include="..\src\command\destroy\Eagle.Alfred.Command.Destroy.Model.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
@@ -571,13 +569,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>
