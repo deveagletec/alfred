@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Command.DB.UpdateRun;
+unit Eagle.Alfred.Command.DB.Update.Run;
 
 interface
 
@@ -7,11 +7,11 @@ uses
   System.SysUtils,
 
   Eagle.Alfred,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Attributes,
 
   Eagle.Alfred.Core.Command,
 
-  Eagle.Alfred.Commom.Repository;
+  Eagle.Alfred.Command.DB.Common.Repository;
 
 type
 

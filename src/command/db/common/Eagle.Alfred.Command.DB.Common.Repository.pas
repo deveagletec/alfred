@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Commom.Repository;
+unit Eagle.Alfred.Command.DB.Common.Repository;
 
 interface
 
@@ -10,11 +10,11 @@ uses
   FireDAC.UI.Intf,
   FireDAC.Comp.ScriptCommands,
 
-  Eagle.Alfred.Data,
+  Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Exceptions,
 
-  Eagle.Alfred.DB.Connection,
-  Eagle.Alfred.DB.Impl.FiredacConnection;
+  Eagle.Alfred.Command.DB.Common.Connection,
+  Eagle.Alfred.Command.DB.Common.FiredacConnection;
 
 type
 

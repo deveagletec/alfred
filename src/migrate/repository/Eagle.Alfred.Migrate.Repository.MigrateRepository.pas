@@ -11,12 +11,12 @@ uses
   FireDAC.UI.Intf,
   FireDAC.Comp.ScriptCommands,
 
-  Eagle.Alfred.Data,
+  Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Migrate.Model.Migrate,
-  Eagle.Alfred.DB.Connection,
-  Eagle.Alfred.DB.Impl.FiredacConnection;
+  Eagle.Alfred.Command.DB.Common.Connection,
+  Eagle.Alfred.Command.DB.Common.FiredacConnection;
 
 type
 

@@ -3,7 +3,7 @@ unit Eagle.Alfred.Command.Generate.Service;
 interface
 uses
   Eagle.Alfred,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Command.Generate.CrudFile;
 
 type

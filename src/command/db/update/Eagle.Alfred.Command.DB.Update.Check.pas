@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Command.DB.UpdateCheck;
+unit Eagle.Alfred.Command.DB.Update.Check;
 
 interface
 
@@ -7,8 +7,8 @@ uses
   System.Generics.Collections,
 
   Eagle.Alfred,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
 
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Exceptions,
@@ -16,7 +16,7 @@ uses
   Eagle.Alfred.Migrate.Model.Migrate,
   Eagle.Alfred.Migrate.Service.MigrateService,
 
-  Eagle.Alfred.Update.Service.UpdateService;
+  Eagle.Alfred.Commond.DB.Update.UpdateService;
 
 type
 

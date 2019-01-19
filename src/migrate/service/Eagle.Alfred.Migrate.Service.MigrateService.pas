@@ -12,7 +12,7 @@ uses
   System.Generics.Collections,
   System.RegularExpressions,
 
-  Eagle.Alfred.Data,
+  Eagle.Alfred.Core.Types,
   Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,

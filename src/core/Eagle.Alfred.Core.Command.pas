@@ -2,9 +2,9 @@ unit Eagle.Alfred.Core.Command;
 
 interface
 uses
-  Eagle.ConsoleIO,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.ConsoleIO,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Exceptions;
 
 type

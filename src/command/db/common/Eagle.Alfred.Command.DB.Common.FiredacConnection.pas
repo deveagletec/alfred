@@ -1,4 +1,4 @@
-unit Eagle.Alfred.DB.Impl.FiredacConnection;
+unit Eagle.Alfred.Command.DB.Common.FiredacConnection;
 
 interface
 
@@ -17,7 +17,7 @@ uses
   FireDAC.Phys.FB,
   FireDAC.VCLUI.Wait,
 
-  Eagle.Alfred.DB.Connection;
+  Eagle.Alfred.Command.DB.Common.Connection;
 
 type
   TFireDacFirebirdConnection = class(TInterfacedObject, IConnection)

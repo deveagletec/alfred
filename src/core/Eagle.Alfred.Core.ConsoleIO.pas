@@ -1,4 +1,4 @@
-unit Eagle.ConsoleIO;
+unit Eagle.Alfred.Core.ConsoleIO;
 
 interface
 uses

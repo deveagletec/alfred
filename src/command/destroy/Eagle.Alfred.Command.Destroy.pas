@@ -3,8 +3,8 @@ unit Eagle.Alfred.Command.Destroy;
 interface
 uses
   Eagle.Alfred,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.DprojParser;
 

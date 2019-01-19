@@ -1,4 +1,4 @@
-unit Eagle.Alfred.DB.Connection;
+unit Eagle.Alfred.Command.DB.Common.Connection;
 
 interface
 

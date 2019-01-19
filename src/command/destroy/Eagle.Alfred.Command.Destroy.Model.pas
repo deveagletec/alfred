@@ -3,8 +3,8 @@ unit Eagle.Alfred.Command.Destroy.Model;
 interface
 uses
   Eagle.Alfred,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Command.Destroy;
 
 type

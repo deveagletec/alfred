@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Attributes;
+unit Eagle.Alfred.Core.Attributes;
 
 interface
 uses

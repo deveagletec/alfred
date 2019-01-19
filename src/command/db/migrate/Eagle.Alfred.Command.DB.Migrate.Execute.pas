@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Command.DB.MigrateExecute;
+unit Eagle.Alfred.Command.DB.Migrate.Execute;
 
 interface
 
@@ -7,8 +7,8 @@ uses
   System.Generics.Collections,
 
   Eagle.Alfred,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Enums,
 
@@ -24,7 +24,7 @@ type
 
     FIsInteractiveMode: Boolean;
     FFilterTypeExecution: TMigrateFilterTypeExecution;
-    FFilter: String;
+    FFilter: string;
     FIsAutoCommit: Boolean;
 
     FMigrates: TList<TMigrate>;
@@ -32,7 +32,7 @@ type
     FMigrateService: IMigrateService;
 
     procedure ExecuteMigrates;
-    procedure ShowMessageError(const error: String);
+    procedure ShowMessageError(const error: string);
     procedure ShowMessageNoneMigrateFounded;
     procedure ShowMessageSucessfull;
 

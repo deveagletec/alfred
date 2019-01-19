@@ -5,7 +5,7 @@ uses
   System.Classes,
   System.SysUtils,
   System.StrUtils,
-  Eagle.Alfred.Data,
+  Eagle.Alfred.Core.Types,
   Eagle.Alfred.DprojParser,
   Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Exceptions;

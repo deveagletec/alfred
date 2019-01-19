@@ -10,7 +10,7 @@ uses
   XSuperObject,
 
   Eagle.Alfred,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Exceptions,
 

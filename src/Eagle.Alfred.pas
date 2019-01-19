@@ -13,10 +13,10 @@ uses
   XSuperJSON, XSuperObject,
 
   Eagle.Alfred.Core.Exceptions,
-  Eagle.ConsoleIO,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.ConsoleIO,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.DprojParser,
-  Eagle.Alfred.Data,
+  Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.CommandRegister;
 

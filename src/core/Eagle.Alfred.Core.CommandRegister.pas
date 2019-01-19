@@ -9,7 +9,7 @@ uses
   Spring.Reflection,
 
   Eagle.Alfred.Core.Exceptions,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command;
 
 type

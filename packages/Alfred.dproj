@@ -81,32 +81,18 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="..\libs\Console.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Attributes.pas"/>
-        <DCCReference Include="..\src\Eagle.Alfred.Data.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.DprojParser.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Utils.pas"/>
-        <DCCReference Include="..\src\Eagle.ConsoleIO.pas"/>
-        <DCCReference Include="..\src\update\service\Eagle.Alfred.Update.Service.UpdateService.pas"/>
-        <DCCReference Include="..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas"/>
         <DCCReference Include="..\src\migrate\repository\Eagle.Alfred.Migrate.Repository.MigrateRepository.pas"/>
         <DCCReference Include="..\src\migrate\model\Eagle.Alfred.Migrate.Model.Migrate.pas"/>
-        <DCCReference Include="..\src\db\Eagle.Alfred.DB.Connection.pas"/>
-        <DCCReference Include="..\src\db\impl\Eagle.Alfred.DB.Impl.FiredacConnection.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.CodeGenerator.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Command.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.CommandRegister.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Enums.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.IOUtils.pas"/>
-        <DCCReference Include="..\src\core\Exception\Eagle.Alfred.Core.Exceptions.pas"/>
-        <DCCReference Include="..\src\commom\repository\Eagle.Alfred.Commom.Repository.pas"/>
         <DCCReference Include="..\src\command\Eagle.Alfred.Command.Init.pas"/>
         <DCCReference Include="..\src\command\config\Eagle.Alfred.Command.Config.Edit.pas"/>
-        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.MigrateExecute.pas"/>
-        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.MigrateRollback.pas"/>
-        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateCheck.pas"/>
-        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateJoin.pas"/>
-        <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.UpdateRun.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas"/>
@@ -116,9 +102,23 @@
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.Test.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.View.pas"/>
         <DCCReference Include="..\src\command\generate\Eagle.Alfred.Command.Generate.ViewModel.pas"/>
-        <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Project.pas"/>
         <DCCReference Include="..\src\command\destroy\Eagle.Alfred.Command.Destroy.pas"/>
         <DCCReference Include="..\src\command\destroy\Eagle.Alfred.Command.Destroy.Model.pas"/>
+        <DCCReference Include="..\src\command\Eagle.Alfred.Command.New.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.Types.pas"/>
+        <DCCReference Include="..\src\command\db\update\Eagle.Alfred.Command.DB.Update.Check.pas"/>
+        <DCCReference Include="..\src\command\db\update\Eagle.Alfred.Command.DB.Update.Join.pas"/>
+        <DCCReference Include="..\src\command\db\update\Eagle.Alfred.Command.DB.Update.Run.pas"/>
+        <DCCReference Include="..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Execute.pas"/>
+        <DCCReference Include="..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Rollback.pas"/>
+        <DCCReference Include="..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas"/>
+        <DCCReference Include="..\src\command\db\update\Eagle.Alfred.Commond.DB.Update.UpdateService.pas"/>
+        <DCCReference Include="..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Repository.pas"/>
+        <DCCReference Include="..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Connection.pas"/>
+        <DCCReference Include="..\src\command\db\common\Eagle.Alfred.Command.DB.Common.FiredacConnection.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.Exceptions.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.Attributes.pas"/>
+        <DCCReference Include="..\src\core\Eagle.Alfred.Core.ConsoleIO.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>

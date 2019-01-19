@@ -5,7 +5,7 @@ uses
   System.IOUtils,
 
   Eagle.Alfred,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Command.Generate.CrudFile;
 
 type

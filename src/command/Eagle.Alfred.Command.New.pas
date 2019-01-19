@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Command.New.Project;
+unit Eagle.Alfred.Command.New;
 
 interface
 uses
@@ -11,13 +11,13 @@ uses
 
   Eagle.Alfred,
   Eagle.Alfred.Utils,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.IOUtils,
   Eagle.Alfred.Core.Command;
 
 type
-  [Command('new', 'project', 'Default applications are created in a directory of the same name')]
+  [Command('new', '', 'Default applications are created in a directory of the same name')]
   TNewProjectCommand = class(TCommandAbstract)
   private
     FProjectDir: string;
@@ -36,7 +36,7 @@ type
   public
     procedure Execute; override;
 
-    [ParamAttribute(1, 'Nome do projeto')]
+    [ParamAttribute(1, 'Project Name')]
     procedure SetName(const Name: string);
 
     [OptionAttribute('force', '-f', 'Forces overwriting of files.')]

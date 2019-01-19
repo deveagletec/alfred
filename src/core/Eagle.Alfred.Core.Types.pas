@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Data;
+unit Eagle.Alfred.Core.Types;
 
 interface
 uses
@@ -7,7 +7,6 @@ uses
   XSuperObject,
 
   Eagle.Alfred.Core.Exceptions;
-
 
 type
 

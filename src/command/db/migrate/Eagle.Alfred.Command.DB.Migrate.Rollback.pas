@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Command.DB.MigrateRollback;
+unit Eagle.Alfred.Command.DB.Migrate.Rollback;
 
 interface
 
@@ -7,8 +7,8 @@ uses
   System.Generics.Collections,
 
   Eagle.Alfred,
-  Eagle.Alfred.Data,
-  Eagle.Alfred.Attributes,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.Attributes,
 
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Enums,
