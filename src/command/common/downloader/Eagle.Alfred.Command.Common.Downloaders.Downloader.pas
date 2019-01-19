@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Downloaders.Downloader;
+unit Eagle.Alfred.Command.Common.Downloaders.Downloader;
 
 interface
 uses Classes, System.Zip, IdHTTP, System.SysUtils, System.IOUtils, IdComponent, IdSSLOpenSSL,

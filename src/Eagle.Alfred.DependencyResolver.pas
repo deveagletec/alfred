@@ -12,10 +12,10 @@ uses
    Eagle.Alfred.Core.Types,
    Eagle.Alfred.Core.ConsoleIO,
    Eagle.Alfred.DprojParser,
-   Eagle.Alfred.Downloaders.Downloader,
-   Eagle.Alfred.Downloaders.GithubDownloader,
-   Eagle.Alfred.Downloaders.BitbucketDownloader,
-   Eagle.Alfred.Downloaders.GitlabDownloader;
+   Eagle.Alfred.Command.Common.Downloaders.Downloader,
+   Eagle.Alfred.Command.Common.Downloaders.GithubDownloader,
+   Eagle.Alfred.Command.Common.Downloaders.BitbucketDownloader,
+   Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader;
 
 type
 

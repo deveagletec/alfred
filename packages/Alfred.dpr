@@ -49,14 +49,14 @@ uses
   Eagle.Alfred.Core.ConsoleIO in '..\src\core\Eagle.Alfred.Core.ConsoleIO.pas',
   Eagle.Alfred.Command.DB.MigrateInit in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas',
   Eagle.Alfred.DependencyResolver in '..\src\Eagle.Alfred.DependencyResolver.pas',
-  Eagle.Alfred.Downloaders.BitbucketDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.BitbucketDownloader.pas',
-  Eagle.Alfred.Downloaders.Downloader in '..\src\downloaders\Eagle.Alfred.Downloaders.Downloader.pas',
-  Eagle.Alfred.Downloaders.GithubDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.GithubDownloader.pas',
-  Eagle.Alfred.Downloaders.GitlabDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.GitlabDownloader.pas',
-  Eagle.Alfred.Downloaders.SourceForgeDownloader in '..\src\downloaders\Eagle.Alfred.Downloaders.SourceForgeDownloader.pas',
   Eagle.Alfred.Command.Install in '..\src\command\Eagle.Alfred.Command.Install.pas',
   Eagle.Alfred.Command.Uninstall in '..\src\command\Eagle.Alfred.Command.Uninstall.pas',
-  Eagle.Alfred.Command.Update in '..\src\command\Eagle.Alfred.Command.Update.pas';
+  Eagle.Alfred.Command.Update in '..\src\command\Eagle.Alfred.Command.Update.pas',
+  Eagle.Alfred.Command.Common.Downloaders.BitbucketDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.BitbucketDownloader.pas',
+  Eagle.Alfred.Command.Common.Downloaders.Downloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.Downloader.pas',
+  Eagle.Alfred.Command.Common.Downloaders.GithubDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.GithubDownloader.pas',
+  Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader.pas',
+  Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader.pas';
 
 var
   OldColor: Byte;

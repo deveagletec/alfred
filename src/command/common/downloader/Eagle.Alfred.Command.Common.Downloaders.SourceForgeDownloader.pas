@@ -1,7 +1,7 @@
-unit Eagle.Alfred.Downloaders.SourceForgeDownloader;
+unit Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader;
 
 interface
-uses Eagle.Alfred.Downloaders.Downloader, Eagle.Alfred.Core.Types;
+uses Eagle.Alfred.Command.Common.Downloaders.Downloader, Eagle.Alfred.Core.Types;
 
 type
 

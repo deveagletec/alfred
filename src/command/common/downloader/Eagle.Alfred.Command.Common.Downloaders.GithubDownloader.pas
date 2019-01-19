@@ -1,7 +1,7 @@
-unit Eagle.Alfred.Downloaders.GithubDownloader;
+unit Eagle.Alfred.Command.Common.Downloaders.GithubDownloader;
 
 interface
-uses Eagle.Alfred.Downloaders.Downloader, Eagle.Alfred.Core.Types;
+uses Eagle.Alfred.Command.Common.Downloaders.Downloader, Eagle.Alfred.Core.Types;
 
 type
 
