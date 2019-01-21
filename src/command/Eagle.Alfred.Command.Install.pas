@@ -54,8 +54,8 @@ begin
 
   if FDependency.IsEmpty then
     FDependencyResolver.ResolverAll
- // else
- //   FDependencyResolver.Install(FDependency);
+  else
+    FDependencyResolver.Install(FDependency);
 
 end;
 

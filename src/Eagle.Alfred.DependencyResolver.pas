@@ -7,10 +7,11 @@ uses
    System.Generics.Collections,
    System.IOUtils,
 
-    XSuperObject,
+   XSuperObject,
 
    Eagle.Alfred.Core.Types,
    Eagle.Alfred.Core.ConsoleIO,
+   Eagle.Alfred.Core.IOUtils,
    Eagle.Alfred.DprojParser,
    Eagle.Alfred.Command.Common.Downloaders.Downloader,
    Eagle.Alfred.Command.Common.Downloaders.GithubDownloader,
@@ -24,7 +25,7 @@ type
       procedure Resolver(Dependency: TDependency);
       procedure ResolverAll;
       procedure UpdateAll;
-      procedure Install(Dependency: TDependency);
+      procedure Install(const Dependency: string);
       procedure Uninstall(Dependency: TDependency);
    end;
 
@@ -54,7 +55,7 @@ type
       procedure Resolver(Dependency: TDependency);
       procedure ResolverAll;
       procedure UpdateAll;
-      procedure Install(Dependency: TDependency);
+      procedure Install(const Value: string);
       procedure Uninstall(Dependency: TDependency);
    end;
 
@@ -122,15 +123,35 @@ begin
    else
       raise Exception.Create('Invalid repository ' + RepoName);
 
-   RootSourcePath := FVendorDir + Dependency.Id + '\' + Dependency.SrcDir;
+   RootSourcePath := FVendorDir + Dependency.Name + '\' + Dependency.SrcDir;
 
    ScanSourceDirectory(RootSourcePath);
 
 
 end;
 
-procedure TDependencyResolver.Install(Dependency: TDependency);
+procedure TDependencyResolver.Install(const Value: string);
+var
+  Dependency: TDependency;
+  Len: Integer;
 begin
+
+  try
+    Dependency := TDependency.Create(Value);
+
+   // DoResolver(Dependency);
+
+    Len := Length(FPackage.Dependencies);
+
+    SetLength(FPackage.Dependencies, Len + 1);
+
+    FPackage.Dependencies[Len] := Value;
+
+    TIOUtils.Save<TPackage>(FPackage, 'package.json');
+
+  finally
+    Dependency.Free;
+  end;
 
 end;
 
@@ -161,11 +182,11 @@ begin
 
   SeparateRemovedDependencies;
 
-  for Dependency in FPackage.Dependencies do
+ { for Dependency in FPackage.Dependencies do
     DoResolver(Dependency);
 
   for Dependency in FPackage.DevDependencies do
-    DoResolver(Dependency);
+    DoResolver(Dependency);  }
 
   SaveFileLock;
 
@@ -222,7 +243,7 @@ var
   Dependencies: TArray<TDependency>;
   Exists: Boolean;
 begin
-  Dependencies := Concat(FPackage.Dependencies, FPackage.DevDependencies);
+ // Dependencies := Concat(FPackage.Dependencies, FPackage.DevDependencies);
 
   Exists := False;
 

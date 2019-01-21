@@ -3,6 +3,8 @@ unit Eagle.Alfred.Core.Types;
 interface
 uses
   System.SysUtils,
+  System.StrUtils,
+  System.RegularExpressions,
 
   XSuperObject,
 
@@ -11,11 +13,12 @@ uses
 type
 
   TDependency = class
-    Id : string;
     Name: string;
     Version: string;
     Repo : string;
     SrcDir : string;
+
+    constructor Create(const Value: string);
   end;
   
   TInstalledDependency = record
@@ -79,10 +82,10 @@ type
     DataBase: TDataBase;
 
     [Alias('dependencies')]
-    Dependencies: TArray<TDependency>;
+    Dependencies: TArray<string>;
 
     [Alias('dev-dependencies')]
-    DevDependencies: TArray<TDependency>;
+    DevDependencies: TArray<string>;
 
     destructor Destroy; override;
     procedure Validate;
@@ -144,18 +147,6 @@ begin
   if Assigned(DataBase) then
     DataBase.Free;
 
-  for Dependency in Dependencies do
-  begin
-    if Assigned(Dependency) then
-      Dependency.Free;
-  end;
-
-  for Dependency in DevDependencies do
-  begin
-    if Assigned(Dependency) then
-      Dependency.Free;
-  end;
-
   inherited;
 end;
 
@@ -185,6 +176,32 @@ begin
   DBUser := 'sysdba';
   DBPass := 'masterkey';
   DBPort := 3050;
+end;
+
+{ TDependency }
+
+constructor TDependency.Create(const Value: string);
+var
+  Match: TMatch;
+  Group: TGroup;
+begin
+  Match := TRegEx.Match(Value, '^((\w+):)?([\w\/-]+)(#([a-f0-9]+))?$');
+
+  if not Match.Success then
+    raise Exception.Create('Error Message');
+
+  Group := Match.Groups.Item[2];
+  Repo := IfThen(Group.Success, Group.Value, 'github');
+  Group := Match.Groups.Item[3];
+  Name := Group.Value;
+  if Match.Groups.Count < 5 then
+  begin
+    Repo := 'lasted';
+    Exit;
+  end;
+
+  Group := Match.Groups.Item[5];
+  Repo := IfThen(Group.Success, Group.Value, 'lasted');
 end;
 
 end.

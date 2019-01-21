@@ -6,6 +6,8 @@ uses
   System.Classes,
   System.IOUtils,
 
+  XSuperObject,
+
   Eagle.Alfred.Core.Exceptions;
 
 type
@@ -14,7 +16,7 @@ type
     class procedure CreateDir(const Path: string; const Force: Boolean = False);
     class procedure CreateFile(const Path, Contents: string; const Force: Boolean = False);
     class function FileIsEncodedUTF8(const fileIO: String): Boolean;
-
+    class procedure Save<T>(Obj: T; const FileName: string);
   end;
 
 implementation
@@ -125,6 +127,15 @@ begin
 
   Result := YesSequences > NoSequences;
 
+end;
+
+class procedure TIOUtils.Save<T>(Obj: T; const FileName: string);
+var
+  Data: string;
+begin
+  Data := TJSON.Stringify<T>(Obj, True);
+
+  TFile.WriteAllText(FileName, Data);
 end;
 
 end.

@@ -72,7 +72,7 @@ var
 begin
 
   Url := GetUrlDependency(Dependency);
-  Filename := Dependency.Id + '.zip';
+  Filename := Dependency.Name + '.zip';
 
   IdHTTP1 := TIdHTTP.Create;
   IdHTTP1.OnWorkBegin := OnDownloadBegin;
@@ -106,13 +106,13 @@ begin
 
    FIO.WriteInfo('');
    FIO.WriteInfo('Unzipping ...');
-   UnZipDependency(Dependency.Id);
+   UnZipDependency(Dependency.Name);
 
    FIO.WriteInfo('Copying ...');
-   CopyDependency(Dependency.Id);
+   CopyDependency(Dependency.Name);
 
    FIO.WriteInfo('Cleaning swap ...');
-   DeleteDownloadedFiles(Dependency.Id);
+   DeleteDownloadedFiles(Dependency.Name);
 
 end;
 
