@@ -118,7 +118,6 @@
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Exceptions.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Attributes.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.ConsoleIO.pas"/>
-        <DCCReference Include="..\src\command\new\Eagle.Alfred.Command.New.Project.pas"/>
         <DCCReference Include="..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
@@ -570,13 +569,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>
