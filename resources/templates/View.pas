@@ -19,6 +19,7 @@ uses
 
 type
   [ViewModel('{ModelName}ViewModel')]
+  [Secured('permissionName')]
   T{ModelName}View = class(TForm)
     [DataBinding('OnCloseQuery', 'OnCloseQuery')]
     [DataBinding('StatusBarText', 'StatusBar.Panels[0].Text')]
@@ -36,6 +37,8 @@ type
     {ModelName}_nome: TMyEdit;
     [DataBinding('IsInativo', '{ModelName}_inativo.Checked')]
     {ModelName}_inativo: TCheckBox;
+
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
   public
@@ -45,6 +48,18 @@ type
 implementation
 
 {$R *.dfm}
+
+procedure T{ModelName}View.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  inherited;
+
+  if (Key = #13) then
+  begin
+    Key := #0;
+    keybd_event(VK_TAB, 0, 0, 0);
+  end;
+
+end;
 
 initialization
 

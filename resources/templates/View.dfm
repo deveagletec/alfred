@@ -15,6 +15,7 @@ object {ModelName}View: T{ModelName}View
   OldCreateOrder = False
   PopupMenu = CrudActions.pmMenu
   Position = poMainFormCenter
+  OnKeyPress = FormKeyPress
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl

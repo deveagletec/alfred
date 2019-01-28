@@ -8,15 +8,12 @@ uses
 
   EventBus.Attributes,
 
-  DSharp.Core.Validations,
-
   Eagle.ERP.Common.Bind.Attributes,
 
   Eagle.ERP.Common.ViewModel.CrudNavigateViewModel,
 
   Eagle.ERP.Common.ViewModel.Utils.SearchUtils,
 
-  Eagle.ERP.Common.Exception.WrongValueException,
   Eagle.ERP.Common.Exception.WrongValuesException,
 
   Eagle.ERP.{ModuleName}.ViewModel.{ModelName}ViewModel,
@@ -29,21 +26,15 @@ type
 
   T{ModelName}SearchResponse = class(TSearchResponse<T{ModelName}>);
 
-  T{ModelName}ViewModel = class(TCrudNavigateViewModel<I{ModelName}, I{ModelName}Repository>, I{ModelName}ViewModel, IDataErrorInfo)
-  private
-    procedure NotifyOfEntityChange; override;
+  T{ModelName}ViewModel = class(TCrudNavigateViewModel<I{ModelName}, I{ModelName}Repository>, I{ModelName}ViewModel)
   public
 
-    [NotifyChange('CanSave, CanEdit, CanDelete, Editable, CanPrior, CanNext')]
-    procedure OnSave(Sender: TObject); override;
+    procedure OnValidate(); override;
 
     procedure OnSearch(Sender: TObject);
 
-    [Subscribe, NotifyChange('CanPrior, CanNext')]
+    [Subscribe, NotifyChange('*')]
     procedure OnSearchResponse(Event: T{ModelName}SearchResponse); virtual;
-
-    function GetError: string;
-    function GetItem(const Name: string): string;
 
     function GetCodigo: Integer;
     function GetNome: string;
@@ -54,7 +45,15 @@ type
     property Codigo: Integer read GetCodigo;
     property Nome: string read GetNome write SetNome;
     property IsInativo: Boolean read GetIsInativo write SetIsInativo;
-  end;
+
+    [Secured('permissao:CanNew')]
+    property CanNew;
+    [Secured('permissao:CanEdit')]
+    property CanEdit;
+    [Secured('permissao:CanDelete')]
+    property CanDelete;
+
+ end;
 
 implementation
 
@@ -68,40 +67,20 @@ begin
   Result := FEntity.Id;
 end;
 
-function T{ModelName}ViewModel.GetError: string;
-begin
-  Result := FLastError;
-end;
-
 function T{ModelName}ViewModel.GetIsInativo: Boolean;
 begin
-
   if not Assigned(FEntity) then
     Exit;
 
   Result := FEntity.Inativo;
-
-end;
-
-function T{ModelName}ViewModel.GetItem(const Name: string): string;
-begin
-  //Adicione aqui as validações dos inputs que deverão ser executadas durante a perda de foco
 end;
 
 function T{ModelName}ViewModel.GetNome: string;
 begin
-
   if not Assigned(FEntity) then
     Exit;
 
   Result := FEntity.Nome;
-
-end;
-
-procedure T{ModelName}ViewModel.NotifyOfEntityChange;
-begin
-  inherited;
-  NotifyOfPropertiesChange(['Codigo', 'Nome', 'IsInativo']);
 end;
 
 procedure T{ModelName}ViewModel.OnSearch(Sender: TObject);
@@ -110,19 +89,32 @@ begin
   FDialogService.ShowSearch('C{ModelName}S', T{ModelName}SearchResponse);
 end;
 
-procedure T{ModelName}ViewModel.OnSave(Sender: TObject);
+procedure T{ModelName}ViewModel.OnValidate();
+const
+  TAMANHO_MAX_NOME = 50;
+  MSG_VIOLACAO_TAMANHO_NOME = 'O Nome do "{ModelName}" não pode possuir mais que %d caracteres!';
+var
+  WrongValuesException: EWrongValuesException;
 begin
+  WrongValuesException := EWrongValuesException.Create([]);
 
   if FEntity.Nome.IsEmpty then
-    raise EWrongValueException.Create('Nome', 'Campo requerido!');
+    WrongValuesException.Add('Nome', 'Campo requerido!');
 
-  inherited;
+  {if FRepository.IsDuplicate(FEntity) then
+    WrongValuesException.Add('Nome', MSG_VIOLACAO_DUPLICIDADE);}
 
+  if FEntity.Nome.Length > TAMANHO_MAX_NOME then
+    WrongValuesException.AddFmt('Nome', MSG_VIOLACAO_TAMANHO_NOME, [TAMANHO_MAX_NOME]);
+
+  if not WrongValuesException.IsEmpty then
+    raise WrongValuesException;
 end;
 
 procedure T{ModelName}ViewModel.OnSearchResponse(Event: T{ModelName}SearchResponse);
 begin
   DoOnSearchResponse(Event.Records.First);
+  Event.Free;
 end;
 
 procedure T{ModelName}ViewModel.SetIsInativo(const Value: Boolean);
