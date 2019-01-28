@@ -279,7 +279,7 @@ begin
     LayerDir := 'model\' + LayerDir;
   end;
 
-  FNamespace := FPackage.Namespace + '.' + FPackage.Name + '.' + ModuleName + LayerName;
+  FNamespace := FPackage.Namespace + '.' + ModuleName + LayerName;
 
   FFilePath := FSourceDir + ModuleDir + LayerDir;
 

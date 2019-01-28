@@ -101,6 +101,7 @@ begin
     raise EPackageNotFoundException.Create('Package Not Found');
 
   Result := CommandMetaData.CommandType.GetMethod('Create').invoke(CommandMetaData.CommandClass, [
+    TValue.From<string>(FAppPath),
     TValue.From<string>(FCurrentPath),
     TValue.From<TConfiguration>(FConfiguration),
     TValue.From<TPackage>(FPackage),
@@ -178,10 +179,7 @@ begin
     Result := DoGetCommandParamByName(Attrib);
 
   if Attrib.Required and Result.IsEmpty then
-    raise Exception.Create('Required Parameter Not Found');
-
-  if Attrib.Required then
-    raise ERequiredParameterException.CreateFmt('Required parameter %s!', [Attrib.Name]);
+    raise ERequiredParameterException.CreateFmt('Required Parameter %s Not Found!', [Attrib.Name]);
 
 end;
 

@@ -48,7 +48,7 @@ end;
 procedure TGenerateCrudFileCommand.Init;
 begin
   inherited;
-  FCodeGenerator := TCodeGenerator.Create(FCurrentPath, FPackage);
+  FCodeGenerator := TCodeGenerator.Create(FAppPath, FPackage);
 end;
 
 procedure TGenerateCrudFileCommand.SetModuleName(const Name: string);

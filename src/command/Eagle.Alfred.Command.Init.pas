@@ -276,6 +276,8 @@ procedure TInitCommand.ReadProjectNamespace;
 var
   Msg, Value: string;
 begin
+  FPackage.Namespace := FPackage.Namespace + '.' + FPackage.Name;
+
   Msg := CreateMessage('namespace: ', FPackage.Namespace);
 
   Value := FConsoleIO.ReadData(Msg).Trim;

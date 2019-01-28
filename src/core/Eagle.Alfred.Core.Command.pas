@@ -15,6 +15,7 @@ type
 
   TCommandAbstract = class abstract (TInterfacedObject, ICommand)
   protected
+    FAppPath: string;
     FCurrentPath: string;
     FConsoleIO: IConsoleIO;
     FConfiguration: TConfiguration;
@@ -23,7 +24,7 @@ type
 
     procedure Init; virtual;
   public
-    constructor Create(const ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
+    constructor Create(const AAppPath, ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
     procedure Execute; virtual; abstract;
 
     [OptionAttribute('verbose', 'v', 'Adds more details to output logging.')]
@@ -34,9 +35,10 @@ implementation
 
 { TCommandAbstract }
 
-constructor TCommandAbstract.Create(const ACurrentPath: string; AConfig:
-    TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
+constructor TCommandAbstract.Create(const AAppPath, ACurrentPath: string;
+    AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
 begin
+  FAppPath := AAppPath;
   FCurrentPath := ACurrentPath + '\';
   FConsoleIO := ConsoleIO;
   FPackage := APackage;
