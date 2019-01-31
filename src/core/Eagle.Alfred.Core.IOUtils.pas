@@ -2,6 +2,8 @@ unit Eagle.Alfred.Core.IOUtils;
 
 interface
 uses
+  ShellApi,
+  Windows,
   System.SysUtils,
   System.Classes,
   System.IOUtils,
@@ -17,6 +19,7 @@ type
     class procedure CreateFile(const Path, Contents: string; const Force: Boolean = False);
     class function FileIsEncodedUTF8(const fileIO: String): Boolean;
     class procedure Save<T>(Obj: T; const FileName: string);
+    class procedure OpenFile(const Path, Editor: string);
   end;
 
 implementation
@@ -127,6 +130,14 @@ begin
 
   Result := YesSequences > NoSequences;
 
+end;
+
+class procedure TIOUtils.OpenFile(const Path, Editor: string);
+begin
+  if Editor.IsEmpty then
+    ShellExecute(0, nil, PChar(Path), nil, nil, SW_SHOWNORMAL)
+  else
+    ShellExecute(0, nil, PChar(Editor), PChar(Path), nil, SW_SHOWNORMAL);
 end;
 
 class procedure TIOUtils.Save<T>(Obj: T; const FileName: string);

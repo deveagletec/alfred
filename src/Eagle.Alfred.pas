@@ -140,7 +140,7 @@ begin
   if (Attrib.Index > 0) and (Attrib.Index + Shift < FCommandArgs.Count) then
   begin
     Result := FCommandArgs.Items[Attrib.Index + Shift];
-    if Result.StartsWith('-') then
+    if Result.StartsWith('-') or Result.Contains('=') then
       Result := EmptyStr;
 
   end;
@@ -179,7 +179,7 @@ begin
     Result := DoGetCommandParamByName(Attrib);
 
   if Attrib.Required and Result.IsEmpty then
-    raise ERequiredParameterException.CreateFmt('Required Parameter %s Not Found!', [Attrib.Name]);
+    raise ERequiredParameterException.CreateFmt('Required Parameter "%s" Not Found!', [Attrib.Description]);
 
 end;
 

@@ -8,23 +8,23 @@ uses
 type
   TMigrate = record
 
-    [Alias('issueIdentifier')]
-    IssueIdentifier: string;
+    [Alias('id')]
+    Id: string;
 
-    [Alias('unixIdentifier')]
-    UnixIdentifier: string;
+    [Alias('issue')]
+    Issue: string;
 
     [Alias('version')]
     Version: string;
 
     [Alias('description')]
-    description: string;
+    Description: string;
 
-    [Alias('responsible')]
-    Responsible: string;
+    [Alias('author')]
+    Author: string;
 
-    [Alias('ignoredScripts')]
-    IgnoredScripts: TArray<integer>;
+    [Alias('ignored-scripts')]
+    IgnoredScripts: TArray<Integer>;
 
     [Alias('up')]
     Up: TArray<string>;

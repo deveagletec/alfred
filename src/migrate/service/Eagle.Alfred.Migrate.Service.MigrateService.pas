@@ -84,7 +84,7 @@ begin
 
   FileValue := TJSON.Stringify(Migrate, True);
 
-  FileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.unixIdentifier, Migrate.issueIdentifier]);
+  FileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.Id, Migrate.Issue]);
 
   TFile.WriteAllText(FileName, FileValue);
 
@@ -222,9 +222,9 @@ begin
     CanRemove := False;
 
     if ExecutionMode = TExecutionModeMigrate.TUp then
-      CanRemove := ListMigratesExecuted.Contains(Migrate.unixIdentifier)
+      CanRemove := ListMigratesExecuted.Contains(Migrate.Id)
     else
-      CanRemove := not ListMigratesExecuted.Contains(Migrate.unixIdentifier);
+      CanRemove := not ListMigratesExecuted.Contains(Migrate.Id);
 
     if CanRemove then
       Migrates.Delete(Index)
