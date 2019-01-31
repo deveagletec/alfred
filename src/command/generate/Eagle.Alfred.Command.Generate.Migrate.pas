@@ -8,13 +8,10 @@ uses
   System.SysUtils,
   System.StrUtils,
 
-  XSuperObject,
-
   Eagle.Alfred,
   Eagle.Alfred.Core.IOUtils,
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
-  Eagle.Alfred.Core.Exceptions,
 
   Eagle.Alfred.Migrate.Service.MigrateService,
   Eagle.Alfred.Migrate.Model.Migrate;
@@ -33,22 +30,21 @@ type
     FOpen: Boolean;
 
     procedure OpenMigrate(const Migrate: TMigrate);
-    procedure ShowMessageSucessfull;
   public
 
     procedure Execute; override;
     procedure Init; override;
 
-    [ParamAttribute(1, 'Migrate Name')]
+    [Param(1, 'Migrate Name')]
     procedure SetName(const Name: string);
 
-    [ParamAttribute(2, 'Migrate Version', False)]
+    [Param(2, 'Migrate Version', False)]
     procedure SetVersion(const Version: string);
 
-    [ParamAttribute('author', 'Migrate Author', False)]
+    [Param('author', 'Migrate Author', False)]
     procedure SetAuthor(const Value: string);
 
-    [ParamAttribute('desc', 'Migrate Description', False)]
+    [Param('desc', 'Migrate Description', False)]
     procedure SetDescription(const Value: string);
 
     [Option('open', 'o', 'Active migration opening after generation')]
@@ -70,7 +66,7 @@ begin
 
   FMigrateService.CreateNewMigrate(Migrate);
 
-  ShowMessageSucessfull();
+  DoShowMessageSuccessful('Migrate Created Sucessfull');
 
   OpenMigrate(Migrate);
 end;
@@ -117,15 +113,6 @@ end;
 procedure TGenerateMigrateCommand.SetVersion(const Version: string);
 begin
   FVersion := Version.Trim;
-end;
-
-procedure TGenerateMigrateCommand.ShowMessageSucessfull;
-begin
-  FConsoleIO.WriteInfo('');
-  FConsoleIO.WriteSucess('* ------- ');
-  FConsoleIO.WriteSucess('| Migrate Created Sucessfull ;) ');
-  FConsoleIO.WriteSucess('* ----------------------------------------------------- ');
-  FConsoleIO.WriteInfo('');
 end;
 
 initialization

@@ -114,9 +114,9 @@ end;
 procedure TUpdateRun.ShowMessageSucessFull;
 begin
   FConsoleIO.WriteInfo(' ');
-  FConsoleIO.WriteSucess('* ------- ');
-  FConsoleIO.WriteSucess('| Update File Executed Sucessfull! ');
-  FConsoleIO.WriteSucess('* ----------------------------------------------------- ');
+  FConsoleIO.WriteSuccess('* ------- ');
+  FConsoleIO.WriteSuccess('| Update File Executed Successful! ');
+  FConsoleIO.WriteSuccess('* ----------------------------------------------------- ');
   FConsoleIO.WriteInfo('');
 end;
 

@@ -26,11 +26,9 @@ type
 
     procedure showMessageSucess(const msg: String);
     procedure showMessageAlert(const msg: String);
-
   public
     procedure Execute; override;
     procedure Init; override;
-
   end;
 
 implementation
@@ -68,9 +66,9 @@ end;
 
 procedure TMigrateInit.showMessageSucess(const msg: String);
 begin
-  FConsoleIO.WriteSucess(sLineBreak + '* ------- ');
-  FConsoleIO.WriteSucess(Format('| %s', [msg]));
-  FConsoleIO.WriteSucess('* ----------------------------------------------------- ' + sLineBreak);
+  FConsoleIO.WriteSuccess(sLineBreak + '* ------- ');
+  FConsoleIO.WriteSuccess(Format('| %s', [msg]));
+  FConsoleIO.WriteSuccess('* ----------------------------------------------------- ' + sLineBreak);
 end;
 
 procedure TMigrateInit.showMessageAlert(const msg: String);

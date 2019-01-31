@@ -369,9 +369,9 @@ end;
 procedure TUpdateJoin.ShowMessageSucessFull;
 begin
   FConsoleIO.WriteInfo(' ');
-  FConsoleIO.WriteSucess('* ------- ');
-  FConsoleIO.WriteSucess('| File Update Created Sucessfull! ');
-  FConsoleIO.WriteSucess('* ----------------------------------------------------- ');
+  FConsoleIO.WriteSuccess('* ------- ');
+  FConsoleIO.WriteSuccess('| File Update Created Successful! ');
+  FConsoleIO.WriteSuccess('* ----------------------------------------------------- ');
   FConsoleIO.WriteInfo('');
 end;
 
