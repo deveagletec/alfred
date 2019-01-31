@@ -12,8 +12,6 @@ uses
   Eagle.Alfred.DprojParser in '..\src\Eagle.Alfred.DprojParser.pas',
   Eagle.Alfred in '..\src\Eagle.Alfred.pas',
   Eagle.Alfred.Utils in '..\src\Eagle.Alfred.Utils.pas',
-  Eagle.Alfred.Migrate.Repository.MigrateRepository in '..\src\migrate\repository\Eagle.Alfred.Migrate.Repository.MigrateRepository.pas',
-  Eagle.Alfred.Migrate.Model.Migrate in '..\src\migrate\model\Eagle.Alfred.Migrate.Model.Migrate.pas',
   Eagle.Alfred.Core.CodeGenerator in '..\src\core\Eagle.Alfred.Core.CodeGenerator.pas',
   Eagle.Alfred.Core.Command in '..\src\core\Eagle.Alfred.Core.Command.pas',
   Eagle.Alfred.Core.CommandRegister in '..\src\core\Eagle.Alfred.Core.CommandRegister.pas',
@@ -39,7 +37,6 @@ uses
   Eagle.Alfred.Command.DB.Update.Run in '..\src\command\db\update\Eagle.Alfred.Command.DB.Update.Run.pas',
   Eagle.Alfred.Command.DB.Migrate.Execute in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Execute.pas',
   Eagle.Alfred.Command.DB.Migrate.Rollback in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Rollback.pas',
-  Eagle.Alfred.Migrate.Service.MigrateService in '..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas',
   Eagle.Alfred.Commond.DB.Update.UpdateService in '..\src\command\db\update\Eagle.Alfred.Commond.DB.Update.UpdateService.pas',
   Eagle.Alfred.Command.DB.Common.Repository in '..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Repository.pas',
   Eagle.Alfred.Command.DB.Common.Connection in '..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Connection.pas',
@@ -56,7 +53,10 @@ uses
   Eagle.Alfred.Command.Common.Downloaders.Downloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.Downloader.pas',
   Eagle.Alfred.Command.Common.Downloaders.GithubDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.GithubDownloader.pas',
   Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader.pas',
-  Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader.pas';
+  Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader in '..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader.pas',
+  Eagle.Alfred.Command.Common.Migrate.Model in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Model.pas',
+  Eagle.Alfred.Command.Common.Migrate.Repository in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Repository.pas',
+  Eagle.Alfred.Command.Common.Migrate.Service in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Service.pas';
 
 var
   OldColor: Byte;

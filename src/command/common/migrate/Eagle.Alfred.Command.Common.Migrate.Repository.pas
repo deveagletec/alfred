@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Migrate.Repository.MigrateRepository;
+unit Eagle.Alfred.Command.Common.Migrate.Repository;
 
 interface
 
@@ -14,7 +14,7 @@ uses
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.Enums,
-  Eagle.Alfred.Migrate.Model.Migrate,
+  Eagle.Alfred.Command.Common.Migrate.Model,
   Eagle.Alfred.Command.DB.Common.Connection,
   Eagle.Alfred.Command.DB.Common.FiredacConnection;
 

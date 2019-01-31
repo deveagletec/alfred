@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Migrate.Model.Migrate;
+unit Eagle.Alfred.Command.Common.Migrate.Model;
 
 interface
 

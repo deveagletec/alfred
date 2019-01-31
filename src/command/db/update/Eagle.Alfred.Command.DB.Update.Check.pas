@@ -13,8 +13,8 @@ uses
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Exceptions,
 
-  Eagle.Alfred.Migrate.Model.Migrate,
-  Eagle.Alfred.Migrate.Service.MigrateService,
+  Eagle.Alfred.Command.Common.Migrate.Model,
+  Eagle.Alfred.Command.Common.Migrate.Service,
 
   Eagle.Alfred.Commond.DB.Update.UpdateService;
 

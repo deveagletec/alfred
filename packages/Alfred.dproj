@@ -46,12 +46,14 @@
         <DCC_K>false</DCC_K>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_BplOutput>.\..\build\$(Platform)\$(Config)\Alfred</DCC_BplOutput>
         <DCC_DcuOutput>.\..\build\$(Platform)\$(Config)\Alfred</DCC_DcuOutput>
         <Manifest_File>None</Manifest_File>
         <DCC_DcpOutput>.\..\build\$(Platform)\$(Config)\Alfred</DCC_DcpOutput>
         <DCC_ExeOutput>.\..\build\$(Platform)\$(Config)\</DCC_ExeOutput>
-        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Locale>1046</VerInfo_Locale>
         <DCC_UsePackage>MyComponents;ACBr_Convenio115;frxADO22;FireDACTDataDriver;ACBr_BoletoFR;FireDACSqliteDriver;FireDACDSDriver;ZComponent;DBXSqliteDriver;frxTee22;Spring.Data;FireDACPgDriver;ACBr_BoletoRL;fmx;TreeViewPresenter;ACBr_Diversos;IndySystem;TeeDB;tethering;TP_LockBox3;ACBr_NFeDanfeFR;vclib;DBXInterBaseDriver;DataSnapClient;DataSnapServer;DataSnapCommon;fsIBX22;ACBr_NFeDanfeESCPOS;ACBr_synapse;ACBr_BlocoX;DataSnapProviderClient;DBXSybaseASEDriver;frxe22;DbxCommonDriver;ACBr_MDFeDamdfeFR;vclimg;DUnitXRuntime;fs22;dbxcds;OnGuardDR;DatasnapConnectorsFreePascal;ACBr_Comum;appanalytics;vcldb;vcldsnap;fsDB22;ACBr_MDFeDamdfeRL;AbbreviaVCLD;fmxFireDAC;DBXDb2Driver;frce;DBXOracleDriver;CustomIPTransport;ACBr_Serial;vclribbon;ACBr_SPED;dsnap;IndyIPServer;TDsharpComboBox;ACBr_MDFe;fmxase;vcl;IndyCore;ACBr_DFeComum;DBXMSSQLDriver;IndyIPCommon;CloudService;FmxTeeUI;FireDACIBDriver;spdNotaSegura_DXE8;CodeSiteExpressPkg;ACBr_Boleto;DataSnapFireDAC;FireDACDBXDriver;ACBr_Sintegra;soapserver;ACBr_CTeDacteFR;inetdbxpress;dsnapxml;FireDACInfxDriver;FireDACDb2Driver;ACBr_LFD;ACBR_DeSTDA;ACBr_PCNComum;adortl;frxDBX22;ACBr_TCP;DataBindingsVCL;FireDACASADriver;ACBr_SEF2;frx22;bindcompfmx;ACBr_PAF;FireDACODBCDriver;RESTBackendComponents;emsclientfiredac;ZDbc;rtl;dbrtl;DbxClientDriver;FireDACCommon;bindcomp;inetdb;ZPlain;ACBr_MTER;Tee;ACBr_NFe;DataBindings;DBXOdbcDriver;ACBr_CTe;ibmonitor;vclFireDAC;xmlrtl;DataSnapNativeClient;svnui;ibxpress;frxIBX22;fsTee22;IndyProtocols;DBXMySQLDriver;ACBr_NFeDanfeRL;FireDACCommonDriver;bindcompdbx;soaprtl;bindengine;vclactnband;FMXTee;TeeUI;bindcompvcl;ACBr_CTeDacteRL;vclie;fsADO22;ACBr_OpenSSL;frxDB22;FireDACADSDriver;vcltouch;ZCore;ACBr_TEFD;emsclient;VCLRESTComponents;FireDAC;VclSmp;DBXInformixDriver;FireDACMSSQLDriver;Intraweb;DataSnapConnectors;DataSnapServerMidas;dsnapcon;DBXFirebirdDriver;ACBr_TXTComum;inet;fmxobj;FireDACMySQLDriver;soapmidas;vclx;ZParseSql;spdGov16_DXE8;ACBr_SPEDImportar;svn;DBXSybaseASADriver;FireDACOracleDriver;fmxdae;RESTComponents;VirtualTreesR;FireDACMSAccDriver;dbexpress;DataSnapIndy10ServerTransport;IndyIPClient;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_ConsoleTarget>true</DCC_ConsoleTarget>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -66,7 +68,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>install</Debugger_RunParams>
+        <Debugger_RunParams>generate migrate EG-456 author=marcos desc=&quot;teste fasdfa&quot;</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -84,8 +86,6 @@
         <DCCReference Include="..\src\Eagle.Alfred.DprojParser.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.pas"/>
         <DCCReference Include="..\src\Eagle.Alfred.Utils.pas"/>
-        <DCCReference Include="..\src\migrate\repository\Eagle.Alfred.Migrate.Repository.MigrateRepository.pas"/>
-        <DCCReference Include="..\src\migrate\model\Eagle.Alfred.Migrate.Model.Migrate.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.CodeGenerator.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.Command.pas"/>
         <DCCReference Include="..\src\core\Eagle.Alfred.Core.CommandRegister.pas"/>
@@ -111,7 +111,6 @@
         <DCCReference Include="..\src\command\db\update\Eagle.Alfred.Command.DB.Update.Run.pas"/>
         <DCCReference Include="..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Execute.pas"/>
         <DCCReference Include="..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Rollback.pas"/>
-        <DCCReference Include="..\src\migrate\service\Eagle.Alfred.Migrate.Service.MigrateService.pas"/>
         <DCCReference Include="..\src\command\db\update\Eagle.Alfred.Commond.DB.Update.UpdateService.pas"/>
         <DCCReference Include="..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Repository.pas"/>
         <DCCReference Include="..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Connection.pas"/>
@@ -129,6 +128,9 @@
         <DCCReference Include="..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.GithubDownloader.pas"/>
         <DCCReference Include="..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader.pas"/>
         <DCCReference Include="..\src\command\common\downloader\Eagle.Alfred.Command.Common.Downloaders.SourceForgeDownloader.pas"/>
+        <DCCReference Include="..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Model.pas"/>
+        <DCCReference Include="..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Repository.pas"/>
+        <DCCReference Include="..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Service.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
@@ -180,10 +182,10 @@
                     <Source Name="MainSource">Alfred.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclDataSnapNativeServer220.bpl">Embarcadero DBExpress DataSnap Native Server Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="C:\development\components\ACBr\Lib\Delphi\LibD22\ACBr_Integrador.bpl">ACBrIntegrador</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclDataSnapNativeServer220.bpl">Embarcadero DBExpress DataSnap Native Server Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="1">
@@ -579,7 +581,7 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>

@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Migrate.Service.MigrateService;
+unit Eagle.Alfred.Command.Common.Migrate.Service;
 
 interface
 
@@ -16,7 +16,7 @@ uses
   Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,
-  Eagle.Alfred.Migrate.Model.Migrate,
+  Eagle.Alfred.Command.Common.Migrate.Model,
 
   XSuperObject;
 
