@@ -8,8 +8,11 @@ uses
 type
   TMigrate = record
 
-    [Alias('id')]
+    [DISABLE]
     Id: string;
+
+    [DISABLE]
+    Name: string;
 
     [Alias('issue')]
     Issue: string;
@@ -23,7 +26,7 @@ type
     [Alias('author')]
     Author: string;
 
-    [Alias('ignored-scripts')]
+    [Alias('ignore')]
     IgnoredScripts: TArray<Integer>;
 
     [Alias('up')]
