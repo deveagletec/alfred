@@ -35,6 +35,10 @@ type
 
   ERequiredParameterException = class(EAlfredException);
 
+  EMigrationsNotFoundException = class(EAlfredException);
+
+  ENoExecutedMigrationFoundException = class(EAlfredException);
+
 implementation
 
 end.

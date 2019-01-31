@@ -13,10 +13,11 @@ type
       procedure WriteInfo(const Msg : string);
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string);
-      procedure WriteSucess(const Msg: string);
+      procedure WriteSuccess(const Msg: string);
+      procedure WriteSuccessFmt(const Msg: string; const Args: array of const);
       function ReadInfo(const Msg: String; Color: Byte = LightGray): String;
       procedure WriteAlert(const msg: String);
-	  function ReadData(const Msg: string): string;
+      function ReadData(const Msg: string): string;
       function ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
    end;
 
@@ -29,8 +30,9 @@ type
       procedure WriteInfo(const Msg : string);
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string);
-      procedure WriteSucess(const Msg: string);
-	  function ReadData(const Msg: string): string;
+      procedure WriteSuccess(const Msg: string);
+      procedure WriteSuccessFmt(const Msg: string; const Args: array of const);
+      function ReadData(const Msg: string): string;
       function ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
    end;
 
@@ -107,9 +109,14 @@ begin
    WriteColor(Msg, LightGray, False);
 end;
 
-procedure TConsoleIO.WriteSucess(const Msg: string);
+procedure TConsoleIO.WriteSuccess(const Msg: string);
 begin
    WriteColor(Msg, Green);
+end;
+
+procedure TConsoleIO.WriteSuccessFmt(const Msg: string; const Args: array of const);
+begin
+  WriteSuccess(string.Format(Msg, Args));
 end;
 
 end.

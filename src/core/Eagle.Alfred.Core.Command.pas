@@ -23,6 +23,7 @@ type
     FVerbose: Boolean;
 
     procedure Init; virtual;
+    procedure DoShowMessageSuccessful(const Msg: string);
   public
     constructor Create(const AAppPath, ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
     procedure Execute; virtual; abstract;
@@ -45,6 +46,15 @@ begin
   FConfiguration := AConfig;
 
   Init;
+end;
+
+procedure TCommandAbstract.DoShowMessageSuccessful(const Msg: string);
+begin
+  FConsoleIO.WriteInfo('');
+  FConsoleIO.WriteSuccess('* ------- ');
+  FConsoleIO.WriteSuccessFmt('| %s ;) ', [Msg]);
+  FConsoleIO.WriteSuccess('* ----------------------------------------------------- ');
+  FConsoleIO.WriteInfo('');
 end;
 
 procedure TCommandAbstract.Init;
