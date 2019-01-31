@@ -13,9 +13,9 @@ uses
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,
 
-  Eagle.Alfred.Migrate.Model.Migrate,
-  Eagle.Alfred.Migrate.Service.MigrateService,
-  Eagle.Alfred.Migrate.Repository.MigrateRepository;
+  Eagle.Alfred.Command.Common.Migrate.Model,
+  Eagle.Alfred.Command.Common.Migrate.Service,
+  Eagle.Alfred.Command.Common.Migrate.Repository;
 
 type
 

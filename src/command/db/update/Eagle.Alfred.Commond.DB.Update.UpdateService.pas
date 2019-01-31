@@ -8,7 +8,7 @@ uses
   System.Generics.Collections,
   System.RegularExpressions,
 
-  Eagle.Alfred.Migrate.Model.Migrate;
+  Eagle.Alfred.Command.Common.Migrate.Model;
 
 type
 

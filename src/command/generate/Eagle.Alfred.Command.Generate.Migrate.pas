@@ -13,8 +13,8 @@ uses
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
 
-  Eagle.Alfred.Migrate.Service.MigrateService,
-  Eagle.Alfred.Migrate.Model.Migrate;
+  Eagle.Alfred.Command.Common.Migrate.Service,
+  Eagle.Alfred.Command.Common.Migrate.Model;
 
 type
 
@@ -66,7 +66,7 @@ begin
 
   FMigrateService.CreateNewMigrate(Migrate);
 
-  DoShowMessageSuccessful('Migrate Created Sucessfull');
+  DoShowMessageSuccessful('Migrate Created Successfull');
 
   OpenMigrate(Migrate);
 end;

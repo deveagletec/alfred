@@ -12,8 +12,8 @@ uses
 
   Eagle.Alfred.Core.Command,
 
-  Eagle.Alfred.Migrate.Service.MigrateService,
-  Eagle.Alfred.Migrate.Repository.MigrateRepository;
+  Eagle.Alfred.Command.Common.Migrate.Service,
+  Eagle.Alfred.Command.Common.Migrate.Repository;
 
 type
 
