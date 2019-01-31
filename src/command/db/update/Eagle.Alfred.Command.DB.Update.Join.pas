@@ -39,7 +39,7 @@ type
     procedure MountFooter;
     procedure MountHeader;
     procedure SaveFileUpdate;
-    procedure InsertBreakLine(var Value: string);
+    function InsertBreakLine(const Value: string): string;
     procedure ShowMessageFounded(ConflictsMigrates: TDictionary<string,TList<string >> );
     procedure ShowMessageMigratesNotFounded;
     procedure ShowMessageSucessFull;
@@ -120,29 +120,32 @@ begin
 
 end;
 
-procedure TUpdateJoin.InsertBreakLine(var Value: string);
+function TUpdateJoin.InsertBreakLine(const Value: string): string;
 var
   Char, PreviousChar: string;
   NewValue: string;
   I: Integer;
 begin
 
+  NewValue := Value;
   I := 1;
 
-  while I < Value.Length do
+  while I < NewValue.Length do
   begin
 
-    Char := Value[I];
-    PreviousChar := Value[I - 1];
+    Char := NewValue[I];
+    PreviousChar := NewValue[I - 1];
 
     if Char.Equals(#9) and (not PreviousChar.Equals(#10)) and (not PreviousChar.Equals(#9)) then
-      Value.Insert(I - 1, #10)
+      NewValue.Insert(I - 1, #10)
     else
       Inc(I);
 
   end;
 
-  Value := Value.Replace(#10#9, #10);
+  NewValue := NewValue.Replace(#10#9, #10);
+
+  Result := NewValue;
 
 end;
 
@@ -181,9 +184,7 @@ begin
       if FUpdateService.indexIsIgnored(Index, Migrate) then
         continue;
 
-      SQLReplaced := SQL;
-
-      InsertBreakLine(SQLReplaced);
+      SQLReplaced := InsertBreakLine(SQL);
 
       FScripts.Add(SQLReplaced);
       FScripts.Add(#10'/* *********************************************************************** */'#10);
