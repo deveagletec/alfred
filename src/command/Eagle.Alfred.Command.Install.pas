@@ -24,24 +24,24 @@ type
     FSaveDev: Boolean;
     FForce: Boolean;
     FGlobal: Boolean;
-
+  protected
     procedure Init; override;
   public
     procedure Execute; override;
 
-    [ParamAttribute(1, 'Dependency', False)]
+    [Param(1, 'Dependency', False)]
     procedure SetDependency(const Name: string);
 
-    [OptionAttribute('save-prod', '-P', 'Package will appear in your dependencies.')]
+    [Option('save-prod', '-P', 'Package will appear in your dependencies.')]
     procedure SaveProd;
 
-    [OptionAttribute('save-dev', '-D', 'Package will appear in your devDependencies.')]
+    [Option('save-dev', '-D', 'Package will appear in your devDependencies.')]
     procedure SaveDev;
 
-    [OptionAttribute('force', '-f', 'Forces overwriting of files.')]
+    [Option('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
 
-    [OptionAttribute('global', '-g', 'The -g or --global argument will cause npm to install the package globally rather than locally')]
+    [Option('global', '-g', 'The -g or --global argument will cause npm to install the package globally rather than locally')]
     procedure Global;
   end;
 

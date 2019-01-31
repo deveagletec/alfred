@@ -36,16 +36,16 @@ type
   public
     procedure Execute; override;
 
-    [ParamAttribute(1, 'Project Name')]
+    [Param(1, 'Project Name')]
     procedure SetName(const Name: string);
 
-    [OptionAttribute('force', '-f', 'Forces overwriting of files.')]
+    [Option('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
 
-    [OptionAttribute('skip-tests', '-S', 'Skip creating tests files.')]
+    [Option('skip-tests', '-S', 'Skip creating tests files.')]
     procedure SkipTests;
 
-    [OptionAttribute('skip-package-json', '', 'Do not add dependencies to package.json.')]
+    [Option('skip-package-json', '', 'Do not add dependencies to package.json.')]
     procedure SkipPackageJson;
 
   end;

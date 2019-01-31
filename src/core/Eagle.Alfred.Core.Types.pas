@@ -146,8 +146,6 @@ implementation
 { TPackage }
 
 destructor TPackage.Destroy;
-var
-  Dependency: TDependency;
 begin
 
   if Assigned(DataBase) then

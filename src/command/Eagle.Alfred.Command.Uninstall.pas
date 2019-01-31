@@ -22,24 +22,24 @@ type
     FSaveDev: Boolean;
     FForce: Boolean;
     FGlobal: Boolean;
-
+  protected
     procedure Init; override;
   public
     procedure Execute; override;
 
-    [ParamAttribute(1, 'Dependency')]
+    [Param(1, 'Dependency')]
     procedure SetDependency(const Name: string);
 
-    [OptionAttribute('save-prod', '-P', 'Package will appear in your dependencies.')]
+    [Option('save-prod', '-P', 'Package will appear in your dependencies.')]
     procedure SaveProd;
 
-    [OptionAttribute('save-dev', '-D', 'Package will appear in your devDependencies.')]
+    [Option('save-dev', '-D', 'Package will appear in your devDependencies.')]
     procedure SaveDev;
 
-    [OptionAttribute('force', '-f', 'Forces overwriting of files.')]
+    [Option('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
 
-    [OptionAttribute('global', '-g', 'Uninstalls the current package context as a global package.')]
+    [Option('global', '-g', 'Uninstalls the current package context as a global package.')]
     procedure Global;
   end;
 
