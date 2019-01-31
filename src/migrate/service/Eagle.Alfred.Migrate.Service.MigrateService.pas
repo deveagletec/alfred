@@ -159,7 +159,7 @@ begin
       begin
 
         FileValue := TFile.ReadAllText(Format('%s%s', [FPackage.MigrationDir, FileName]));
-        FileValue := FileValue.Replace(#13#10, '');
+        FileValue := FileValue.Replace(#13#10, #9);
 
         ListMigrates.Add(TJSON.Parse<TMigrate>(FileValue));
 
