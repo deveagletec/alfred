@@ -25,9 +25,9 @@ type
     FName: string;
     FVersion: string;
     FDescription: string;
-
-    FMigrateService: IMigrateService;
+    FIssue: string;
     FOpen: Boolean;
+    FMigrateService: IMigrateService;
 
     procedure OpenMigrate(const Migrate: TMigrate);
   public
@@ -36,10 +36,13 @@ type
     procedure Init; override;
 
     [Param(1, 'Migrate Name')]
-    procedure SetName(const Name: string);
+    procedure SetName(const Value: string);
 
-    [Param(2, 'Migrate Version', False)]
-    procedure SetVersion(const Version: string);
+    [Param('issue', 'Migrate Issue', False)]
+    procedure SetIssue(const Value: string);
+
+    [Param('version', 'Migrate Version', False)]
+    procedure SetVersion(const Value: string);
 
     [Param('author', 'Migrate Author', False)]
     procedure SetAuthor(const Value: string);
@@ -59,7 +62,8 @@ var
 begin
 
   Migrate.Id := DateTimeToUnix(Now).ToString;
-  Migrate.Issue := FName;
+  Migrate.Name := Migrate.Id + '_' + FName;
+  Migrate.Issue := FIssue;
   Migrate.Version := IfThen(FVersion.IsEmpty, FPackage.Version, FVersion);
   Migrate.Author := IfThen(FAuthor.IsEmpty, FConfiguration.Author, FAuthor);
   Migrate.Description := FDescription;
@@ -85,7 +89,7 @@ begin
   if not FOpen then
     Exit;
 
-  FileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.Id, Migrate.Issue]);
+  FileName := FPackage.MigrationDir + Migrate.Name+ '.json';
 
   TIOUtils.OpenFile(FileName, FConfiguration.DefaultEditor);
 end;
@@ -100,9 +104,14 @@ begin
   FDescription := Value.Trim;
 end;
 
-procedure TGenerateMigrateCommand.SetName(const Name: String);
+procedure TGenerateMigrateCommand.SetIssue(const Value: string);
 begin
-  FName := Name.Trim().ToUpper;
+  FIssue := Value.Trim.ToUpper;
+end;
+
+procedure TGenerateMigrateCommand.SetName(const Value: string);
+begin
+  FName := Value.Trim().ToUpper;
 end;
 
 procedure TGenerateMigrateCommand.EnableOpen;
@@ -110,9 +119,9 @@ begin
   FOpen := True;
 end;
 
-procedure TGenerateMigrateCommand.SetVersion(const Version: string);
+procedure TGenerateMigrateCommand.SetVersion(const Value: string);
 begin
-  FVersion := Version.Trim;
+  FVersion := Value.Trim;
 end;
 
 initialization

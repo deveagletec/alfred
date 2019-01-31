@@ -41,6 +41,7 @@ type
 
     procedure FilterMigratesByVersion(var Migrates: TList<TMigrate>; const Version: string);
     function GetListFilesMigrate: TList<string>;
+    function LoadMigrate(FileName: string): TMigrate;
 
   public
     constructor Create(const Package: TPackage);
@@ -84,7 +85,7 @@ begin
 
   FileValue := TJSON.Stringify(Migrate, True);
 
-  FileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.Id, Migrate.Issue]);
+  FileName := FPackage.MigrationDir + Migrate.Name + '.json';
 
   TFile.WriteAllText(FileName, FileValue);
 
@@ -137,9 +138,10 @@ end;
 
 function TMigrateService.GetMigratesByMigrationDir: TList<TMigrate>;
 var
-  ListFiles: TList<String>;
+  ListFiles: TList<string>;
   ListMigrates: TList<TMigrate>;
-  FileName, FileValue: String;
+  FileName: string;
+  Migrate: TMigrate;
 begin
 
   ListFiles := GetListFilesMigrate();
@@ -148,39 +150,23 @@ begin
 
     ListFiles.Sort();
 
-    if (ListFiles.Count = 0) then
+    if ListFiles.Count = 0 then
       Exit(nil);
 
     ListMigrates := TList<TMigrate>.Create();
 
-    try
-
-      for FileName in ListFiles do
-      begin
-
-        FileValue := TFile.ReadAllText(Format('%s%s', [FPackage.MigrationDir, FileName]));
-        FileValue := FileValue.Replace(#13#10, #9);
-
-        ListMigrates.Add(TJSON.Parse<TMigrate>(FileValue));
-
-      end;
-
-    except
-
-      on E: Exception do
-        raise EJSONReadException.CreateFmt('Not is possible create the files JSON! Error: %s', [E.Message]);
-
+    for FileName in ListFiles do
+    begin
+      Migrate := LoadMigrate(FileName);
+      ListMigrates.Add(Migrate);
     end;
 
     Result := ListMigrates;
 
   finally
-
     if Assigned(ListFiles) then
       ListFiles.Free();
-
   end;
-
 end;
 
 function TMigrateService.GetMigratesByVersion(const Version: string): TList<TMigrate>;
@@ -195,6 +181,25 @@ begin
 
   Result := Migrates;
 
+end;
+
+function TMigrateService.LoadMigrate(FileName: string): TMigrate;
+var
+  Data: string;
+begin
+
+  Data := TFile.ReadAllText(FPackage.MigrationDir + FileName);
+
+  Data := Data.Replace(#13#10, #9);
+
+  try
+    Result := TJSON.Parse<TMigrate>(Data);
+    Result.Id := FileName.Split(['_'])[0];
+    Result.Name := FileName;
+  except
+    on E: Exception do
+      raise EJSONReadException.CreateFmt('Not is possible create the files JSON! Error: %s', [E.Message]);
+  end;
 end;
 
 function TMigrateService.MigrateDirectoryExists: Boolean;
