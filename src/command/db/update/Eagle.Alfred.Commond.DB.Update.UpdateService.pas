@@ -71,7 +71,7 @@ begin
       if not Assigned(listConflicts) then
         listConflicts := TList<String>.Create();
 
-      listConflicts.Add(Migrates[indexMigrate].unixIdentifier);
+      listConflicts.Add(Migrates[indexMigrate].Id);
 
       conflictsMigrate.AddOrSetValue(objectName, listConflicts);
 

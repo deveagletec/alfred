@@ -131,7 +131,7 @@ begin
     if FIsInteractiveMode then
     begin
 
-      Answer := FConsoleIO.ReadInfo(Format('Wish execute the file %s? <Y>es | <N>o', [Migrate.IssueIdentifier]));
+      Answer := FConsoleIO.ReadInfo(Format('Wish execute the file %s? <Y>es | <N>o', [Migrate.Issue]));
 
       if not Answer.ToUpper.Equals(SIM) then
         Exit;
@@ -146,7 +146,7 @@ begin
       CanExecute := Migrate.version.Equals(FFilter)
     else
     begin
-      CanExecute := Migrate.UnixIdentifier <= FFilter;
+      CanExecute := Migrate.Id <= FFilter;
 
       if not CanExecute then
         Exit;
@@ -158,7 +158,7 @@ begin
 
       FMigrateRepository.ExecuteMigrate(Migrate, TExecutionModeMigrate.TUp, FIsAutoCommit);
 
-      FConsoleIO.WriteInfo(Format('| Migrate %s_%s executed', [Migrate.UnixIdentifier, Migrate.IssueIdentifier]));
+      FConsoleIO.WriteInfo(Format('| Migrate %s_%s executed', [Migrate.Id, Migrate.Issue]));
 
     end;
 

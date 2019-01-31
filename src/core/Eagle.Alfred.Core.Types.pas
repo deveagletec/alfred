@@ -132,6 +132,12 @@ type
     [Alias('default-editor')]
     DefaultEditor: string;
 
+    [Alias('author')]
+    Author: string;
+
+    [Alias('auto-open')]
+    AutoOpen: Boolean;
+
     constructor Create;
   end;
 

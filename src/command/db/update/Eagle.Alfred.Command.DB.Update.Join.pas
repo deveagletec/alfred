@@ -174,14 +174,14 @@ begin
 
     FScripts.Add('');
     FScripts.Add('/* *********************************************************************** */');
-    FScripts.Add(Format('/* ************************* Migrate %s ************************** */', [Migrate.unixIdentifier]));
+    FScripts.Add(Format('/* ************************* Migrate %s ************************** */', [Migrate.Id]));
     FScripts.Add('/* *********************************************************************** */');
     FScripts.Add('');
 
-    for SQL in Migrate.up do
+    for SQL in Migrate.Up do
     begin
 
-      if FUpdateService.indexIsIgnored(Index, Migrate) then
+      if FUpdateService.IndexIsIgnored(Index, Migrate) then
         continue;
 
       SQLReplaced := InsertBreakLine(SQL);

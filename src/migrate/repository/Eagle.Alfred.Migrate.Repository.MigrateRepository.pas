@@ -114,9 +114,9 @@ begin
     end;
 
     if ExecutionMode = TExecutionModeMigrate.TUp then
-      InsertCodeMigrate(Migrate.UnixIdentifier)
+      InsertCodeMigrate(Migrate.Id)
     else
-      DeleteCodeMigrate(Migrate.UnixIdentifier);
+      DeleteCodeMigrate(Migrate.Id);
 
     FFDConnection.GetConnection.Commit;
 
@@ -125,7 +125,7 @@ begin
     on E: Exception do
     begin
       FFDConnection.GetConnection.Rollback;
-      raise EDataBaseException.Create(Format('Erro ao executar arquivo %s! ||| %s', [Migrate.UnixIdentifier, E.Message]));
+      raise EDataBaseException.Create(Format('Erro ao executar arquivo %s! ||| %s', [Migrate.Id, E.Message]));
     end;
 
   end;

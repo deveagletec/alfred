@@ -6,10 +6,12 @@ uses
   Classes,
   System.DateUtils,
   System.SysUtils,
+  System.StrUtils,
 
   XSuperObject,
 
   Eagle.Alfred,
+  Eagle.Alfred.Core.IOUtils,
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.Exceptions,
@@ -22,89 +24,102 @@ type
   [Command('generate', 'migrate', 'Generates a Migrate')]
   TGenerateMigrateCommand = class(TCommandAbstract)
   private
-
-    FMigrateName: String;
-    FVersion: String;
+    FAuthor: string;
+    FName: string;
+    FVersion: string;
+    FDescription: string;
 
     FMigrateService: IMigrateService;
-    procedure showMessageError(const error: String);
-    procedure showMessageSucessfull;
+    FOpen: Boolean;
 
+    procedure OpenMigrate(const Migrate: TMigrate);
+    procedure ShowMessageSucessfull;
   public
 
     procedure Execute; override;
-    procedure init; override;
+    procedure Init; override;
 
     [ParamAttribute(1, 'Migrate Name')]
-    procedure setName(const name: String);
+    procedure SetName(const Name: string);
 
     [ParamAttribute(2, 'Migrate Version', False)]
-    procedure setVersion(const version: String);
+    procedure SetVersion(const Version: string);
 
+    [ParamAttribute('author', 'Migrate Author', False)]
+    procedure SetAuthor(const Value: string);
+
+    [ParamAttribute('desc', 'Migrate Description', False)]
+    procedure SetDescription(const Value: string);
+
+    [Option('open', 'o', 'Active migration opening after generation')]
+    procedure EnableOpen;
   end;
 
 implementation
 
 procedure TGenerateMigrateCommand.Execute;
 var
-  TimeStamp: String;
   Migrate: TMigrate;
 begin
 
-  TimeStamp := DateTimeToUnix(Now).ToString;
+  Migrate.Id := DateTimeToUnix(Now).ToString;
+  Migrate.Issue := FName;
+  Migrate.Version := IfThen(FVersion.IsEmpty, FPackage.Version, FVersion);
+  Migrate.Author := IfThen(FAuthor.IsEmpty, FConfiguration.Author, FAuthor);
+  Migrate.Description := FDescription;
 
-  if FVersion.Trim().IsEmpty() then
-    FVersion := FPackage.version;
+  FMigrateService.CreateNewMigrate(Migrate);
 
-  Migrate.issueIdentifier := FMigrateName.ToUpper;
-  Migrate.version := FVersion;
-  Migrate.unixIdentifier := TimeStamp;
+  ShowMessageSucessfull();
 
-  try
-
-    FMigrateService.createNewMigrate(Migrate);
-
-    showMessageSucessfull();
-
-  except
-
-    on e: EAlfredException do
-      showMessageError(e.Message)
-    else
-      raise;
-
-  end;
-
+  OpenMigrate(Migrate);
 end;
 
-procedure TGenerateMigrateCommand.init;
+procedure TGenerateMigrateCommand.Init;
 begin
   inherited;
-
   FMigrateService := TMigrateService.Create(FPackage);
-
+  FOpen := FConfiguration.AutoOpen;
 end;
 
-procedure TGenerateMigrateCommand.setName(const name: String);
+procedure TGenerateMigrateCommand.OpenMigrate(const Migrate: TMigrate);
+var
+  FileName: string;
 begin
-  FMigrateName := name;
+  if not FOpen then
+    Exit;
+
+  FileName := Format('%s%s_%s.json', [FPackage.MigrationDir, Migrate.Id, Migrate.Issue]);
+
+  TIOUtils.OpenFile(FileName, FConfiguration.DefaultEditor);
 end;
 
-procedure TGenerateMigrateCommand.setVersion(const version: String);
+procedure TGenerateMigrateCommand.SetAuthor(const Value: string);
 begin
-  FVersion := version;
+  FAuthor := Value.Trim;
 end;
 
-procedure TGenerateMigrateCommand.showMessageError(const error: String);
+procedure TGenerateMigrateCommand.SetDescription(const Value: string);
 begin
-  FConsoleIO.WriteInfo('');
-  FConsoleIO.WriteError('* ------- ');
-  FConsoleIO.WriteError(Format('| %s :( ', [error]));
-  FConsoleIO.WriteError('* ----------------------------------------------------- ');
-  FConsoleIO.WriteInfo('');
+  FDescription := Value.Trim;
 end;
 
-procedure TGenerateMigrateCommand.showMessageSucessfull;
+procedure TGenerateMigrateCommand.SetName(const Name: String);
+begin
+  FName := Name.Trim().ToUpper;
+end;
+
+procedure TGenerateMigrateCommand.EnableOpen;
+begin
+  FOpen := True;
+end;
+
+procedure TGenerateMigrateCommand.SetVersion(const Version: string);
+begin
+  FVersion := Version.Trim;
+end;
+
+procedure TGenerateMigrateCommand.ShowMessageSucessfull;
 begin
   FConsoleIO.WriteInfo('');
   FConsoleIO.WriteSucess('* ------- ');
