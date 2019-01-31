@@ -18,12 +18,12 @@ type
   private
     FDependencyResolver : IDependencyResolver;
     FGlobal: Boolean;
-
+  protected
     procedure Init; override;
   public
     procedure Execute; override;
 
-    [OptionAttribute('global', '-g', 'Update globally installed packages.')]
+    [Option('global', '-g', 'Update globally installed packages.')]
     procedure Global;
   end;
 

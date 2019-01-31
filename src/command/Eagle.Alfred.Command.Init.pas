@@ -20,8 +20,6 @@ type
   private
     function CreateMessage(const Msg: string; Default: string): string;
     procedure ReadProjectName;
-
-    procedure Init; override;
     procedure ReadDBFile;
     procedure ReadDBHost;
     procedure ReadDBPass;
@@ -40,6 +38,8 @@ type
     procedure ReadProjectVersion;
     function ReadRequiredData(const Msg, Default, Alert: string): string;
     procedure ShowGenerationConfirmation;
+  protected
+    procedure Init; override;
   public
     destructor Destroy; override;
     procedure Execute; override;
@@ -247,7 +247,7 @@ end;
 
 procedure TInitCommand.ReadProjectModular;
 var
-  Msg, Value: string;
+  Msg: string;
 begin
   Msg := CreateMessage('modular: ', IfThen(FConfiguration.Modular, 'yes', 'no'));
 

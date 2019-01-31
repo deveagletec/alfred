@@ -121,12 +121,12 @@ begin
 end;
 
 procedure TDprojParser.ChangeVersion;
-var
+{var
   Project, Node, VerInfo_Keys: IXMLNode;
   I, J, K: Integer;
   Keys_String: String;
   Keys : TArray<string>;
-  Version: TArray<string>;
+  Version: TArray<string>;   }
 begin
 
  { try
