@@ -17,6 +17,7 @@ uses
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Command.Common.Migrate.Model,
+  Eagle.Alfred.Command.Common.Migrate.Repository,
 
   XSuperObject;
 
@@ -38,10 +39,11 @@ type
   private
 
     FPackage: TPackage;
+    FMigrateRepository: IMigrateRepository;
 
     procedure FilterMigratesByVersion(var Migrates: TList<TMigrate>; const Version: string);
     function GetListFilesMigrate: TList<string>;
-    function LoadMigrate(FileName: string): TMigrate;
+    function LoadMigrate(FileName: string; ExecutedMigrates: TList<string>): TMigrate;
 
   public
     constructor Create(const Package: TPackage);
@@ -60,6 +62,8 @@ constructor TMigrateService.Create(const Package: TPackage);
 begin
   inherited Create();
   FPackage := package;
+
+  FMigrateRepository := TMigrateRepository.Create(FPackage);
 end;
 
 procedure TMigrateService.CreateMigrateDirectory;
@@ -141,7 +145,7 @@ var
   ListFiles: TList<string>;
   ListMigrates: TList<TMigrate>;
   FileName: string;
-  Migrate: TMigrate;
+  ExecutedMigrates: TList<string>;
 begin
 
   ListFiles := GetListFilesMigrate();
@@ -153,20 +157,25 @@ begin
     if ListFiles.Count = 0 then
       Exit(nil);
 
+    ExecutedMigrates := FMigrateRepository.GetListMigratesExecuted();
+
     ListMigrates := TList<TMigrate>.Create();
 
     for FileName in ListFiles do
-    begin
-      Migrate := LoadMigrate(FileName);
-      ListMigrates.Add(Migrate);
-    end;
+      ListMigrates.Add(LoadMigrate(FileName, ExecutedMigrates));
 
     Result := ListMigrates;
 
   finally
+
     if Assigned(ListFiles) then
       ListFiles.Free();
+
+    if Assigned(ExecutedMigrates) then
+      ExecutedMigrates.Free();
+
   end;
+
 end;
 
 function TMigrateService.GetMigratesByVersion(const Version: string): TList<TMigrate>;
@@ -183,7 +192,7 @@ begin
 
 end;
 
-function TMigrateService.LoadMigrate(FileName: string): TMigrate;
+function TMigrateService.LoadMigrate(FileName: string; ExecutedMigrates: TList<string>): TMigrate;
 var
   Data: string;
 begin
@@ -196,6 +205,10 @@ begin
     Result := TJSON.Parse<TMigrate>(Data);
     Result.Id := FileName.Split(['_'])[0];
     Result.Name := FileName;
+
+    if Assigned(ExecutedMigrates) and (ExecutedMigrates.Count > 0) then
+      Result.WasExecuted := ExecutedMigrates.Contains(Result.Id);
+
   except
     on E: Exception do
       raise EJSONReadException.CreateFmt('Not is possible create the files JSON! Error: %s', [E.Message]);
