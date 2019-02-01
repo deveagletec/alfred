@@ -14,6 +14,9 @@ type
     [DISABLE]
     Name: string;
 
+    [DISABLE]
+    WasExecuted: Boolean;
+
     [Alias('issue')]
     Issue: string;
 
