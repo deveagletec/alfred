@@ -12,14 +12,14 @@ uses
   System.Generics.Collections,
   System.RegularExpressions,
 
+  XSuperObject,
+
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Command.Common.Migrate.Model,
-  Eagle.Alfred.Command.Common.Migrate.Repository,
-
-  XSuperObject;
+  Eagle.Alfred.Command.Common.Migrate.Repository;
 
 type
 
@@ -29,6 +29,7 @@ type
     ['{A31CC6DC-9FE4-4FC1-9610-E476806C6D33}']
     function GetMigratesByMigrationDir(): TList<TMigrate>;
     function GetMigratesByVersion(const Version: string): TList<TMigrate>;
+    function GetMigrateByIdentifier(const Identifier: string): TMigrate;
     procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
     procedure CreateNewMigrate(const Migrate: TMigrate);
     procedure CreateMigrateDirectory();
@@ -51,9 +52,9 @@ type
     procedure CreateNewMigrate(const Migrate: TMigrate);
     function GetMigratesByMigrationDir: TList<TMigrate>;
     function GetMigratesByVersion(const Version: string): TList<TMigrate>;
+    function GetMigrateByIdentifier(const Identifier: string): TMigrate;
     function MigrateDirectoryExists: Boolean;
-
-    procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
+    procedure RemoveMigratesUnusableList(const ExecutionMode : TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
   end;
 
 implementation
@@ -126,7 +127,8 @@ begin
 
   ListFiles := TList<String>.Create;
 
-  Index := FindFirst(Format('%s%s*.json', [FPackage.BaseDir, FPackage.MigrationDir]), faAnyFile, Search);
+  Index := FindFirst(Format('%s%s*.json', [FPackage.BaseDir,
+    FPackage.MigrationDir]), faAnyFile, Search);
 
   while Index = 0 do
   begin
@@ -137,6 +139,38 @@ begin
   end;
 
   Result := ListFiles;
+
+end;
+
+function TMigrateService.GetMigrateByIdentifier(const Identifier: string) : TMigrate;
+var
+  Migrates: TList<TMigrate>;
+  Migrate, MigrateResult: TMigrate;
+begin
+
+  Migrates := GetMigratesByMigrationDir();
+
+  if (not Assigned(Migrates)) or (Migrates.Count <= 0) then
+    Exit(MigrateResult);
+
+  try
+
+    for Migrate in Migrates do
+    begin
+
+      if not (Migrate.Id.Equals(Identifier) or Migrate.Name.Replace('.json', '').ToUpper.Equals(Identifier.ToUpper)) then
+        continue;
+
+      MigrateResult := Migrates.Extract(Migrate);
+      Exit(MigrateResult);
+
+    end;
+
+  finally
+    Migrates.Free;
+  end;
+
+  Result := MigrateResult;
 
 end;
 
@@ -220,7 +254,8 @@ begin
   Result := DirectoryExists(FPackage.MigrationDir + '\');
 end;
 
-procedure TMigrateService.RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
+procedure TMigrateService.RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>;
+  const ListMigratesExecuted: TList<string>);
 var
   Migrate: TMigrate;
   CanRemove: Boolean;

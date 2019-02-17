@@ -220,7 +220,7 @@ begin
 
     FFDConnection.GetConnection.GetTableNames('', '', '', TablesNameList);
 
-    TableMigrateExists := TablesNameList.IndexOf('MIGRATIONS') > 0;
+    TableMigrateExists := TablesNameList.IndexOf('MIGRATIONS') >= 0;
 
   finally
     TablesNameList.Free();

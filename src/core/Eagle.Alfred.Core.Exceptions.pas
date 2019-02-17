@@ -17,6 +17,8 @@ type
 
   EAlfredCreateFileException = class(EAlfredException);
 
+  EAlfredDeleteFileException = class(EAlfredException);
+
   EDataBaseException = class(EAlfredException);
 
   EFileNotFoundException = class(EAlfredException);

@@ -57,7 +57,8 @@ uses
   Eagle.Alfred.Command.Common.Migrate.Model in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Model.pas',
   Eagle.Alfred.Command.Common.Migrate.Repository in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Repository.pas',
   Eagle.Alfred.Command.Common.Migrate.Service in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Service.pas',
-  Eagle.Alfred.Command.DB.Migrate.List in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.List.pas';
+  Eagle.Alfred.Command.DB.Migrate.List in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.List.pas',
+  Eagle.Alfred.Command.DB.Migrate.Delete in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Delete.pas';
 
 var
   OldColor: Byte;
