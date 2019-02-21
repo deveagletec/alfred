@@ -16,6 +16,7 @@ type
     procedure AddPathInUnitSearchPath(const Path: string);
     procedure DeleteUnit(const Name, Path: string);
     procedure DeletePathInUnitSearchPath(const Path: string);
+    procedure RemoveLibInSearchPath(const Name: string);
     procedure Save;
   end;
 
@@ -45,6 +46,7 @@ type
       procedure DeleteUnit(const Name, Path: string);
       procedure AddPathInUnitSearchPath(const Path: string);
       procedure DeletePathInUnitSearchPath(const Path: string);
+      procedure RemoveLibInSearchPath(const Name: string);
       procedure Save;
 
       property VersionString: string read FVersionString write SetVersionString;
@@ -243,25 +245,30 @@ var
   Condition, AttributeValue: string;
 begin
 
-  Condition := '$(Cfg_1_Win32)'.QuotedString + '!=' + ''.QuotedString;
+  Condition := '$(Base)'.QuotedString + '!=' + ''.QuotedString;
 
-  NodeList := FXMLDocument.selectNodes('/Project/PropertyGroup/DCC_UnitSearchPath');
+  NodeList := FXMLDocument.selectNodes('/Project/PropertyGroup');
 
   Node := NodeList.nextNode;
 
   while Node <> nil do
   begin
 
-    Attribute := Node.parentNode.attributes.getNamedItem('Condition');
+    Attribute := Node.attributes.getNamedItem('Condition');
 
     if Attribute = nil then
+    begin
+      Node := NodeList.nextNode;
       Continue;
+    end;
 
     AttributeValue := Attribute.Text;
 
     if AttributeValue.Equals(Condition) then
     begin
-      Result := Node;
+      Result := Node.selectSingleNode('//DCC_UnitSearchPath');
+
+      AttributeValue := Result.text;
       Break;
     end;
 
@@ -292,6 +299,35 @@ begin
 
   FUnitSearchPathList.AddRange(UnitsList.Split([';']));
 
+end;
+
+procedure TDprojParser.RemoveLibInSearchPath(const Name: string);
+var
+  I, Count: Integer;
+  Value: string;
+begin
+
+  if Name.IsEmpty then
+    Exit;
+
+  Count := FUnitSearchPathList.Count;
+
+  I := 0;
+
+  while I < Count do
+  begin
+    Value := FUnitSearchPathList.Items[I];
+
+    if Value.Contains(Name) then
+    begin
+      FUnitSearchPathList.Delete(I);
+      Dec(Count);
+    end
+    else
+      Inc(I);
+  end;
+
+  FUnitSearchPathList.TrimExcess;
 end;
 
 procedure TDprojParser.Save;
