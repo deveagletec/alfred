@@ -2,10 +2,12 @@ unit Eagle.Alfred.DependencyResolver;
 
 interface
 uses
+   TypInfo,
    System.SysUtils,
    System.Classes,
    System.Generics.Collections,
    System.IOUtils,
+   system.RegularExpressions,
 
    XSuperObject,
 
@@ -13,16 +15,13 @@ uses
    Eagle.Alfred.Core.ConsoleIO,
    Eagle.Alfred.Core.IOUtils,
    Eagle.Alfred.DprojParser,
-   Eagle.Alfred.Command.Common.Downloaders.Downloader,
-   Eagle.Alfred.Command.Common.Downloaders.GithubDownloader,
-   Eagle.Alfred.Command.Common.Downloaders.BitbucketDownloader,
-   Eagle.Alfred.Command.Common.Downloaders.GitlabDownloader;
+   Eagle.Alfred.Core.DownloaderFactory,
+   Eagle.Alfred.Command.Common.Downloaders.Downloader;
 
 type
 
    IDependencyResolver = interface
       ['{BBA5E2B9-98CC-4C23-9772-3F009020E746}']
-      procedure Resolver(Dependency: TDependency);
       procedure ResolverAll;
       procedure UpdateAll;
       procedure Install(const Dependency: string);
@@ -35,6 +34,7 @@ type
       FPackage: TPackage;
       FPackageLocked: TPackagelocked;
       FVendorDir : string;
+      FRelativeVendorPath: string;
       FForce: Boolean;
       FConsoleIO : IConsoleIO;
       FPaths : TList<string>;
@@ -43,6 +43,7 @@ type
       FRemovedDependencies: TList<TDependency>;
       FMainProject: IDprojParser;
       FTestProject: IDprojParser;
+      FDownloaderFactory: IDownloaderFactory;
 
       procedure DoResolver(Dependency: TDependency);
       procedure LoadFileLock;
@@ -50,19 +51,15 @@ type
       procedure SaveFileLock;
       procedure ScanSourceDirectory(Dependency: TDependency);
       procedure DoScanSourceDirectory(const Path : string);
-      procedure DownloadBitbucket(Dependency: TDependency);
       procedure DownloadDependency(Dependency: TDependency);
-      procedure DownloadGithub(Dependency: TDependency);
-      procedure DownloadGitlab(Dependency: TDependency);
       function IsInstalled(Dependency: TDependency): Boolean;
+      procedure LoadDependencies;
       procedure RegisterDependency(Dependency: TDependency);
-      procedure UpdateLibraryPath();
       procedure UpdatePackage;
       procedure UpdateProject;
    public
       constructor Create(APackage: TPackage; aIO : IConsoleIO);
       destructor Destroy(); override;
-      procedure Resolver(Dependency: TDependency);
       procedure ResolverAll;
       procedure UpdateAll;
       procedure Install(const Value: string);
@@ -86,6 +83,8 @@ begin
   FPackage := APackage;
   FConsoleIO := aIO;
 
+  FRelativeVendorPath := TRegEx.Replace(FPackage.PackagesDir, '[^\\]+', '..');
+
   FPaths := TList<string>.Create;
   FDependencies := TDictionary<string,TDependency>.Create;
   FInstalledDependencies := TDictionary<string,TDependency>.Create;
@@ -94,6 +93,9 @@ begin
   FMainProject := TDprojParser.Create(APackage.PackagesDir, APackage.Name);
   FTestProject := TDprojParser.Create(APackage.PackagesDir, APackage.Name + 'Test');
 
+  FDownloaderFactory := TDownloaderFactory.Create(FConsoleIO, FVendorDir);
+
+  LoadDependencies;
   LoadFileLock;
 end;
 
@@ -132,30 +134,23 @@ end;
 procedure TDependencyResolver.Install(const Value: string);
 var
   Dependency: TDependency;
-  Len: Integer;
 begin
 
-  try
+  Dependency := TDependency.Create(Value);
 
-    Dependency := TDependency.Create(Value);
-
-    if IsInstalled(Dependency) and not FForce then
-    begin
-      FConsoleIO.WriteInfo('Dependency already installed!');
-      Exit;
-    end;
-
-    DoResolver(Dependency);
-
-    UpdateProject;
-
-    UpdatePackage;
-
-    SaveFileLock;
-  finally
-    Dependency.Free;
+  if IsInstalled(Dependency) and not FForce then
+  begin
+    FConsoleIO.WriteInfoFmt('Dependency %s already installed!', [Dependency.Name.QuotedString]);
+    Exit;
   end;
 
+  DoResolver(Dependency);
+
+  UpdateProject;
+
+  UpdatePackage;
+
+  SaveFileLock;
 end;
 
 procedure TDependencyResolver.LoadFileLock;
@@ -185,25 +180,36 @@ begin
 
 end;
 
-procedure TDependencyResolver.Resolver(Dependency: TDependency);
-begin
-
-end;
-
 procedure TDependencyResolver.ResolverAll;
 var
   Dependency : TDependency;
+  Value: string;
+  Updated: Boolean;
 begin
+  Updated := False;
 
- { for Dependency in FPackage.Dependencies do
-    DoResolver(Dependency);  }
+  for Value in FPackage.Dependencies do
+  begin
+    Dependency := TDependency.Create(Value);
+
+    if IsInstalled(Dependency) and not FForce then
+    begin
+      FConsoleIO.WriteInfoFmt('Dependency %s already installed!', [Dependency.Name.QuotedString]);
+      Continue;
+    end;
+
+    DoResolver(Dependency);
+    Updated := True;
+  end;
+
+  if not Updated then
+    Exit;
 
   UpdateProject;
 
   UpdatePackage;
 
   SaveFileLock;
-
 end;
 
 function TDependencyResolver.ResolverSourceDiretory(const Path : string): string;
@@ -251,7 +257,6 @@ procedure TDependencyResolver.ScanSourceDirectory(Dependency: TDependency);
 var
   DependencyDiretory, SourceDiretory: string;
 begin
-
   FConsoleIO.WriteInfo('Scanning source diretory...');
 
   DependencyDiretory := FVendorDir + Dependency.Project;
@@ -259,7 +264,7 @@ begin
   SourceDiretory := ResolverSourceDiretory(DependencyDiretory);
 
   if SourceDiretory.Equals(DependencyDiretory) then
-    FPaths.Add(SourceDiretory)
+    FPaths.Add(FRelativeVendorPath + SourceDiretory)
   else
     DoScanSourceDirectory(SourceDiretory);
 end;
@@ -278,7 +283,7 @@ begin
   if FPaths.Contains(Path) then
     Exit;
 
-  FPaths.Add(Path);
+  FPaths.Add(FRelativeVendorPath + Path);
 
   if FindFirst(Path + '\*', faDirectory, SearchResult) <> 0 then
     Exit;
@@ -297,43 +302,17 @@ begin
   FindClose(searchResult);
 end;
 
-procedure TDependencyResolver.DownloadBitbucket(Dependency: TDependency);
-var
-  Downloader: IDownloader;
-begin
-  Downloader := TBitbucketDownloader.Create(FConsoleIO, FVendorDir);
-  Downloader.DownloadDependency(Dependency);
-end;
-
 procedure TDependencyResolver.DownloadDependency(Dependency: TDependency);
 var
   RepoName: string;
-begin
-  RepoName := Dependency.Repo.ToUpper;
-
-  if 'GITHUB'.Equals(RepoName) then
-    DownloadGithub(Dependency)
-  else if 'BITBUCKET'.Equals(RepoName) then
-    DownloadBitbucket(Dependency)
-  else if 'GITLAB'.Equals(RepoName) then
-    DownloadGitlab(Dependency)
-  else
-    raise Exception.Create('Invalid repository ' + RepoName);
-end;
-
-procedure TDependencyResolver.DownloadGithub(Dependency: TDependency);
-var
+  Repo: TRepositoryType;
   Downloader: IDownloader;
 begin
-  Downloader := TGithubDownloader.Create(FConsoleIO, FVendorDir);
-  Downloader.DownloadDependency(Dependency);
-end;
+  RepoName := Dependency.Repo.Trim;
 
-procedure TDependencyResolver.DownloadGitlab(Dependency: TDependency);
-var
-  Downloader: IDownloader;
-begin
-  Downloader := TGitlabDownloader.Create(FConsoleIO, FVendorDir);
+  Repo := TRepositoryType(GetEnumValue(TypeInfo(TRepositoryType), RepoName));
+
+  Downloader := FDownloaderFactory.GetDownloader(Repo);
   Downloader.DownloadDependency(Dependency);
 end;
 
@@ -344,11 +323,22 @@ begin
   Result := FInstalledDependencies.Items[Dependency.Name].Version.Equals(Dependency.Version);
 end;
 
+procedure TDependencyResolver.LoadDependencies;
+var
+  Dep: string;
+  Dependency: TDependency;
+begin
+  for Dep in FPackage.Dependencies do
+  begin
+    Dependency := TDependency.Create(Dep);
+    FDependencies.Add(Dependency.Name, Dependency);
+  end;
+end;
+
 procedure TDependencyResolver.RegisterDependency(Dependency: TDependency);
 var
   Dep: TDependency;
 begin
-
   if FInstalledDependencies.ContainsKey(Dependency.Name) then
   begin
     Dep := FInstalledDependencies.Items[Dependency.Name];
@@ -357,9 +347,8 @@ begin
       FRemovedDependencies.Add(Dep);
   end;
 
-  FDependencies.Add(Dependency.Name, Dependency);
-  FInstalledDependencies.Add(Dependency.Name, Dependency);
-
+  FDependencies.AddOrSetValue(Dependency.Name, Dependency);
+  FInstalledDependencies.AddOrSetValue(Dependency.Name, Dependency);
 end;
 
 procedure TDependencyResolver.Uninstall(Dependency: TDependency);
@@ -369,18 +358,6 @@ end;
 
 procedure TDependencyResolver.UpdateAll;
 begin
-
-end;
-
-procedure TDependencyResolver.UpdateLibraryPath;
-var
-  Path: string;
-begin
-
-  for Path in FPaths do
-  begin
-    FMainProject.AddPathInUnitSearchPath(Path);
-  end;
 
 end;
 
@@ -407,13 +384,18 @@ begin
 end;
 
 procedure TDependencyResolver.UpdateProject;
+var
+  Dependency: TDependency;
+  Path: string;
 begin
-  // Remover dependencias depreciadas
-  // Adicionar as novas dependencias
 
-  //UpdateLibraryPath;
+  for Dependency in FRemovedDependencies.ToArray do
+    FMainProject.RemoveLibInSearchPath(FVendorDir + Dependency.Project);
 
-  TFile.WriteAllText('lib.txt', string.Join(#13, FPaths.ToArray));
+  for Path in FPaths do
+    FMainProject.AddPathInUnitSearchPath(Path);
+
+  FMainProject.Save;
 end;
 
 end.

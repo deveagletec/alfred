@@ -12,7 +12,7 @@ uses
 
 type
 
-  TDependency = class
+  TDependency = record
     Repo: string;
     User: string;
     Project: string;

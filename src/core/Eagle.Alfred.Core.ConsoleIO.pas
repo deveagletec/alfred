@@ -1,6 +1,6 @@
 unit Eagle.Alfred.Core.ConsoleIO;
 
-interface
+interface
 
 uses
   System.SysUtils,
@@ -126,8 +126,7 @@ begin
   WriteColor(Msg, Green);
 end;
 
-procedure TConsoleIO.WriteSuccessFmt(const Msg: string;
-  const Args: array of const);
+procedure TConsoleIO.WriteSuccessFmt(const Msg: string; const Args: array of const);
 begin
   WriteSuccess(string.Format(Msg, Args));
 end;

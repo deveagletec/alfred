@@ -15,7 +15,7 @@ uses
 
 type
   [PackageRequired]
-  [Command('install', '', 'Generates a Test')]
+  [Command('install', '', 'Install a package')]
   TInstallCommand = class(TCommandAbstract)
   private
     FDependencyResolver : IDependencyResolver;
@@ -33,7 +33,7 @@ type
     [Option('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
 
-    [Option('global', '-g', 'The -g or --global argument will cause npm to install the package globally rather than locally')]
+    [Option('global', '-g', 'The -g or --global argument will cause alfred to install the package globally rather than locally')]
     procedure Global;
   end;
 
@@ -43,14 +43,12 @@ implementation
 
 procedure TInstallCommand.Execute;
 begin
-
   FDependencyResolver.SetForce(FForce);
 
   if FDependency.IsEmpty then
     FDependencyResolver.ResolverAll
   else
     FDependencyResolver.Install(FDependency);
-
 end;
 
 procedure TInstallCommand.Force;
