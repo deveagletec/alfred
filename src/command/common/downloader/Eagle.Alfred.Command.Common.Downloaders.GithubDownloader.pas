@@ -16,7 +16,7 @@ implementation
 
 function TGithubDownloader.GetUrlDependency(Dependency: TDependency): string;
 begin
-   Result := 'https://api.github.com/repos/' + Dependency.Name + '/zipball/' + Dependency.Version;
+   Result := 'https://api.github.com/repos/' + Dependency.User + '/' + Dependency.Project + '/zipball/' + Dependency.Version;
 end;
 
 end.

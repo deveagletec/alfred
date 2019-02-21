@@ -17,10 +17,11 @@ type
       FVendorDir : string;
       FDownloadSize : Int64;
 
+      procedure CreateDir(const RepoName: string);
       procedure UnZipDependency(const FileName : string);
       procedure DoDownloadDependency(Dependency : TDependency);
       function GetSourceDirName(const FileName : string) : string;
-      procedure CopyDependency(const FileName : string);
+      procedure CopyDependency(Dependency : TDependency);
       procedure DeleteDownloadedFiles(const FileName : string);
 
       procedure OnDownloadBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
@@ -35,26 +36,34 @@ implementation
 
 { TDownloader }
 
-procedure TDownloader.CopyDependency(const FileName: string);
+procedure TDownloader.CopyDependency(Dependency : TDependency);
 var
    SourceDirName, DestDirName : string;
 begin
+  SourceDirName := GetSourceDirName(Dependency.Project);
 
-   SourceDirName := GetSourceDirName(FileName);
+  DestDirName := FVendorDir + Dependency.Project;
 
-   DestDirName := FVendorDir + FileName;
+  if TDirectory.Exists(DestDirName) then
+    TDirectory.Delete(DestDirName, True);
 
-   if TDirectory.Exists(DestDirName) then
-      TDirectory.Delete(DestDirName, True);
-
-   TDirectory.Move(SourceDirName, DestDirName);
-
+  TDirectory.Move(SourceDirName, DestDirName);
 end;
 
 constructor TDownloader.Create(aIO : IConsoleIO; const VendorDir: string);
 begin
    FIO := aIO;
    FVendorDir := VendorDir;
+end;
+
+procedure TDownloader.CreateDir(const RepoName: string);
+var
+  Dir: string;
+begin
+  if RepoName.Contains('/') then
+    Dir := RepoName.Split(['/'])[0];
+
+  TDirectory.CreateDirectory(FVendorDir + Dir);
 end;
 
 procedure TDownloader.DeleteDownloadedFiles(const FileName: string);
@@ -72,7 +81,7 @@ var
 begin
 
   Url := GetUrlDependency(Dependency);
-  Filename := Dependency.Name + '.zip';
+  Filename := Dependency.Project + '.zip';
 
   IdHTTP1 := TIdHTTP.Create;
   IdHTTP1.OnWorkBegin := OnDownloadBegin;
@@ -106,13 +115,13 @@ begin
 
    FIO.WriteInfo('');
    FIO.WriteInfo('Unzipping ...');
-   UnZipDependency(Dependency.Name);
+   UnZipDependency(Dependency.Project);
 
    FIO.WriteInfo('Copying ...');
-   CopyDependency(Dependency.Name);
+   CopyDependency(Dependency);
 
    FIO.WriteInfo('Cleaning swap ...');
-   DeleteDownloadedFiles(Dependency.Name);
+   DeleteDownloadedFiles(Dependency.Project);
 
 end;
 
@@ -140,14 +149,12 @@ begin
 
 end;
 
-procedure TDownloader.OnDownloadBegin(ASender: TObject; AWorkMode: TWorkMode;
-  AWorkCountMax: Int64);
+procedure TDownloader.OnDownloadBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
 begin
-   FDownloadSize := AWorkCountMax;
+  FDownloadSize := AWorkCountMax;
 
-   if FDownloadSize < 1 then
-      FDownloadSize := 1;
-
+  if FDownloadSize < 1 then
+    FDownloadSize := 1;
 end;
 
 procedure TDownloader.OnDownloadWork(ASender: TObject; AWorkMode: TWorkMode;
@@ -164,9 +171,8 @@ end;
 
 procedure TDownloader.UnZipDependency(const FileName: string);
 var
-   Zipper: TZipFile;
+  Zipper: TZipFile;
 begin
-
   Zipper := TZipFile.Create();
 
   try
@@ -176,8 +182,6 @@ begin
   finally
     Zipper.Free;
   end;
-
-
 end;
 
 end.
