@@ -20,8 +20,6 @@ type
   private
     FDependencyResolver : IDependencyResolver;
     FDependency: string;
-    FSaveProd: Boolean;
-    FSaveDev: Boolean;
     FForce: Boolean;
     FGlobal: Boolean;
   protected
@@ -31,12 +29,6 @@ type
 
     [Param(1, 'Dependency', False)]
     procedure SetDependency(const Name: string);
-
-    [Option('save-prod', '-P', 'Package will appear in your dependencies.')]
-    procedure SaveProd;
-
-    [Option('save-dev', '-D', 'Package will appear in your devDependencies.')]
-    procedure SaveDev;
 
     [Option('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
@@ -51,6 +43,8 @@ implementation
 
 procedure TInstallCommand.Execute;
 begin
+
+  FDependencyResolver.SetForce(FForce);
 
   if FDependency.IsEmpty then
     FDependencyResolver.ResolverAll
@@ -73,17 +67,6 @@ procedure TInstallCommand.Init;
 begin
   inherited;
   FDependencyResolver := TDependencyResolver.Create(FPackage, FConsoleIO);
-  FSaveProd := True;
-end;
-
-procedure TInstallCommand.SaveDev;
-begin
-  FSaveDev := True;
-end;
-
-procedure TInstallCommand.SaveProd;
-begin
-  FSaveProd := True;
 end;
 
 procedure TInstallCommand.SetDependency(const Name: string);

@@ -13,10 +13,12 @@ uses
 type
 
   TDependency = class
-    Name: string;
+    Repo: string;
+    User: string;
+    Project: string;
     Version: string;
-    Repo : string;
-    SrcDir : string;
+    Name: string;
+    Full : string;
 
     constructor Create(const Value: string);
   end;
@@ -84,11 +86,14 @@ type
     [Alias('dependencies')]
     Dependencies: TArray<string>;
 
-    [Alias('dev-dependencies')]
-    DevDependencies: TArray<string>;
-
     destructor Destroy; override;
     procedure Validate;
+  end;
+
+  TPackagelocked = class
+  public
+    [Alias('dependencies')]
+    Dependencies: TArray<string>;
   end;
 
   TConfiguration = class
@@ -189,7 +194,9 @@ var
   Match: TMatch;
   Group: TGroup;
 begin
-  Match := TRegEx.Match(Value, '^((\w+):)?([\w\/-]+)(#([a-f0-9]+))?$');
+  Full := Value;
+
+  Match := TRegEx.Match(Value, '^((\w+):)?(([\w-]+)\/([\w-]+))(#([a-f0-9]+))?$');
 
   if not Match.Success then
     raise Exception.Create('Error Message');
@@ -198,14 +205,18 @@ begin
   Repo := IfThen(Group.Success, Group.Value, 'github');
   Group := Match.Groups.Item[3];
   Name := Group.Value;
-  if Match.Groups.Count < 5 then
+  Group := Match.Groups.Item[4];
+  User := Group.Value;
+  Group := Match.Groups.Item[5];
+  Project := Group.Value;
+  if Match.Groups.Count < 7 then
   begin
     Repo := 'lasted';
     Exit;
   end;
 
-  Group := Match.Groups.Item[5];
-  Repo := IfThen(Group.Success, Group.Value, 'lasted');
+  Group := Match.Groups.Item[7];
+  Version := IfThen(Group.Success, Group.Value, 'lasted');
 end;
 
 end.
