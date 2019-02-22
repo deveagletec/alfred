@@ -9,35 +9,35 @@ uses
 
 type
 
-   IDownloader = interface
-      ['{D736B7F1-65D7-4125-992E-2ECC12420525}']
-      procedure DownloadDependency(Dependency : TDependency);
-   end;
+  IDownloader = interface
+    ['{D736B7F1-65D7-4125-992E-2ECC12420525}']
+    procedure DownloadDependency(Dependency : TDependency);
+  end;
 
-   TDownloader = class(TInterfacedObject, IDownloader)
-   protected
-      FIO : IConsoleIO;
-      FVendorDir : string;
-      FDownloadSize : Int64;
-      FIdHTTP: TIdHTTP;
+  TDownloader = class(TInterfacedObject, IDownloader)
+  protected
+    FIO : IConsoleIO;
+    FVendorDir : string;
+    FDownloadSize : Int64;
+    FIdHTTP: TIdHTTP;
 
-      procedure CreateDir(const RepoName: string);
-      procedure UnZipDependency(const FileName : string);
-      procedure DoDownloadDependency(Dependency : TDependency);
-      function GetSourceDirName(const FileName : string) : string;
-      procedure CopyDependency(Dependency : TDependency);
-      procedure DeleteDownloadedFiles(const FileName : string);
+    procedure CreateDir(const RepoName: string);
+    procedure UnZipDependency(const FileName : string);
+    procedure DoDownloadDependency(Dependency : TDependency);
+    function GetSourceDirName(const FileName : string) : string;
+    procedure CopyDependency(Dependency : TDependency);
+    procedure DeleteDownloadedFiles(const FileName : string);
 
-      procedure OnDownloadBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
-      procedure OnDownloadWork(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
+    procedure OnDownloadBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
+    procedure OnDownloadWork(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
 
-      function MountUrl(Dependency : TDependency): string; virtual; abstract;
-      procedure SetAuthentication(Dependency: TDependency); virtual; abstract;
-   public
-      constructor Create(aIO : IConsoleIO; const VendorDir : string);
-      destructor Destroy; override;
-      procedure DownloadDependency(Dependency : TDependency);
-   end;
+    function MountUrl(Dependency : TDependency): string; virtual; abstract;
+    procedure SetAuthentication(Dependency: TDependency); virtual; abstract;
+  public
+    constructor Create(aIO : IConsoleIO; const VendorDir : string);
+    destructor Destroy; override;
+    procedure DownloadDependency(Dependency : TDependency);
+  end;
 
 implementation
 
