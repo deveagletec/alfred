@@ -3,9 +3,6 @@ unit Eagle.Alfred.Command.Install;
 interface
 uses
   System.SysUtils,
-  System.IOUtils,
-
-  XSuperObject,
 
   Eagle.Alfred,
   Eagle.Alfred.Core.Types,
