@@ -1,8 +1,11 @@
 unit Eagle.Alfred.Command.Common.Downloaders.Downloader;
 
 interface
-uses Classes, System.Zip, IdHTTP, System.SysUtils, System.IOUtils, IdComponent, IdSSLOpenSSL,
-   Eagle.Alfred.Core.Types, Eagle.Alfred.Core.ConsoleIO;
+uses
+  Classes, System.Zip, IdHTTP, System.SysUtils, System.IOUtils, IdComponent, IdSSLOpenSSL, Math,
+  System.NetEncoding,
+  Eagle.Alfred.Core.Types,
+  Eagle.Alfred.Core.ConsoleIO;
 
 type
 
@@ -16,6 +19,7 @@ type
       FIO : IConsoleIO;
       FVendorDir : string;
       FDownloadSize : Int64;
+      FIdHTTP: TIdHTTP;
 
       procedure CreateDir(const RepoName: string);
       procedure UnZipDependency(const FileName : string);
@@ -26,10 +30,13 @@ type
 
       procedure OnDownloadBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
       procedure OnDownloadWork(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
+
+      function MountUrl(Dependency : TDependency): string; virtual; abstract;
+      procedure SetAuthentication(Dependency: TDependency); virtual; abstract;
    public
       constructor Create(aIO : IConsoleIO; const VendorDir : string);
+      destructor Destroy; override;
       procedure DownloadDependency(Dependency : TDependency);
-      function GetUrlDependency(Dependency : TDependency) : string; Virtual; Abstract;
    end;
 
 implementation
@@ -51,9 +58,24 @@ begin
 end;
 
 constructor TDownloader.Create(aIO : IConsoleIO; const VendorDir: string);
+var
+  ssl: TIdSSLIOHandlerSocketOpenSSL;
 begin
-   FIO := aIO;
-   FVendorDir := VendorDir;
+  FIO := aIO;
+  FVendorDir := VendorDir;
+
+  FIdHTTP := TIdHTTP.Create;
+  FIdHTTP.OnWorkBegin := OnDownloadBegin;
+  FIdHTTP.OnWork := OnDownloadWork;
+  FIdHTTP.Request.UserAgent :=  'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0';
+  FIdHTTP.HandleRedirects := True;
+
+  ssl := TIdSSLIOHandlerSocketOpenSSL.Create(FIdHTTP);
+
+  ssl.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2, sslvSSLv23];
+  ssl.SSLOptions.CipherList := 'ALL:!EXPORT:!LOW:!aNULL:!eNULL:!SSLv2';
+
+  FIdHTTP.IOHandler := ssl;
 end;
 
 procedure TDownloader.CreateDir(const RepoName: string);
@@ -68,67 +90,69 @@ end;
 
 procedure TDownloader.DeleteDownloadedFiles(const FileName: string);
 begin
-   TDirectory.Delete(FileName, True);
-   TFile.Delete(FileName + '.zip');
+  TDirectory.Delete(FileName, True);
+  TFile.Delete(FileName + '.zip');
+end;
+
+destructor TDownloader.Destroy;
+begin
+  if Assigned(FIdHTTP) then
+    FIdHTTP.Free;
+  inherited;
 end;
 
 procedure TDownloader.DoDownloadDependency(Dependency: TDependency);
 var
-  IdHTTP1: TIdHTTP;
   Stream: TMemoryStream;
   Url, FileName: String;
-  ssl: TIdSSLIOHandlerSocketOpenSSL;
 begin
+  FIdHTTP.Request.RawHeaders.Clear;
+  FIdHTTP.Request.BasicAuthentication := False;
 
-  Url := GetUrlDependency(Dependency);
+  Url := MountUrl(Dependency);
   Filename := Dependency.Project + '.zip';
 
-  IdHTTP1 := TIdHTTP.Create;
-  IdHTTP1.OnWorkBegin := OnDownloadBegin;
-  IdHTTP1.OnWork := OnDownloadWork;
-  IdHTTP1.Request.UserAgent :=  'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0';
-  IdHTTP1.HandleRedirects := True;
-
-  ssl := TIdSSLIOHandlerSocketOpenSSL.Create(IdHTTP1);
-
-  ssl.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2, sslvSSLv23];
-  ssl.SSLOptions.CipherList := 'ALL:!EXPORT:!LOW:!aNULL:!eNULL:!SSLv2';
-
-  IdHTTP1.IOHandler := ssl;
+  SetAuthentication(Dependency);
 
   Stream := TMemoryStream.Create;
+
   try
-    IdHTTP1.Get(Url, Stream);
+    FIdHTTP.Get(Url, Stream);
     Stream.SaveToFile(FileName);
   finally
     Stream.Free;
-    IdHTTP1.Free;
   end;
-
 end;
 
 procedure TDownloader.DownloadDependency(Dependency: TDependency);
 begin
+  try
+    FIO.WriteProcess('Downloading => 0 Mb');
+    DoDownloadDependency(Dependency);
 
-   FIO.WriteProcess('Downloading => 0%');
-   DoDownloadDependency(Dependency);
+    FIO.WriteInfo('');
+    FIO.WriteProcess('Unzipping ...');
+    UnZipDependency(Dependency.Project);
+    FIO.WriteProcess('Unzipping... Done');
 
-   FIO.WriteInfo('');
-   FIO.WriteInfo('Unzipping ...');
-   UnZipDependency(Dependency.Project);
+    FIO.WriteInfo('');
+    FIO.WriteProcess('Copying...');
+    CopyDependency(Dependency);
+    FIO.WriteProcess('Copying... Done');
 
-   FIO.WriteInfo('Copying ...');
-   CopyDependency(Dependency);
-
-   FIO.WriteInfo('Cleaning swap ...');
-   DeleteDownloadedFiles(Dependency.Project);
-
+    FIO.WriteInfo('');
+    FIO.WriteProcess('Cleaning swap...');
+    DeleteDownloadedFiles(Dependency.Project);
+    FIO.WriteProcess('Cleaning swap... Done');
+  finally
+    FIO.WriteInfo('');
+  end;
 end;
 
 function TDownloader.GetSourceDirName(const FileName: string): string;
 var
-   Dir : string;
-   searchResult : TSearchRec;
+  Dir : string;
+  searchResult : TSearchRec;
 begin
 
   if FindFirst(FileName + '\*', faDirectory, searchResult) = 0 then
@@ -157,16 +181,13 @@ begin
     FDownloadSize := 1;
 end;
 
-procedure TDownloader.OnDownloadWork(ASender: TObject; AWorkMode: TWorkMode;
-  AWorkCount: Int64);
+procedure TDownloader.OnDownloadWork(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
 var
-   Progress : Integer;
+  Progress : Double;
 begin
+  Progress := RoundTo((AWorkCount / 1024) / 1024, -3);
 
-   Progress := Round((AWorkCount / FDownloadSize) * 100);
-
-   FIO.WriteProcess('Downloading => ' + String.Parse(Progress) + '%');
-
+  FIO.WriteProcess('Downloading => ' + String.Parse(Progress) + ' Mb');
 end;
 
 procedure TDownloader.UnZipDependency(const FileName: string);
@@ -174,6 +195,9 @@ var
   Zipper: TZipFile;
 begin
   Zipper := TZipFile.Create();
+
+  if TDirectory.Exists(FileName) then
+    TDirectory.Delete(FileName, True);
 
   try
     Zipper.Open(FileName + '.zip', zmRead);
