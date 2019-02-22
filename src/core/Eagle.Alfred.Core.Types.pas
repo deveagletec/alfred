@@ -217,7 +217,7 @@ begin
   Match := TRegEx.Match(Value, REGEX);
 
   if not Match.Success then
-    raise Exception.Create('Error Message');
+    raise EDependencyDefinitionException.Create('Invalid dependency definition pattern');
 
   Group := Match.Groups.Item[GROUP_REPO];
   Repo := Group.Value;
