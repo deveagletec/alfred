@@ -41,6 +41,10 @@ type
 
   ENoExecutedMigrationFoundException = class(EAlfredException);
 
+  EDependencyDefinitionException = class(EAlfredException);
+
+  ERepositoryTypeInvalidException = class(EAlfredException);
+
 implementation
 
 end.

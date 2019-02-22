@@ -5,6 +5,7 @@ uses
   System.SysUtils,
 
   Eagle.Alfred.Core.ConsoleIO,
+  Eagle.Alfred.Core.Exceptions,
 
   Eagle.Alfred.Command.Common.Downloaders.Downloader,
   Eagle.Alfred.Command.Common.Downloaders.GithubDownloader,
@@ -25,6 +26,15 @@ type
   private
     FConsoleIO: IConsoleIO;
     FVendorDir: string;
+
+    FGithubDownloader: IDownloader;
+    FGitlabDownloader: IDownloader;
+    FBitbucketDownloader: IDownloader;
+    FSourceForgeDownloader: IDownloader;
+    function CreateBitbucketDownloader: IDownloader;
+    function CreateGithubDownloader: IDownloader;
+    function CreateGitlabDownloader: IDownloader;
+    function CreateSourceForgeDownloader: IDownloader;
   public
     constructor Create(ConsoleIO: IConsoleIO; const VendorDir: string);
     function GetDownloader(const RepoType: TRepositoryType): IDownloader;
@@ -38,19 +48,51 @@ begin
   FVendorDir := VendorDir;
 end;
 
+function TDownloaderFactory.CreateBitbucketDownloader: IDownloader;
+begin
+  if not Assigned(FBitbucketDownloader) then
+    FBitbucketDownloader := TBitbucketDownloader.Create(FConsoleIO, FVendorDir);
+
+  Result := FBitbucketDownloader;
+end;
+
+function TDownloaderFactory.CreateGithubDownloader: IDownloader;
+begin
+  if not Assigned(FGithubDownloader) then
+    FGithubDownloader := TGithubDownloader.Create(FConsoleIO, FVendorDir);
+
+  Result := FGithubDownloader
+end;
+
+function TDownloaderFactory.CreateGitlabDownloader: IDownloader;
+begin
+  if not Assigned(FGitlabDownloader) then
+    FGitlabDownloader := TGitlabDownloader.Create(FConsoleIO, FVendorDir);
+
+  Result := FGitlabDownloader;
+end;
+
+function TDownloaderFactory.CreateSourceForgeDownloader: IDownloader;
+begin
+  if not Assigned(FSourceForgeDownloader) then
+    FSourceForgeDownloader := TSourceForgeDownloader.Create(FConsoleIO, FVendorDir);
+
+  Result := FSourceForgeDownloader;
+end;
+
 function TDownloaderFactory.GetDownloader(const RepoType: TRepositoryType): IDownloader;
 begin
   case RepoType of
     Github:
-      Result := TGithubDownloader.Create(FConsoleIO, FVendorDir);
+      Result := CreateGithubDownloader;
     Gitlab:
-      Result := TGitlabDownloader.Create(FConsoleIO, FVendorDir);
+      Result := CreateGitlabDownloader;
     Bitbucket:
-      Result := TBitbucketDownloader.Create(FConsoleIO, FVendorDir);
+      Result := CreateBitbucketDownloader;
     SourceForge:
-      Result := TSourceForgeDownloader.Create(FConsoleIO, FVendorDir);
+      Result := CreateSourceForgeDownloader;
   else
-    raise Exception.Create('Invalid repository ');
+    raise ERepositoryTypeInvalidException.Create('Repository type invalid');
   end;
 end;
 
