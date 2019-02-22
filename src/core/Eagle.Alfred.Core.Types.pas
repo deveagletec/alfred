@@ -13,6 +13,9 @@ uses
 type
 
   TDependency = record
+    Host: string;
+    AuthUser: string;
+    AuthPass: string;
     Repo: string;
     User: string;
     Project: string;
@@ -86,6 +89,9 @@ type
     [Alias('dependencies')]
     Dependencies: TArray<string>;
 
+    [Alias('dev-dependencies')]
+    DevDependencies: TArray<string>;
+
     destructor Destroy; override;
     procedure Validate;
   end;
@@ -94,6 +100,9 @@ type
   public
     [Alias('dependencies')]
     Dependencies: TArray<string>;
+
+    [Alias('dev-dependencies')]
+    DevDependencies: TArray<string>;
   end;
 
   TConfiguration = class
@@ -190,33 +199,57 @@ end;
 { TDependency }
 
 constructor TDependency.Create(const Value: string);
+const
+  REGEX = '^(\w+)(\+(\w+\:\/\/[^:]+:\d+))?:(([^;]+:[^:]+)@)?([\w-]+)\/([\w-]+)#([a-f0-9]+)$';
+  GROUP_REPO = 1;
+  GROUP_HOST = 3;
+  GROUP_AUTH = 5;
+  GROUP_USER = 6;
+  GROUP_PROJECT = 7;
+  GROUP_VERSION = 8;
 var
   Match: TMatch;
   Group: TGroup;
+  Auth: TArray<string>;
 begin
   Full := Value;
 
-  Match := TRegEx.Match(Value, '^((\w+):)?(([\w-]+)\/([\w-]+))(#([a-f0-9]+))?$');
+  Match := TRegEx.Match(Value, REGEX);
 
   if not Match.Success then
     raise Exception.Create('Error Message');
 
-  Group := Match.Groups.Item[2];
-  Repo := IfThen(Group.Success, Group.Value, 'github');
-  Group := Match.Groups.Item[3];
-  Name := Group.Value;
-  Group := Match.Groups.Item[4];
+  Group := Match.Groups.Item[GROUP_REPO];
+  Repo := Group.Value;
+
+  Group := Match.Groups.Item[GROUP_HOST];
+  Host := Group.Value;
+
+  Group := Match.Groups.Item[GROUP_AUTH];
+  Auth := Group.Value.Split([':']);
+
+  Group := Match.Groups.Item[GROUP_USER];
   User := Group.Value;
-  Group := Match.Groups.Item[5];
+
+  Group := Match.Groups.Item[GROUP_PROJECT];
   Project := Group.Value;
-  if Match.Groups.Count < 7 then
+
+  if Match.Groups.Count < 8 then
   begin
     Repo := 'lasted';
     Exit;
   end;
 
-  Group := Match.Groups.Item[7];
+  Group := Match.Groups.Item[GROUP_VERSION];
   Version := IfThen(Group.Success, Group.Value, 'lasted');
+
+  Name := User + '/' + Project;
+
+  if Length(Auth) < 2 then
+    Exit;
+
+  AuthUser := Auth[0];
+  AuthPass := Auth[1];
 end;
 
 end.

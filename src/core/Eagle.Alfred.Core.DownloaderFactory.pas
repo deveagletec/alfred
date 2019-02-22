@@ -44,9 +44,9 @@ begin
     Github:
       Result := TGithubDownloader.Create(FConsoleIO, FVendorDir);
     Gitlab:
-      Result := TBitbucketDownloader.Create(FConsoleIO, FVendorDir);
-    Bitbucket:
       Result := TGitlabDownloader.Create(FConsoleIO, FVendorDir);
+    Bitbucket:
+      Result := TBitbucketDownloader.Create(FConsoleIO, FVendorDir);
     SourceForge:
       Result := TSourceForgeDownloader.Create(FConsoleIO, FVendorDir);
   else
