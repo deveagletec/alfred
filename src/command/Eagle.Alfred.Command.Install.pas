@@ -8,7 +8,7 @@ uses
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
-  Eagle.Alfred.DependencyResolver;
+  Eagle.Alfred.Command.Common.DependencyResolver;
 
 type
   [PackageRequired]

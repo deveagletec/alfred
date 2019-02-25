@@ -1,4 +1,4 @@
-unit Eagle.Alfred.DprojParser;
+unit Eagle.Alfred.Command.Common.DprojParser;
 
 interface
 uses

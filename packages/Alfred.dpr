@@ -9,7 +9,6 @@ program Alfred;
 uses
   System.SysUtils,
   Console in '..\libs\Console.pas',
-  Eagle.Alfred.DprojParser in '..\src\Eagle.Alfred.DprojParser.pas',
   Eagle.Alfred in '..\src\Eagle.Alfred.pas',
   Eagle.Alfred.Utils in '..\src\Eagle.Alfred.Utils.pas',
   Eagle.Alfred.Core.CodeGenerator in '..\src\core\Eagle.Alfred.Core.CodeGenerator.pas',
@@ -45,7 +44,6 @@ uses
   Eagle.Alfred.Core.Attributes in '..\src\core\Eagle.Alfred.Core.Attributes.pas',
   Eagle.Alfred.Core.ConsoleIO in '..\src\core\Eagle.Alfred.Core.ConsoleIO.pas',
   Eagle.Alfred.Command.DB.MigrateInit in '..\src\command\db\Eagle.Alfred.Command.DB.MigrateInit.pas',
-  Eagle.Alfred.DependencyResolver in '..\src\Eagle.Alfred.DependencyResolver.pas',
   Eagle.Alfred.Command.Install in '..\src\command\Eagle.Alfred.Command.Install.pas',
   Eagle.Alfred.Command.Uninstall in '..\src\command\Eagle.Alfred.Command.Uninstall.pas',
   Eagle.Alfred.Command.Update in '..\src\command\Eagle.Alfred.Command.Update.pas',
@@ -59,7 +57,9 @@ uses
   Eagle.Alfred.Command.Common.Migrate.Service in '..\src\command\common\migrate\Eagle.Alfred.Command.Common.Migrate.Service.pas',
   Eagle.Alfred.Command.DB.Migrate.List in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.List.pas',
   Eagle.Alfred.Command.DB.Migrate.Delete in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Delete.pas',
-  Eagle.Alfred.Core.DownloaderFactory in '..\src\core\Eagle.Alfred.Core.DownloaderFactory.pas';
+  Eagle.Alfred.Command.Common.DependencyResolver in '..\src\command\common\Eagle.Alfred.Command.Common.DependencyResolver.pas',
+  Eagle.Alfred.Command.Common.DprojParser in '..\src\command\common\Eagle.Alfred.Command.Common.DprojParser.pas',
+  Eagle.Alfred.Command.Common.DownloaderFactory in '..\src\command\common\Eagle.Alfred.Command.Common.DownloaderFactory.pas';
 
 var
   OldColor: Byte;
