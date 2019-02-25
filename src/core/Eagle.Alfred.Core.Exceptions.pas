@@ -45,6 +45,8 @@ type
 
   ERepositoryTypeInvalidException = class(EAlfredException);
 
+  EDownloadException = class(EAlfredException);
+
 implementation
 
 end.

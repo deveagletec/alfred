@@ -3,6 +3,7 @@ unit Eagle.Alfred.DependencyResolver;
 interface
 uses
    TypInfo,
+   System.Zip,
    System.SysUtils,
    System.Classes,
    System.Generics.Collections,
@@ -54,6 +55,10 @@ type
       procedure ScanSourceDirectory(Dependency: TDependency);
       procedure DoScanSourceDirectory(const Path : string);
       procedure DownloadDependency(Dependency: TDependency);
+      procedure UnZipDependency(const FileName : string);
+      function GetSourceDirName(const FileName : string) : string;
+      procedure CopyDependency(Dependency : TDependency);
+      procedure DeleteDownloadedFiles(const FileName : string);
       function IsInstalled(Dependency: TDependency): Boolean;
       procedure LoadDependencies;
       procedure Prepare;
@@ -79,6 +84,20 @@ implementation
 
 { TDependencyResolver }
 
+procedure TDependencyResolver.CopyDependency(Dependency: TDependency);
+var
+  SourceDirName, DestDirName : string;
+begin
+  SourceDirName := GetSourceDirName(Dependency.Project);
+
+  DestDirName := FVendorDir + Dependency.Project;
+
+  if TDirectory.Exists(DestDirName) then
+    TDirectory.Delete(DestDirName, True);
+
+  TDirectory.Move(SourceDirName, DestDirName);
+end;
+
 constructor TDependencyResolver.Create(APackage: TPackage; aIO : IConsoleIO);
 begin
   FForce := False;
@@ -101,7 +120,13 @@ begin
   FMainProject := TDprojParser.Create(APackage.PackagesDir, APackage.Name);
   FTestProject := TDprojParser.Create(APackage.PackagesDir, APackage.Name + 'Test');
 
-  FDownloaderFactory := TDownloaderFactory.Create(FConsoleIO, FVendorDir);
+  FDownloaderFactory := TDownloaderFactory.Create(FVendorDir);
+end;
+
+procedure TDependencyResolver.DeleteDownloadedFiles(const FileName: string);
+begin
+  TDirectory.Delete(FileName, True);
+  TFile.Delete(FileName + '.zip');
 end;
 
 destructor TDependencyResolver.Destroy;
@@ -255,7 +280,6 @@ var
   Dependencies: TArray<TDependency>;
   Dependency: TDependency;
   List: TList<string>;
-  Data: string;
 begin
   Dependencies := FInstalledDependencies.Values.ToArray;
 
@@ -345,7 +369,53 @@ begin
   Repo := TRepositoryType(GetEnumValue(TypeInfo(TRepositoryType), RepoName));
 
   Downloader := FDownloaderFactory.GetDownloader(Repo);
-  Downloader.DownloadDependency(Dependency);
+
+  try
+    FConsoleIO.WriteProcess('Downloading => 0 Mb');
+    Downloader.DownloadDependency(Dependency, procedure(const Value: Double)
+    begin
+      FConsoleIO.WriteProcess('Downloading => ' + String.Parse(Value) + ' Mb');
+    end);
+
+    FConsoleIO.WriteInfo('');
+    FConsoleIO.WriteProcess('Unzipping ...');
+    UnZipDependency(Dependency.Project);
+    FConsoleIO.WriteProcess('Unzipping... Done');
+
+    FConsoleIO.WriteInfo('');
+    FConsoleIO.WriteProcess('Copying...');
+    CopyDependency(Dependency);
+    FConsoleIO.WriteProcess('Copying... Done');
+
+    FConsoleIO.WriteInfo('');
+    FConsoleIO.WriteProcess('Cleaning swap...');
+    DeleteDownloadedFiles(Dependency.Project);
+    FConsoleIO.WriteProcess('Cleaning swap... Done');
+  finally
+    FConsoleIO.WriteInfo('');
+  end;
+end;
+
+function TDependencyResolver.GetSourceDirName(const FileName: string): string;
+var
+  Dir : string;
+  searchResult : TSearchRec;
+begin
+  if FindFirst(FileName + '\*', faDirectory, searchResult) = 0 then
+  begin
+
+    repeat
+      Dir := searchResult.Name;
+
+      if Dir.Equals('.') or Dir.Equals('..') then
+         continue;
+
+      Result := FileName + '\' + Dir;
+
+    until FindNext(searchResult) <> 0;
+
+    FindClose(searchResult);
+  end;
 end;
 
 function TDependencyResolver.IsInstalled(Dependency: TDependency): Boolean;
@@ -430,6 +500,24 @@ begin
   Prepare;
 end;
 
+procedure TDependencyResolver.UnZipDependency(const FileName: string);
+var
+  Zipper: TZipFile;
+begin
+  Zipper := TZipFile.Create();
+
+  if TDirectory.Exists(FileName) then
+    TDirectory.Delete(FileName, True);
+
+  try
+    Zipper.Open(FileName + '.zip', zmRead);
+    Zipper.ExtractAll(FileName);
+    Zipper.Close;
+  finally
+    Zipper.Free;
+  end;
+end;
+
 procedure TDependencyResolver.UpdateAll;
 begin
   Prepare;
@@ -478,10 +566,11 @@ procedure TDependencyResolver.UpdateProject;
 begin
   FConsoleIO.WriteProcess('Updating Search Path...');
   try
-    if FSaveDev then
-      UpdateTestProject
-    else
+    UpdateTestProject;
+
+    if not FSaveDev then
       UpdateMainProject;
+
     FConsoleIO.WriteProcess('Updating Search Path... Done');
   finally
     FConsoleIO.WriteInfo('');
