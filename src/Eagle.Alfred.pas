@@ -16,7 +16,7 @@ uses
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.ConsoleIO,
   Eagle.Alfred.Core.Attributes,
-  Eagle.Alfred.DprojParser,
+  Eagle.Alfred.Command.Common.DprojParser,
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Command,
   Eagle.Alfred.Core.CommandRegister;

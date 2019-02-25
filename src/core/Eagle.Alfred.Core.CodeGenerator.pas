@@ -6,7 +6,7 @@ uses
   System.SysUtils,
   System.StrUtils,
   Eagle.Alfred.Core.Types,
-  Eagle.Alfred.DprojParser,
+  Eagle.Alfred.Command.Common.DprojParser,
   Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Exceptions;
 

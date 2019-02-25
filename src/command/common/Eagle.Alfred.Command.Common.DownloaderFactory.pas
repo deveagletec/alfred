@@ -1,4 +1,4 @@
-unit Eagle.Alfred.Core.DownloaderFactory;
+unit Eagle.Alfred.Command.Common.DownloaderFactory;
 
 interface
 uses

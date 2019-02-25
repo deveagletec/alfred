@@ -1,4 +1,4 @@
-unit Eagle.Alfred.DependencyResolver;
+unit Eagle.Alfred.Command.Common.DependencyResolver;
 
 interface
 uses
@@ -15,9 +15,9 @@ uses
    Eagle.Alfred.Core.Types,
    Eagle.Alfred.Core.ConsoleIO,
    Eagle.Alfred.Core.IOUtils,
-   Eagle.Alfred.DprojParser,
    Eagle.Alfred.Core.Exceptions,
-   Eagle.Alfred.Core.DownloaderFactory,
+   Eagle.Alfred.Command.Common.DprojParser,
+   Eagle.Alfred.Command.Common.DownloaderFactory,
    Eagle.Alfred.Command.Common.Downloaders.Downloader;
 
 type
@@ -87,7 +87,7 @@ implementation
 
 procedure TDependencyResolver.CopyDependency(Dependency: TDependency);
 var
-  SourceDirName, DestDirName : string;
+  SourceDirName, DestDirName: string;
 begin
   SourceDirName := GetSourceDirName(Dependency.Project);
 
@@ -132,7 +132,6 @@ end;
 
 destructor TDependencyResolver.Destroy;
 begin
-
   if Assigned(FPackageLocked) then
     FPackageLocked.Free;
 

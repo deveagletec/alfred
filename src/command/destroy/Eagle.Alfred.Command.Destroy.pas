@@ -6,7 +6,7 @@ uses
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command,
-  Eagle.Alfred.DprojParser;
+  Eagle.Alfred.Command.Common.DprojParser;
 
 type
 
