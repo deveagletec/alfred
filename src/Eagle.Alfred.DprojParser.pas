@@ -86,7 +86,6 @@ begin
   FUnitSearchPathList.Add(UnitPath);
 
   FChanged := True;
-
 end;
 
 procedure TDprojParser.AddUnit(const Name, Path: string);
@@ -112,7 +111,6 @@ begin
   FUnitsList.Add('  ' + Name.Replace('.pas', ' in ') + Path.QuotedString);
 
   FChanged := True;
-
 end;
 
 constructor TDprojParser.Create(const PackagePath, ProjectName: string);
@@ -245,6 +243,7 @@ begin
   end;
 
   FUnitSearchPathList.TrimExcess;
+  FChanged := True;
 end;
 
 procedure TDprojParser.Save;
@@ -258,6 +257,8 @@ begin
     FUnitSearchPathNode.text := string.Join(';', FUnitSearchPathList.ToArray);
 
   FXMLDocument.save(FDprojFile);
+
+  FChanged := False;
 end;
 
 procedure TDprojParser.UpdateDpr;

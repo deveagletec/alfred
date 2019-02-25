@@ -18,7 +18,6 @@ type
   private
     FDependencyResolver : IDependencyResolver;
     FDependency: string;
-    FSaveProd: Boolean;
     FSaveDev: Boolean;
     FForce: Boolean;
     FGlobal: Boolean;
@@ -48,11 +47,11 @@ implementation
 { TUninstallCommand }
 
 procedure TUninstallCommand.Execute;
-var
-  Dependency: TDependency;
 begin
-  inherited;
-  FDependencyResolver.Uninstall(Dependency);
+  FDependencyResolver.SetForce(FForce);
+  FDependencyResolver.SetSaveDev(FSaveDev);
+
+  FDependencyResolver.Uninstall(FDependency);
 end;
 
 procedure TUninstallCommand.Force;
@@ -69,7 +68,7 @@ procedure TUninstallCommand.Init;
 begin
   inherited;
   FDependencyResolver := TDependencyResolver.Create(FPackage, FConsoleIO);
-  FSaveProd := True;
+  FSaveDev := False;
 end;
 
 procedure TUninstallCommand.SaveDev;
@@ -79,7 +78,7 @@ end;
 
 procedure TUninstallCommand.SaveProd;
 begin
-  FSaveProd := True;
+  FSaveDev := False;
 end;
 
 procedure TUninstallCommand.SetDependency(const Name: string);

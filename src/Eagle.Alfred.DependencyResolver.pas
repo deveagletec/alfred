@@ -16,6 +16,7 @@ uses
    Eagle.Alfred.Core.ConsoleIO,
    Eagle.Alfred.Core.IOUtils,
    Eagle.Alfred.DprojParser,
+   Eagle.Alfred.Core.Exceptions,
    Eagle.Alfred.Core.DownloaderFactory,
    Eagle.Alfred.Command.Common.Downloaders.Downloader;
 
@@ -26,7 +27,7 @@ type
       procedure ResolverAll;
       procedure UpdateAll;
       procedure Install(const Dependency: string);
-      procedure Uninstall(Dependency: TDependency);
+      procedure Uninstall(const Dependency: string);
       procedure SetForce(const Value: Boolean);
       procedure SetSaveDev(const Value: Boolean);
    end;
@@ -75,7 +76,7 @@ type
       procedure ResolverAll;
       procedure UpdateAll;
       procedure Install(const Value: string);
-      procedure Uninstall(Dependency: TDependency);
+      procedure Uninstall(const DependencyName: string);
       procedure SetForce(const Value: Boolean);
       procedure SetSaveDev(const Value: Boolean);
    end;
@@ -165,7 +166,6 @@ procedure TDependencyResolver.Install(const Value: string);
 var
   Dependency: TDependency;
 begin
-
   Prepare;
 
   Dependency := TDependency.Create(Value);
@@ -495,9 +495,22 @@ begin
   end;
 end;
 
-procedure TDependencyResolver.Uninstall(Dependency: TDependency);
+procedure TDependencyResolver.Uninstall(const DependencyName: string);
 begin
   Prepare;
+
+  if not FDependencies.ContainsKey(DependencyName) then
+    raise EUninstallException.Create('Dependency Not Found');
+
+  FDependencies.Remove(DependencyName);
+
+  TrimDependencies;
+
+  UpdateProject;
+
+  UpdatePackage;
+
+  SaveFileLock;
 end;
 
 procedure TDependencyResolver.UnZipDependency(const FileName: string);
