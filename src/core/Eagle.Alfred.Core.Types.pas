@@ -65,6 +65,9 @@ type
     [Alias('modular')]
     Modular: Boolean;
 
+    [Alias('multisolutions')]
+    MultiSolutions: Boolean;
+
     [Alias('base-dir')]
     BaseDir: string;
 
@@ -212,6 +215,8 @@ var
   Group: TGroup;
   Auth: TArray<string>;
 begin
+  AuthUser := EmptyStr;
+  AuthPass := EmptyStr;
   Full := Value;
 
   Match := TRegEx.Match(Value, REGEX);

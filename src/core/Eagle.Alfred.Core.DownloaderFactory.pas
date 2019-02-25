@@ -4,7 +4,6 @@ interface
 uses
   System.SysUtils,
 
-  Eagle.Alfred.Core.ConsoleIO,
   Eagle.Alfred.Core.Exceptions,
 
   Eagle.Alfred.Command.Common.Downloaders.Downloader,
@@ -24,7 +23,6 @@ type
 
   TDownloaderFactory = class(TInterfacedObject, IDownloaderFactory)
   private
-    FConsoleIO: IConsoleIO;
     FVendorDir: string;
 
     FGithubDownloader: IDownloader;
@@ -36,22 +34,21 @@ type
     function CreateGitlabDownloader: IDownloader;
     function CreateSourceForgeDownloader: IDownloader;
   public
-    constructor Create(ConsoleIO: IConsoleIO; const VendorDir: string);
+    constructor Create(const VendorDir: string);
     function GetDownloader(const RepoType: TRepositoryType): IDownloader;
   end;
 
 implementation
 
-constructor TDownloaderFactory.Create(ConsoleIO: IConsoleIO; const VendorDir: string);
+constructor TDownloaderFactory.Create(const VendorDir: string);
 begin
-  FConsoleIO := ConsoleIO;
   FVendorDir := VendorDir;
 end;
 
 function TDownloaderFactory.CreateBitbucketDownloader: IDownloader;
 begin
   if not Assigned(FBitbucketDownloader) then
-    FBitbucketDownloader := TBitbucketDownloader.Create(FConsoleIO, FVendorDir);
+    FBitbucketDownloader := TBitbucketDownloader.Create(FVendorDir);
 
   Result := FBitbucketDownloader;
 end;
@@ -59,7 +56,7 @@ end;
 function TDownloaderFactory.CreateGithubDownloader: IDownloader;
 begin
   if not Assigned(FGithubDownloader) then
-    FGithubDownloader := TGithubDownloader.Create(FConsoleIO, FVendorDir);
+    FGithubDownloader := TGithubDownloader.Create(FVendorDir);
 
   Result := FGithubDownloader
 end;
@@ -67,7 +64,7 @@ end;
 function TDownloaderFactory.CreateGitlabDownloader: IDownloader;
 begin
   if not Assigned(FGitlabDownloader) then
-    FGitlabDownloader := TGitlabDownloader.Create(FConsoleIO, FVendorDir);
+    FGitlabDownloader := TGitlabDownloader.Create(FVendorDir);
 
   Result := FGitlabDownloader;
 end;
@@ -75,7 +72,7 @@ end;
 function TDownloaderFactory.CreateSourceForgeDownloader: IDownloader;
 begin
   if not Assigned(FSourceForgeDownloader) then
-    FSourceForgeDownloader := TSourceForgeDownloader.Create(FConsoleIO, FVendorDir);
+    FSourceForgeDownloader := TSourceForgeDownloader.Create(FVendorDir);
 
   Result := FSourceForgeDownloader;
 end;
