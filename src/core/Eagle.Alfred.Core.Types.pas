@@ -203,7 +203,7 @@ end;
 
 constructor TDependency.Create(const Value: string);
 const
-  REGEX = '^(\w+)(\+(\w+\:\/\/[^:]+:\d+))?:(([^;]+:[^:]+)@)?([\w-]+)\/([\w-]+)#([a-f0-9]+)$';
+  REGEX = '^(\w+)(\+(\w+\:\/\/[^:]+:\d+))?:(([^;]+:[^:]+)@)?([\w-]+)\/([\w-]+)#([a-f0-9]+|latest)$';
   GROUP_REPO = 1;
   GROUP_HOST = 3;
   GROUP_AUTH = 5;
@@ -241,12 +241,12 @@ begin
 
   if Match.Groups.Count < 8 then
   begin
-    Repo := 'lasted';
+    Repo := 'latest';
     Exit;
   end;
 
   Group := Match.Groups.Item[GROUP_VERSION];
-  Version := IfThen(Group.Success, Group.Value, 'lasted');
+  Version := IfThen(Group.Success, Group.Value, 'latest');
 
   Name := User + '/' + Project;
 
