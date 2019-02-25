@@ -47,6 +47,8 @@ type
 
   EDownloadException = class(EAlfredException);
 
+  EUninstallException = class(EAlfredException);
+
 implementation
 
 end.
