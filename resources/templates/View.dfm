@@ -7,11 +7,12 @@ object {ModelName}View: T{ModelName}View
   ClientHeight = 537
   ClientWidth = 794
   Color = clWhite
-  Font.Charset = DEFAULT_CHARSET
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -13
+  Font.Name = 'Verdana'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   PopupMenu = CrudActions.pmMenu
   Position = poMainFormCenter
