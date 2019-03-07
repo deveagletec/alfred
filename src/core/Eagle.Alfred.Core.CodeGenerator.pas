@@ -66,14 +66,12 @@ implementation
 
 constructor TCodeGenerator.Create(const AppPath: string; APackage: TPackage);
 begin
-
   FAppPath := AppPath;
   FPackage := APackage;
 
   FDprojParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Name);
 
   FDprojTestParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Name + 'Test');
-
 end;
 
 destructor TCodeGenerator.Destroy;
@@ -89,7 +87,6 @@ procedure TCodeGenerator.DoGenerateModel(const InterfaceTemplate, ClassTemplate:
 var
   BaseDir, InterfaceName, ClassName: string;
 begin
-
   BaseDir := FPackage.BaseDir + FFilePath;
 
   CreateDiretories([BaseDir, BaseDir + 'impl\']);
@@ -105,14 +102,12 @@ begin
 
   FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath);
   FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath + 'impl\');
-
 end;
 
 procedure TCodeGenerator.DoGenerateTest;
 var
   BaseDir, FileName: string;
 begin
-
   BaseDir := FPackage.BaseDir + FFilePath;
 
   CreateDiretories([BaseDir]);
@@ -122,14 +117,12 @@ begin
   GenerateFile('T' + FLayerName + 'Test.pas', FileName, BaseDir + FileName);
 
   FDprojTestParser.AddUnit(FileName, '..\..\' + FFilePath + FileName);
-
 end;
 
 procedure TCodeGenerator.DoGenerateView;
 var
   BaseDir, UnitName, ViewName: string;
 begin
-
   BaseDir := FPackage.BaseDir + FFilePath;
 
   CreateDiretories([BaseDir]);
@@ -142,7 +135,6 @@ begin
   GenerateFile('View.pas', UnitName, BaseDir + UnitName);
 
   FDprojParser.AddForm(UnitName, FModelName + 'View', '..\..\' + FFilePath + UnitName);
-
 end;
 
 procedure TCodeGenerator.GenerateFile(const Template, UnitName, FileName: string);
@@ -150,7 +142,6 @@ var
   FStringList: TStringList;
   TemplatePath: string;
 begin
-
   if FileExists(FileName) and not FForce then
     raise EFileAlwaysExistsException.Create('File ' + FileName.QuotedString + ' already exists');
 
@@ -175,90 +166,74 @@ begin
   finally
     FStringList.Free;
   end;
-
 end;
 
 procedure TCodeGenerator.GenerateModel(const ModuleName, ModelName: string);
 begin
-
   FSourceDir := FPackage.SourceDir;
 
   Prepare(ModuleName, 'Entity', ModelName);
 
   DoGenerateModel('IModel.pas', 'TModel.pas');
-
 end;
 
 procedure TCodeGenerator.GenerateRepository(const ModuleName, ModelName: string);
 begin
-
   FSourceDir := FPackage.SourceDir;
 
   Prepare(ModuleName, 'Repository', ModelName);
 
   DoGenerateModel('IModelRepository.pas', 'TModelRepository.pas');
-
 end;
 
 procedure TCodeGenerator.GenerateService(const ModuleName, ModelName: string);
 begin
-
   FSourceDir := FPackage.SourceDir;
 
   Prepare(ModuleName, 'Service', ModelName);
 
   DoGenerateModel('IModelService.pas', 'TModelService.pas');
-
 end;
 
 procedure TCodeGenerator.GenerateTest(const ModuleName, LayerName, ModelName: string);
 begin
-
   FSourceDir := FPackage.TestsDir;
 
   Prepare(ModuleName, LayerName, ModelName);
 
   DoGenerateTest;
-
 end;
 
 procedure TCodeGenerator.GenerateView(const ModuleName, ModelName: string);
 begin
-
   FSourceDir := FPackage.SourceDir;
 
   Prepare(ModuleName, 'View', ModelName);
 
   DoGenerateView;
-
 end;
 
 procedure TCodeGenerator.GenerateViewModel(const ModuleName, ModelName: string);
 begin
-
   FSourceDir := FPackage.SourceDir;
 
   Prepare(ModuleName, 'ViewModel', ModelName);
 
   DoGenerateModel('IViewModel.pas', 'TViewModel.pas');
-
 end;
 
 procedure TCodeGenerator.MountClassName;
 begin
-
   FClassName := FModelName;
 
   if AnsiMatchText(FLayerName, ['viewmodel', 'service', 'repository']) then
     FClassName := FClassName + FLayerName;
-
 end;
 
 procedure TCodeGenerator.MountNamespaceAndFilePath;
 var
   ModuleName, ModuleDir, LayerName, LayerDir: string;
 begin
-
   if FPackage.Modular then
   begin
     ModuleName := FModuleName + '.';
@@ -282,12 +257,10 @@ begin
   FNamespace := FPackage.Namespace + '.' + ModuleName + LayerName;
 
   FFilePath := FSourceDir + ModuleDir + LayerDir;
-
 end;
 
 procedure TCodeGenerator.Prepare(const ModuleName, LayerName, ModelName: string);
 begin
-
   FModuleName := Capitalize(ModuleName.Replace('.', ''));
   FLayerName := Capitalize(LayerName.Replace('.', ''));
   FModelName := Capitalize(ModelName.Replace('.', ''));
@@ -295,7 +268,6 @@ begin
   MountNamespaceAndFilePath;
 
   MountClassName;
-
 end;
 
 procedure TCodeGenerator.SetForceGenerate(const Value: Boolean);
