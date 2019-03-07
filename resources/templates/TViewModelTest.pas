@@ -92,8 +92,8 @@ end;
 
 procedure T{ModelName}ViewModelTest.ResetDataBase;
 begin
-  FDataBase.Clean('{ModuleName}');
-  FDataBase.Load('..\..\..\tests\resources\Load_{ModuleName}.sql');
+  FDataBase.Clean('{ModelName}');
+  FDataBase.Load('..\..\..\tests\resources\Load_{ModelName}.sql');
 end;
 
 procedure T{ModelName}ViewModelTest.Setup;
@@ -126,7 +126,7 @@ begin
 
   F{ModelName}ViewModel.OnSave(nil);
 
-  FDataBase.AssertHas('{ModuleName}', 'NOME', 'XPTO 1');
+  FDataBase.AssertHas('{ModelName}', 'NOME', 'XPTO 1');
 end;
 
 procedure T{ModelName}ViewModelTest.Test_deveria_carregar_as_propriedades_sem_erros;
