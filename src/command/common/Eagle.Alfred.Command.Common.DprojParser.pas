@@ -65,7 +65,7 @@ begin
 
   ItemGroup.insertBefore(Node, ItemGroup.selectSingleNode('//BuildConfiguration'));
 
-  FUnitsList.Add('  ' + UnitName.Replace('.pas', ' in ') + Path.QuotedString);
+  FUnitsList.Add(UnitName.Replace('.pas', ' in ') + Path.QuotedString);
 
   FChanged := True;
 end;
@@ -74,7 +74,6 @@ procedure TDprojParser.AddPathInUnitSearchPath(const Path: string);
 var
   UnitPath: string;
 begin
-
   UnitPath := Path.Trim;
 
   if UnitPath.EndsWith('\') then
@@ -91,7 +90,14 @@ end;
 procedure TDprojParser.AddUnit(const Name, Path: string);
 var
   ItemGroup, NodeBase, Node: IXMLDOMNode;
+  Expression: string;
 begin
+  Expression := '/Project/ItemGroup/DCCReference[@Include="' + Path.Replace('\', '\\') + '"][1]';
+
+  Node := FXMLDocument.selectSingleNode(Expression);
+
+  if Assigned(Node) then
+    Exit;
 
   ItemGroup := FXMLDocument.selectSingleNode('/Project/ItemGroup');
 
@@ -101,14 +107,14 @@ begin
 
   Node.attributes.getNamedItem('Include').Text := Path;
 
-  while node.hasChildNodes do
+  while Node.hasChildNodes do
     Node.removeChild(Node.firstChild);
 
   NodeBase := FXMLDocument.selectSingleNode('/Project/ItemGroup/BuildConfiguration');
 
   ItemGroup.insertBefore(Node, NodeBase);
 
-  FUnitsList.Add('  ' + Name.Replace('.pas', ' in ') + Path.QuotedString);
+  FUnitsList.Add(Name.Replace('.pas', ' in ') + Path.QuotedString);
 
   FChanged := True;
 end;
@@ -176,7 +182,7 @@ var
   Node, UnitSearchPathNode, ExeOutputNode: IXMLDOMNode;
   Expression, Condition: string;
 begin
-  Condition := '$(Base)'.QuotedString + '!=' + ''.QuotedString;
+  Condition := '$(Base_Win32)'.QuotedString + '!=' + ''.QuotedString;
 
   Expression := '/Project/PropertyGroup[@Condition="' + Condition + '"]';
 
@@ -191,7 +197,7 @@ begin
 
   UnitSearchPathNode := FXMLDocument.createNode(ExeOutputNode.nodeType, 'DCC_UnitSearchPath', ExeOutputNode.namespaceURI);
 
-  Node.insertBefore(UnitSearchPathNode, ExeOutputNode);
+  Node.appendChild(UnitSearchPathNode);
 
   Result := UnitSearchPathNode;
 end;
@@ -265,7 +271,7 @@ procedure TDprojParser.UpdateDpr;
 var
   DprFile: TStringList;
   I, J, Count: Integer;
-  Line: string;
+  Line, UnitRecord: string;
 begin
   if FUnitsList.Count = 0 then
     Exit;
@@ -276,16 +282,21 @@ begin
     DprFile.LoadFromFile(FDprFile);
 
     Count := DprFile.Count -1;
+    J := 0;
 
     for I := 0 to Count do
     begin
       Line := DprFile.Strings[I];
 
+      UnitRecord := Line.Trim.Replace(',', '').Replace(';', '');
+
+      if FUnitsList.Contains(UnitRecord) then
+        FUnitsList.Remove(UnitRecord);
+
       if Line.EndsWith('.pas'';') then
       begin
         DprFile.Delete(I);
-        Line := Line.Replace(';', '');
-        FUnitsList.Insert(0, Line);
+        FUnitsList.Insert(0, UnitRecord);
         Break;
       end;
     end;
@@ -293,12 +304,12 @@ begin
     for J := 0 to FUnitsList.Count - 2 do
     begin
       Line := FUnitsList.Items[J];
-      DprFile.Insert(I, Line + ',');
+      DprFile.Insert(I, '  ' + Line + ',');
       Inc(I);
     end;
 
     Line := FUnitsList.Items[J];
-    DprFile.Insert(I, Line + ';');
+    DprFile.Insert(I, '  ' + Line + ';');
 
     DprFile.SaveToFile(FDprFile);
 

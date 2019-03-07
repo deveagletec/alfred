@@ -22,7 +22,7 @@ var
 begin
 
   flag := True;
-  s := Str.ToLower;
+  s := Str;
   Result := EmptyStr;
 
   for i := 1 to Length(s) do
