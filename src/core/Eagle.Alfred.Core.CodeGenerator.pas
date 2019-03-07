@@ -38,7 +38,12 @@ type
 
     FDprojParser : IDprojParser;
     FDprojTestParser : IDprojParser;
+    FCoveragePaths: TStringList;
+    FCoveragePathsFileName: string;
+    FCoverageUnits: TStringList;
+    FCoverageUnitsFileName: string;
 
+    procedure AddUnitToCoverage(ClassName: string; const Path: string);
     procedure MountNamespaceAndFilePath;
     procedure MountClassName;
     procedure Prepare(const ModuleName, LayerName, ModelName: string);
@@ -69,9 +74,21 @@ begin
   FAppPath := AppPath;
   FPackage := APackage;
 
+  FCoveragePathsFileName := FPackage.CoverageConfigDir + 'dcov_paths.lst';
+  FCoverageUnitsFileName := FPackage.CoverageConfigDir + 'dcov_units.lst';
+
   FDprojParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Name);
 
   FDprojTestParser := TDprojParser.Create(FPackage.PackagesDir, FPackage.Name + 'Test');
+
+  FCoveragePaths := TStringList.Create;
+  FCoverageUnits := TStringList.Create;
+
+  if FileExists(FCoveragePathsFileName) then
+    FCoveragePaths.LoadFromFile(FCoveragePathsFileName);
+
+  if FileExists(FCoverageUnitsFileName) then
+    FCoverageUnits.LoadFromFile(FCoverageUnitsFileName);
 end;
 
 destructor TCodeGenerator.Destroy;
@@ -80,7 +97,29 @@ begin
     FDprojParser.Save;
   if Assigned(FDprojTestParser) then
     FDprojTestParser.Save;
+
+  if Assigned(FCoveragePaths) then
+  begin
+    FCoveragePaths.SaveToFile(FCoveragePathsFileName);
+    FCoveragePaths.Free;
+  end;
+
+  if Assigned(FCoverageUnits) then
+  begin
+    FCoverageUnits.SaveToFile(FCoverageUnitsFileName);
+    FCoverageUnits.Free;
+  end;
+
   inherited;
+end;
+
+procedure TCodeGenerator.AddUnitToCoverage(ClassName: string; const Path: string);
+begin
+  if FCoveragePaths.IndexOf(Path) < 0 then
+    FCoveragePaths.Add(Path);
+
+  if FCoverageUnits.IndexOf(ClassName) < 0 then
+    FCoverageUnits.Add(ClassName);
 end;
 
 procedure TCodeGenerator.DoGenerateModel(const InterfaceTemplate, ClassTemplate: string);
@@ -102,6 +141,8 @@ begin
 
   FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath);
   FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath + 'impl\');
+
+  AddUnitToCoverage(ClassName, '..\..\..\' + FFilePath + 'impl');
 end;
 
 procedure TCodeGenerator.DoGenerateTest;

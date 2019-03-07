@@ -86,6 +86,9 @@ type
     [Alias('vendor-dir')]
     VendorDir: string;
 
+    [Alias('coverage-config-dir')]
+    CoverageConfigDir: string;
+
     [Alias('db')]
     DataBase: TDataBase;
 
