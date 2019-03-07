@@ -24,6 +24,8 @@ type
 
     function GetRecord(const Sql: string): I{ModelName};
   public
+    constructor Create; overload;
+    constructor Create(Con: IConnection); overload;
     function IsFirst({ModelName}: I{ModelName}): Boolean;
     function IsLast({ModelName}: I{ModelName}): Boolean;
     function GetFirst(): I{ModelName};
@@ -39,6 +41,17 @@ type
 implementation
 
 { T{ModelName}Repository }
+
+constructor T{ModelName}Repository.Create;
+begin
+
+end;
+
+constructor T{ModelName}Repository.Create(Con: IConnection);
+begin
+  inherited Create;
+  FConnection := Con;
+end;
 
 procedure T{ModelName}Repository.Delete({ModelName}: I{ModelName});
 begin
@@ -92,14 +105,12 @@ const
 var
   Sql: string;
 begin
-
   if not Assigned({ModelName}) then
     Exit(False);
 
   Sql := SQL_ID.Replace('?', string.Parse({ModelName}.Id).QuotedString);
 
   Result := FConnection.GetSession.ExecuteScalar<string>(Sql, []).Equals('')
-
 end;
 
 function T{ModelName}Repository.IsLast({ModelName}: I{ModelName}): Boolean;
@@ -108,14 +119,12 @@ const
 var
   Sql: string;
 begin
-
   if not Assigned({ModelName}) then
     Exit(False);
 
   Sql := SQL_ID.Replace('?', string.Parse({ModelName}.Id).QuotedString);
 
   Result := FConnection.GetSession.ExecuteScalar<string>(Sql, []).Equals('')
-
 end;
 
 function T{ModelName}Repository.Reload(Current: I{ModelName}): I{ModelName};
@@ -129,8 +138,5 @@ begin
 end;
 
 initialization
-
-GlobalContainer.RegisterType<T{ModelName}Repository>('{ModelName}Repository').Implements<I{ModelName}Repository>;
-
-
+  GlobalContainer.RegisterType<T{ModelName}Repository>('{ModelName}Repository').Implements<I{ModelName}Repository>;
 end.
