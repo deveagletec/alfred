@@ -136,6 +136,7 @@ begin
   Package.SourceDir := 'src\';
   Package.TestsDir := 'tests\';
   Package.Namespace := 'Eagle';
+  Package.CoverageConfigDir := 'ci\';
   Package.Modular := False;
 
   try
