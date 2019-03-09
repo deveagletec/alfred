@@ -142,7 +142,7 @@ begin
   FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath);
   FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath + 'impl\');
 
-  AddUnitToCoverage(ClassName, '..\..\..\' + FFilePath + 'impl');
+  AddUnitToCoverage(FNamespace + 'Impl.' + FClassName, '..\..\..\' + FFilePath + 'impl');
 end;
 
 procedure TCodeGenerator.DoGenerateTest;
