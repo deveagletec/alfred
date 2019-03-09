@@ -21,6 +21,7 @@ type
     procedure GenerateRepository(const ModuleName, ModelName: string);
     procedure GenerateTest(const ModuleName, LayerName, ModelName: string);
     procedure SetForceGenerate(const Value: Boolean);
+    procedure SetTemplateName(const Name: string);
   end;
 
   TCodeGenerator = class(TInterfacedObject, ICodeGenerator)
@@ -35,6 +36,7 @@ type
     FFilePath: string;
     FSourceDir: string;
     FForce: Boolean;
+    FTemplateName: string;
 
     FDprojParser : IDprojParser;
     FDprojTestParser : IDprojParser;
@@ -63,6 +65,7 @@ type
     procedure GenerateRepository(const ModuleName, ModelName: string);
     procedure GenerateTest(const ModuleName, LayerName, ModelName: string);
     procedure SetForceGenerate(const Value: Boolean);
+    procedure SetTemplateName(const Name: string);
   end;
 
 implementation
@@ -186,7 +189,7 @@ begin
   if FileExists(FileName) and not FForce then
     raise EFileAlwaysExistsException.Create('File ' + FileName.QuotedString + ' already exists');
 
-  TemplatePath := FAppPath + 'templates\' + Template;
+  TemplatePath := FAppPath + 'templates\' + FTemplateName + '\' + Template;
 
   if not FileExists(TemplatePath) then
     raise EFileNotFoundException.Create('Template File ' + TemplatePath.QuotedString + ' not found');
@@ -314,6 +317,11 @@ end;
 procedure TCodeGenerator.SetForceGenerate(const Value: Boolean);
 begin
   FForce := Value;
+end;
+
+procedure TCodeGenerator.SetTemplateName(const Name: string);
+begin
+  FTemplateName := Name;
 end;
 
 end.
