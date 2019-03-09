@@ -113,6 +113,7 @@ end;
 function TAlfred.DoGetCommandParamByName(Attrib: ParamAttribute): string;
 var
   Arg: string;
+  Values: TArray<string>;
 begin
   Result := EmptyStr;
 
@@ -121,12 +122,18 @@ begin
     if not Arg.ToLower.StartsWith(Attrib.Name+'=') then
       Continue;
 
-    Result := Arg.Split(['='])[1];
+    Values := Arg.Split(['=']);
+
+    if Length(Values) = 1 then
+      raise ERequiredParameterException.CreateFmt('Value Required "%s" Not Found', [Attrib.Description]);
+
+    Result := Values[1].Replace('''', '',[rfReplaceAll]).Replace('"', '', [rfReplaceAll]).Trim;
 
     if Result.IsEmpty then
-      raise Exception.Create('Value Required Parameter Not Found');
-  end;
+      raise ERequiredParameterException.CreateFmt('Value Required "%s" Not Found', [Attrib.Description]);
 
+    Break;
+  end;
 end;
 
 function TAlfred.DoGetCommandParamByPosition(Attrib: ParamAttribute; const IsSingle: Boolean): string;
@@ -157,7 +164,6 @@ var
   Command: ICommand;
   CommandMetaData: TCommandMetaData;
 begin
-
   CommandMetaData := FCommandRegister.GetCommand(GroupName, CommandName);
 
   Command := CreateCommand(CommandMetaData);
@@ -167,12 +173,10 @@ begin
   SetOptions(Command, CommandMetaData);
 
   Command.Execute;
-
 end;
 
 function TAlfred.GetCommandParam(Attrib: ParamAttribute; const IsSingle: Boolean): string;
 begin
-
   Result := DoGetCommandParamByPosition(Attrib, IsSingle);
 
   if Result.IsEmpty then
@@ -180,17 +184,14 @@ begin
 
   if Attrib.Required and Result.IsEmpty then
     raise ERequiredParameterException.CreateFmt('Required Parameter "%s" Not Found!', [Attrib.Description]);
-
 end;
 
 class function TAlfred.GetInstance: TAlfred;
 begin
-
   if FInstance = nil then
     Self.FInstance := TAlfred.Create;
 
   Result := Self.FInstance;
-
 end;
 
 procedure TAlfred.Help;
@@ -218,7 +219,6 @@ var
   Command: TCommandMetaData;
   CommandAttrib: CommandAttribute;
 begin
-
   FConsoleIO.WriteAlert(sLineBreak + '| Usage: alfred ' + GroupName + ' <option>');
   FConsoleIO.WriteAlert('* -------------------------');
   FConsoleIO.WriteAlert('| ' + 'OPTIONS:');
@@ -235,7 +235,6 @@ begin
   end;
 
   FConsoleIO.WriteInfo('* ----------------------------------------------------- ' + sLineBreak);
-
 end;
 
 procedure TAlfred.HelpProjectInit;
@@ -249,7 +248,6 @@ procedure TAlfred.Init;
 var
   Data: string;
 begin
-
   LoadConfiguration;
 
   LoadCommandArgs;
@@ -266,7 +264,6 @@ begin
   end;
 
   FPackage.Validate;
-
 end;
 
 procedure TAlfred.LoadCommandArgs;
