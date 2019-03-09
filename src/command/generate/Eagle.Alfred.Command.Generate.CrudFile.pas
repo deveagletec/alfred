@@ -2,6 +2,8 @@ unit Eagle.Alfred.Command.Generate.CrudFile;
 
 interface
 uses
+  System.SysUtils,
+
   Eagle.Alfred,
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Exceptions,
@@ -18,6 +20,7 @@ type
     FCodeGenerator: ICodeGenerator;
     FForce: Boolean;
     FSkipTests: Boolean;
+    FTemplateName: string;
 
     procedure Init; override;
   public
@@ -27,6 +30,9 @@ type
 
     [ParamAttribute(2, 'Module name')]
     procedure SetModuleName(const Name: string);
+
+    [ParamAttribute('template', 'Template name', False)]
+    procedure SetTemplateName(const Name: string);
 
     [OptionAttribute('force', '-f', 'Forces overwriting of files.')]
     procedure Force;
@@ -49,6 +55,7 @@ procedure TGenerateCrudFileCommand.Init;
 begin
   inherited;
   FCodeGenerator := TCodeGenerator.Create(FAppPath, FPackage);
+  FCodeGenerator.SetTemplateName('default');
 end;
 
 procedure TGenerateCrudFileCommand.SetModuleName(const Name: string);
@@ -59,6 +66,16 @@ end;
 procedure TGenerateCrudFileCommand.SetName(const Name: string);
 begin
   FName := Name;
+end;
+
+procedure TGenerateCrudFileCommand.SetTemplateName(const Name: string);
+begin
+  FTemplateName := Name.Trim;
+
+  if FTemplateName.IsEmpty then
+    FTemplateName := 'default';
+
+  FCodeGenerator.SetTemplateName(FTemplateName);
 end;
 
 procedure TGenerateCrudFileCommand.SkipTests;
