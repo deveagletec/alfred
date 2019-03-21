@@ -22,6 +22,11 @@ type
     Version: string;
     Name: string;
     Full : string;
+    CachePath: string;
+    VendorPath: string;
+    VendorPathFull: string;
+    ProjectFile: string;
+    Cached: Boolean;
 
     constructor Create(const Value: string);
   end;
@@ -167,6 +172,9 @@ type
 
     [Alias('auto-open')]
     AutoOpen: Boolean;
+
+    [Alias('storage-dir')]
+    StorageDir: string;
 
     constructor Create;
   end;

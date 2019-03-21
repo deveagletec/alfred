@@ -46,7 +46,7 @@ implementation
 
 procedure TConsoleIO.NewEmptyLine;
 begin
-  WriteInfo('');
+  WriteInfo(EmptyStr);
 end;
 
 function TConsoleIO.ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
@@ -79,7 +79,6 @@ function TConsoleIO.ReadInfo(const Msg: String; Color: Byte = LightGray): String
 begin
   WriteColor(Msg, Color);
   Result := ReadKey;
-
 end;
 
 procedure TConsoleIO.WriteAlert(const msg: String);
@@ -103,7 +102,7 @@ begin
   Write(Text);
 
   if NewLine then
-    Writeln('');
+    Writeln(EmptyStr);
 
   TextColor(OldColor);
 

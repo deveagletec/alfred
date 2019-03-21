@@ -18,7 +18,8 @@ uses
    Eagle.Alfred.Core.Exceptions,
    Eagle.Alfred.Command.Common.DprojParser,
    Eagle.Alfred.Command.Common.DownloaderFactory,
-   Eagle.Alfred.Command.Common.Downloaders.Downloader;
+   Eagle.Alfred.Command.Common.Downloaders.Downloader,
+   Eagle.Alfred.Command.Common.Builder;
 
 type
 
@@ -34,6 +35,7 @@ type
 
    TDependencyResolver = class(TInterfacedObject ,IDependencyResolver)
    private
+      FConfiguration: TConfiguration;
       FPackage: TPackage;
       FPackageLocked: TPackagelocked;
       FVendorDir : string;
@@ -49,6 +51,7 @@ type
       FDownloaderFactory: IDownloaderFactory;
       FSaveDev: Boolean;
 
+      procedure BuildDependency(Dependency: TDependency);
       procedure DoResolver(Dependency: TDependency);
       procedure LoadFileLock;
       function ResolverSourceDiretory(const Path : string): string;
@@ -56,22 +59,25 @@ type
       procedure ScanSourceDirectory(Dependency: TDependency);
       procedure DoScanSourceDirectory(const Path : string);
       procedure DownloadDependency(Dependency: TDependency);
+      procedure DoDownloadDependency(Dependency: TDependency);
       procedure UnZipDependency(const FileName : string);
       function GetSourceDirName(const FileName : string) : string;
       procedure CopyDependency(Dependency : TDependency);
       procedure DeleteDownloadedFiles(const FileName : string);
+      procedure DoCopyDependencyFromStorage(Dependency: TDependency);
       function IsInstalled(Dependency: TDependency): Boolean;
       procedure LoadDependencies;
       procedure Prepare;
       procedure RegisterDependency(Dependency: TDependency);
       procedure RemoveDependencyDir(Dependency: TDependency);
+      procedure SaveCache(Dependency: TDependency);
       procedure TrimDependencies;
       procedure UpdateMainProject;
       procedure UpdatePackage;
       procedure UpdateProject;
       procedure UpdateTestProject;
    public
-      constructor Create(APackage: TPackage; aIO : IConsoleIO);
+      constructor Create(AConfiguration: TConfiguration; APackage: TPackage; aIO : IConsoleIO);
       destructor Destroy(); override;
       procedure ResolverAll;
       procedure UpdateAll;
@@ -96,10 +102,11 @@ begin
   if TDirectory.Exists(DestDirName) then
     TDirectory.Delete(DestDirName, True);
 
-  TDirectory.Move(SourceDirName, DestDirName);
+  TDirectory.Copy(SourceDirName, Dependency.CachePath + '\source');
+  TDirectory.Move(SourceDirName, DestDirName + '\source');
 end;
 
-constructor TDependencyResolver.Create(APackage: TPackage; aIO : IConsoleIO);
+constructor TDependencyResolver.Create(AConfiguration: TConfiguration; APackage: TPackage; aIO : IConsoleIO);
 begin
   FForce := False;
 
@@ -108,6 +115,7 @@ begin
   else
     FVendorDir := APackage.VendorDir + '\';
 
+  FConfiguration := AConfiguration;
   FPackage := APackage;
   FConsoleIO := aIO;
 
@@ -150,11 +158,58 @@ begin
   inherited;
 end;
 
+procedure TDependencyResolver.BuildDependency(Dependency: TDependency);
+var
+  Builder: IBuilder;
+begin
+  Builder := TBuilder.Create;
+
+  FConsoleIO.WriteInfo('Buiding dependency...');
+  Builder.Build(Dependency);
+  SaveCache(Dependency);
+  FConsoleIO.WriteInfo('Buiding dependency... Done');
+end;
+
+procedure TDependencyResolver.DoCopyDependencyFromStorage(Dependency: TDependency);
+var
+  DestDirName: string;
+begin
+  DestDirName := FVendorDir + Dependency.Project;
+
+  if TDirectory.Exists(DestDirName) then
+    TDirectory.Delete(DestDirName, True);
+
+  FConsoleIO.WriteProcess('Copying from Cache...');
+
+  try
+    TDirectory.Copy(Dependency.CachePath, DestDirName);
+
+    FConsoleIO.WriteProcess('Copying from Cache... Done');
+  finally
+    FConsoleIO.NewEmptyLine;
+  end;
+end;
+
 procedure TDependencyResolver.DoResolver(Dependency: TDependency);
 begin
   FConsoleIO.WriteInfo('Resolving dependency '+ Dependency.Name.QuotedString);
 
+  Dependency.VendorPath := FVendorDir + Dependency.Project;
+  Dependency.VendorPathFull := GetCurrentDir + '\' + FVendorDir + Dependency.Project;
+  Dependency.ProjectFile := '\source\packages\dxe8\loggerproRT.dproj';
+
+  Dependency.CachePath := string.Format('%s\%s\%s\%s', [
+    FConfiguration.StorageDir,
+    Dependency.User,
+    Dependency.Project,
+    Dependency.Version]);
+
+  Dependency.Cached := TDirectory.Exists(Dependency.CachePath);
+
   DownloadDependency(Dependency);
+
+  if not Dependency.Cached then
+    BuildDependency(Dependency);
 
   ScanSourceDirectory(Dependency);
 
@@ -316,7 +371,7 @@ begin
 
     FConsoleIO.WriteProcess('Scanning source diretory... Done');
   finally
-    FConsoleIO.WriteInfo('');
+    FConsoleIO.NewEmptyLine;
   end;
 end;
 
@@ -358,6 +413,14 @@ begin
 end;
 
 procedure TDependencyResolver.DownloadDependency(Dependency: TDependency);
+begin
+  if Dependency.Cached then
+    DoCopyDependencyFromStorage(Dependency)
+  else
+    DoDownloadDependency(Dependency);
+end;
+
+procedure TDependencyResolver.DoDownloadDependency(Dependency: TDependency);
 var
   RepoName: string;
   Repo: TRepositoryType;
@@ -376,22 +439,22 @@ begin
       FConsoleIO.WriteProcess('Downloading => ' + String.Parse(Value) + ' Mb');
     end);
 
-    FConsoleIO.WriteInfo('');
+    FConsoleIO.NewEmptyLine;
     FConsoleIO.WriteProcess('Unzipping ...');
     UnZipDependency(Dependency.Project);
     FConsoleIO.WriteProcess('Unzipping... Done');
 
-    FConsoleIO.WriteInfo('');
+    FConsoleIO.NewEmptyLine;
     FConsoleIO.WriteProcess('Copying...');
     CopyDependency(Dependency);
     FConsoleIO.WriteProcess('Copying... Done');
 
-    FConsoleIO.WriteInfo('');
+    FConsoleIO.NewEmptyLine;
     FConsoleIO.WriteProcess('Cleaning swap...');
     DeleteDownloadedFiles(Dependency.Project);
     FConsoleIO.WriteProcess('Cleaning swap... Done');
   finally
-    FConsoleIO.WriteInfo('');
+    FConsoleIO.NewEmptyLine;
   end;
 end;
 
@@ -472,6 +535,16 @@ begin
 
   if TDirectory.Exists(Path) then
     TDirectory.Delete(Path, True);
+end;
+
+procedure TDependencyResolver.SaveCache(Dependency: TDependency);
+var
+  SourceDir, TargetDir: string;
+begin
+  SourceDir := Dependency.VendorPath + '\bin\Debug';
+  TargetDir := Dependency.CachePath + '\bin\Debug';
+
+  TDirectory.Copy(SourceDir, TargetDir);
 end;
 
 procedure TDependencyResolver.TrimDependencies;
@@ -585,7 +658,7 @@ begin
 
     FConsoleIO.WriteProcess('Updating Search Path... Done');
   finally
-    FConsoleIO.WriteInfo('');
+    FConsoleIO.NewEmptyLine;
   end;
 end;
 

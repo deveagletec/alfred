@@ -67,7 +67,7 @@ end;
 procedure TUninstallCommand.Init;
 begin
   inherited;
-  FDependencyResolver := TDependencyResolver.Create(FPackage, FConsoleIO);
+  FDependencyResolver := TDependencyResolver.Create(FConfiguration, FPackage, FConsoleIO);
   FSaveDev := False;
 end;
 
