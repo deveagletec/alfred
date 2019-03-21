@@ -45,7 +45,7 @@ end;
 procedure TUpdateCommand.Init;
 begin
   inherited;
-  FDependencyResolver := TDependencyResolver.Create(FPackage, FConsoleIO);
+  FDependencyResolver := TDependencyResolver.Create(FConfiguration, FPackage, FConsoleIO);
 end;
 
 initialization
