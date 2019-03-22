@@ -76,7 +76,7 @@ begin
   FIdHTTP.Request.BasicAuthentication := False;
 
   Url := MountUrl(Dependency);
-  Filename := Dependency.Project + '.zip';
+  Filename := Dependency.ArtifactId + '.zip';
 
   SetAuthentication(Dependency);
 

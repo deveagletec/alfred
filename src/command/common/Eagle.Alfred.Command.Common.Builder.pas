@@ -17,30 +17,30 @@ type
 
   IBuilder = interface
     ['{2E4E62F8-1909-49D4-BCAC-758863D6B762}']
-    procedure Build(Dependency: TDependency);
+    procedure Build(Dependency: TDependency; const Mode: string);
   end;
 
   TBuilder = class(TInterfacedObject, IBuilder)
   private
     function ExecuteProcess(const Cmd, Params: string): Boolean;
   public
-    procedure Build(Dependency: TDependency);
+    procedure Build(Dependency: TDependency; const Mode: string);
   end;
 
 implementation
 
 { TBuilder }
 
-procedure TBuilder.Build(Dependency: TDependency);
+procedure TBuilder.Build(Dependency: TDependency; const Mode: string);
 var
   Params, ProjectFilePath: string;
 begin
-  ProjectFilePath := Dependency.VendorPath + Dependency.ProjectFile;
+  ProjectFilePath := Dependency.VendorPath + '\source' + Dependency.PackageFile;
 
   if not TFile.Exists(ProjectFilePath) then
     raise Exception.CreateFmt('Project Package %s not found', [ProjectFilePath.QuotedString]);
 
-  Params := string.Format('%s %s %s', [Dependency.VendorPathFull, ProjectFilePath, 'Debug']);
+  Params := string.Format('%s %s %s', [Dependency.VendorPathFull, ProjectFilePath, Mode]);
 
   if not ExecuteProcess('.\Scripts\Build.bat', Params) then
     raise Exception.Create('Error Build');
@@ -60,24 +60,20 @@ var
   ExitCode: DWORD;
 begin
   Result := False;
-  with SA do
-  begin
-    nLength := SizeOf(SA);
-    bInheritHandle := True;
-    lpSecurityDescriptor := nil;
-  end;
+
+  SA.nLength := SizeOf(SA);
+  SA.bInheritHandle := True;
+  SA.lpSecurityDescriptor := nil;
+
   CreatePipe(StdOutPipeRead, StdOutPipeWrite, @SA, 0);
   try
-    with SI do
-    begin
-      FillChar(SI, SizeOf(SI), 0);
-      cb := SizeOf(SI);
-      dwFlags := STARTF_USESHOWWINDOW or STARTF_USESTDHANDLES;
-      wShowWindow := SW_HIDE;
-      hStdInput := GetStdHandle(STD_INPUT_HANDLE); // don't redirect stdin
-      hStdOutput := StdOutPipeWrite;
-      hStdError := StdOutPipeWrite;
-    end;
+    FillChar(SI, SizeOf(SI), 0);
+    SI.cb := SizeOf(SI);
+    SI.dwFlags := STARTF_USESHOWWINDOW or STARTF_USESTDHANDLES;
+    SI.wShowWindow := SW_HIDE;
+    SI.hStdInput := GetStdHandle(STD_INPUT_HANDLE); // don't redirect stdin
+    SI.hStdOutput := StdOutPipeWrite;
+    SI.hStdError := StdOutPipeWrite;
 
     Handle := CreateProcess(nil, PChar(Cmd + ' ' + Params), nil, nil, True, 0, nil, nil, SI, PI);
     CloseHandle(StdOutPipeWrite);
@@ -103,7 +99,6 @@ begin
   finally
     CloseHandle(StdOutPipeRead);
   end;
-
 end;
 
 end.

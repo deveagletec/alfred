@@ -70,7 +70,7 @@ type
       procedure Prepare;
       procedure RegisterDependency(Dependency: TDependency);
       procedure RemoveDependencyDir(Dependency: TDependency);
-      procedure SaveCache(Dependency: TDependency);
+      procedure SaveCache(Dependency: TDependency; const Mode: string);
       procedure TrimDependencies;
       procedure UpdateMainProject;
       procedure UpdatePackage;
@@ -95,9 +95,9 @@ procedure TDependencyResolver.CopyDependency(Dependency: TDependency);
 var
   SourceDirName, DestDirName: string;
 begin
-  SourceDirName := GetSourceDirName(Dependency.Project);
+  SourceDirName := GetSourceDirName(Dependency.ArtifactId);
 
-  DestDirName := FVendorDir + Dependency.Project;
+  DestDirName := FVendorDir + Dependency.ArtifactId;
 
   if TDirectory.Exists(DestDirName) then
     TDirectory.Delete(DestDirName, True);
@@ -165,8 +165,8 @@ begin
   Builder := TBuilder.Create;
 
   FConsoleIO.WriteInfo('Buiding dependency...');
-  Builder.Build(Dependency);
-  SaveCache(Dependency);
+  Builder.Build(Dependency, 'Debug');
+  SaveCache(Dependency, 'Debug');
   FConsoleIO.WriteInfo('Buiding dependency... Done');
 end;
 
@@ -174,7 +174,7 @@ procedure TDependencyResolver.DoCopyDependencyFromStorage(Dependency: TDependenc
 var
   DestDirName: string;
 begin
-  DestDirName := FVendorDir + Dependency.Project;
+  DestDirName := FVendorDir + Dependency.ArtifactId;
 
   if TDirectory.Exists(DestDirName) then
     TDirectory.Delete(DestDirName, True);
@@ -192,16 +192,17 @@ end;
 
 procedure TDependencyResolver.DoResolver(Dependency: TDependency);
 begin
-  FConsoleIO.WriteInfo('Resolving dependency '+ Dependency.Name.QuotedString);
+  Dependency.Prepare;
 
-  Dependency.VendorPath := FVendorDir + Dependency.Project;
-  Dependency.VendorPathFull := GetCurrentDir + '\' + FVendorDir + Dependency.Project;
-  Dependency.ProjectFile := '\source\packages\dxe8\loggerproRT.dproj';
+  FConsoleIO.WriteInfo('Resolving dependency '+ Dependency.Identifier.QuotedString);
+
+  Dependency.VendorPath := FVendorDir + Dependency.ArtifactId;
+  Dependency.VendorPathFull := GetCurrentDir + '\' + FVendorDir + Dependency.ArtifactId;
 
   Dependency.CachePath := string.Format('%s\%s\%s\%s', [
     FConfiguration.StorageDir,
-    Dependency.User,
-    Dependency.Project,
+    Dependency.GroupId,
+    Dependency.ArtifactId,
     Dependency.Version]);
 
   Dependency.Cached := TDirectory.Exists(Dependency.CachePath);
@@ -222,11 +223,11 @@ var
 begin
   Prepare;
 
-  Dependency := TDependency.Create(Value);
+ // Dependency := TDependency.Create(Value);
 
   if IsInstalled(Dependency) and not FForce then
   begin
-    FConsoleIO.WriteInfoFmt('Dependency %s already installed!', [Dependency.Name.QuotedString]);
+    FConsoleIO.WriteInfoFmt('Dependency %s already installed!', [Dependency.Identifier.QuotedString]);
     Exit;
   end;
 
@@ -242,9 +243,11 @@ end;
 procedure TDependencyResolver.LoadFileLock;
 var
   Data, Dep: string;
-  Dependencies: TArray<string>;
+  Dependencies: TArray<TDependency>;
   Dependency: TDependency;
 begin
+  if not TFile.Exists('package.lock') then
+    Exit;
 
   try
     Data := TFile.ReadAllText('package.lock');
@@ -256,25 +259,19 @@ begin
     else
       Dependencies := FPackageLocked.Dependencies;
 
-    for Dep in Dependencies do
-    begin
-      Dependency := TDependency.Create(Dep);
-
-      FInstalledDependencies.Add(Dependency.Name, Dependency);
-    end;
+    for Dependency in Dependencies do
+      FInstalledDependencies.Add(Dependency.Identifier, Dependency);
 
   except on E: Exception do
     raise Exception.Create('Error load package.lock + ' + E.Message);
   end;
-
 end;
 
 procedure TDependencyResolver.ResolverAll;
 var
   Dependency : TDependency;
-  Value: string;
   Updated: Boolean;
-  Dependencies: TArray<string>;
+  Dependencies: TArray<TDependency>;
 begin
   Updated := False;
 
@@ -285,13 +282,11 @@ begin
   else
     Dependencies := FPackage.Dependencies;
 
-  for Value in Dependencies do
+  for Dependency in Dependencies do
   begin
-    Dependency := TDependency.Create(Value);
-
     if IsInstalled(Dependency) and not FForce then
     begin
-      FConsoleIO.WriteAlertFmt('Dependency %s already installed!', [Dependency.Name.QuotedString]);
+      FConsoleIO.WriteAlertFmt('Dependency %s already installed!', [Dependency.Identifier.QuotedString]);
       Continue;
     end;
 
@@ -332,26 +327,18 @@ end;
 procedure TDependencyResolver.SaveFileLock;
 var
   Dependencies: TArray<TDependency>;
-  Dependency: TDependency;
-  List: TList<string>;
 begin
+  if not Assigned(FPackageLocked) then
+    FPackageLocked := TPackagelocked.Create;
+
   Dependencies := FInstalledDependencies.Values.ToArray;
 
-  List := TList<string>.Create;
+  if FSaveDev then
+    FPackageLocked.DevDependencies := Dependencies
+  else
+    FPackageLocked.Dependencies := Dependencies;
 
-  try
-    for Dependency in Dependencies do
-      List.Add(Dependency.Full);
-
-    if FSaveDev then
-      FPackageLocked.DevDependencies := List.ToArray
-    else
-      FPackageLocked.Dependencies := List.ToArray;
-
-    TIOUtils.Save<TPackageLocked>(FPackageLocked, 'package.lock');
-  finally
-    List.Free;
-  end;
+  TIOUtils.Save<TPackageLocked>(FPackageLocked, 'package.lock');
 end;
 
 procedure TDependencyResolver.ScanSourceDirectory(Dependency: TDependency);
@@ -360,7 +347,7 @@ var
 begin
   FConsoleIO.WriteProcess('Scanning source diretory...');
   try
-    DependencyDiretory := FVendorDir + Dependency.Project;
+    DependencyDiretory := FVendorDir + Dependency.ArtifactId + '\source';
 
     SourceDiretory := ResolverSourceDiretory(DependencyDiretory);
 
@@ -441,7 +428,7 @@ begin
 
     FConsoleIO.NewEmptyLine;
     FConsoleIO.WriteProcess('Unzipping ...');
-    UnZipDependency(Dependency.Project);
+    UnZipDependency(Dependency.ArtifactId);
     FConsoleIO.WriteProcess('Unzipping... Done');
 
     FConsoleIO.NewEmptyLine;
@@ -451,7 +438,7 @@ begin
 
     FConsoleIO.NewEmptyLine;
     FConsoleIO.WriteProcess('Cleaning swap...');
-    DeleteDownloadedFiles(Dependency.Project);
+    DeleteDownloadedFiles(Dependency.ArtifactId);
     FConsoleIO.WriteProcess('Cleaning swap... Done');
   finally
     FConsoleIO.NewEmptyLine;
@@ -482,27 +469,23 @@ end;
 
 function TDependencyResolver.IsInstalled(Dependency: TDependency): Boolean;
 begin
-  if not FInstalledDependencies.ContainsKey(Dependency.Name) then
+  if not FInstalledDependencies.ContainsKey(Dependency.Identifier) then
     Exit(False);
-  Result := FInstalledDependencies.Items[Dependency.Name].Version.Equals(Dependency.Version);
+  Result := FInstalledDependencies.Items[Dependency.Identifier].Version.Equals(Dependency.Version);
 end;
 
 procedure TDependencyResolver.LoadDependencies;
 var
-  Dep: string;
   Dependency: TDependency;
-  Dependencies: TArray<string>;
+  Dependencies: TArray<TDependency>;
 begin
   if FSaveDev then
     Dependencies := FPackage.DevDependencies
   else
     Dependencies := FPackage.Dependencies;
 
-  for Dep in Dependencies do
-  begin
-    Dependency := TDependency.Create(Dep);
-    FDependencies.Add(Dependency.Name, Dependency);
-  end;
+  for Dependency in Dependencies do
+    FDependencies.Add(Dependency.Identifier, Dependency);
 end;
 
 procedure TDependencyResolver.Prepare;
@@ -515,34 +498,34 @@ procedure TDependencyResolver.RegisterDependency(Dependency: TDependency);
 var
   Dep: TDependency;
 begin
-  if FInstalledDependencies.ContainsKey(Dependency.Name) then
+  if FInstalledDependencies.ContainsKey(Dependency.Identifier) then
   begin
-    Dep := FInstalledDependencies.Items[Dependency.Name];
+    Dep := FInstalledDependencies.Items[Dependency.Identifier];
 
     if not Dependency.Version.Equals(Dep.Version) or FForce then
       FRemovedDependencies.Add(Dep);
   end;
 
-  FDependencies.AddOrSetValue(Dependency.Name, Dependency);
-  FInstalledDependencies.AddOrSetValue(Dependency.Name, Dependency);
+  FDependencies.AddOrSetValue(Dependency.Identifier, Dependency);
+  FInstalledDependencies.AddOrSetValue(Dependency.Identifier, Dependency);
 end;
 
 procedure TDependencyResolver.RemoveDependencyDir(Dependency: TDependency);
 var
   Path: string;
 begin
-  Path := FVendorDir + Dependency.Project;
+  Path := FVendorDir + Dependency.ArtifactId;
 
   if TDirectory.Exists(Path) then
     TDirectory.Delete(Path, True);
 end;
 
-procedure TDependencyResolver.SaveCache(Dependency: TDependency);
+procedure TDependencyResolver.SaveCache(Dependency: TDependency; const Mode: string);
 var
   SourceDir, TargetDir: string;
 begin
-  SourceDir := Dependency.VendorPath + '\bin\Debug';
-  TargetDir := Dependency.CachePath + '\bin\Debug';
+  SourceDir := Dependency.VendorPath + '\bin\' + Mode;
+  TargetDir := Dependency.CachePath + '\bin\' + Mode;
 
   TDirectory.Copy(SourceDir, TargetDir);
 end;
@@ -556,12 +539,12 @@ begin
 
   for Dependency in Dependencies do
   begin
-    if FDependencies.ContainsKey(Dependency.Name) then
+    if FDependencies.ContainsKey(Dependency.Identifier) then
       Continue;
 
     FRemovedDependencies.Add(Dependency);
 
-    FInstalledDependencies.Remove(Dependency.Name);
+    FInstalledDependencies.Remove(Dependency.Identifier);
 
     RemoveDependencyDir(Dependency);
   end;
@@ -614,10 +597,12 @@ var
   Path: string;
 begin
   for Dependency in FRemovedDependencies.ToArray do
-    FMainProject.RemoveLibInSearchPath(FVendorDir + Dependency.Project);
+    FMainProject.RemoveLibInSearchPath(FVendorDir + Dependency.ArtifactId);
 
   for Path in FPaths do
     FMainProject.AddPathInUnitSearchPath(Path);
+
+  //FInstalledDependencies
 
   FMainProject.Save;
 end;
@@ -625,24 +610,13 @@ end;
 procedure TDependencyResolver.UpdatePackage;
 var
   Dependencies: TArray<TDependency>;
-  Dependency: TDependency;
-  List: TList<string>;
 begin
   Dependencies := FDependencies.Values.ToArray;
 
-  List := TList<string>.Create;
-
-  try
-    for Dependency in Dependencies do
-      List.Add(Dependency.Full);
-
-    if FSaveDev then
-      FPackage.DevDependencies := List.ToArray
-    else
-      FPackage.Dependencies := List.ToArray;
-  finally
-    List.Free;
-  end;
+  if FSaveDev then
+    FPackage.DevDependencies := Dependencies
+  else
+    FPackage.Dependencies := Dependencies;
 
   TIOUtils.Save<TPackage>(FPackage, 'package.json');
 end;
@@ -668,7 +642,7 @@ var
   Path: string;
 begin
   for Dependency in FRemovedDependencies.ToArray do
-    FTestProject.RemoveLibInSearchPath(FVendorDir + Dependency.Project);
+    FTestProject.RemoveLibInSearchPath(FVendorDir + Dependency.ArtifactId);
 
   for Path in FPaths do
     FTestProject.AddPathInUnitSearchPath(Path);

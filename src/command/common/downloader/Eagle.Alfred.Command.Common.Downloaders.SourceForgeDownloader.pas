@@ -18,7 +18,7 @@ implementation
 function TSourceForgeDownloader.MountUrl(Dependency: TDependency): string;
 begin
   //https://sourceforge.net/code-snapshots/svn/a/ac/acbr/code/acbr-code-13690.zip
-   Result := 'https://api.github.com/repos/' + Dependency.Name + '/zipball/' + Dependency.Version;
+   Result := 'https://api.github.com/repos/' + Dependency.Identifier + '/zipball/' + Dependency.Version;
 end;
 
 procedure TSourceForgeDownloader.SetAuthentication(Dependency: TDependency);

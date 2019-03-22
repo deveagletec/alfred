@@ -20,7 +20,7 @@ implementation
 
 function TGithubDownloader.MountUrl(Dependency: TDependency): string;
 begin
-  Result := 'https://api.github.com/repos/' + Dependency.User + '/' + Dependency.Project + '/zipball/' + Dependency.Version;
+  Result := 'https://api.github.com/repos/' + Dependency.GroupId + '/' + Dependency.ArtifactId + '/zipball/' + Dependency.Version;
 end;
 
 procedure TGithubDownloader.SetAuthentication(Dependency: TDependency);
