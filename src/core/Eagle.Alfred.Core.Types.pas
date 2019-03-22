@@ -13,22 +13,35 @@ uses
 type
 
   TDependency = record
-    Host: string;
-    AuthUser: string;
-    AuthPass: string;
-    Repo: string;
-    User: string;
-    Project: string;
+    [Alias('groupId')]
+    GroupId: string;
+    [Alias('artifactId')]
+    ArtifactId: string;
+    [Alias('version')]
     Version: string;
-    Name: string;
-    Full : string;
+    [Alias('packageFile')]
+    PackageFile: string;
+    [Alias('repository')]
+    Repository: string;
+    [DISABLE]
+    Host: string;
+    [DISABLE]
+    AuthUser: string;
+    [DISABLE]
+    AuthPass: string;
+    [DISABLE]
+    Repo: string;
+    [DISABLE]
     CachePath: string;
+    [DISABLE]
     VendorPath: string;
+    [DISABLE]
     VendorPathFull: string;
-    ProjectFile: string;
+    [DISABLE]
     Cached: Boolean;
 
-    constructor Create(const Value: string);
+    procedure Prepare;
+    function Identifier(): string;
   end;
   
   TInstalledDependency = record
@@ -103,10 +116,10 @@ type
     DataBase: TDataBase;
 
     [Alias('dependencies')]
-    Dependencies: TArray<string>;
+    Dependencies: TArray<TDependency>;
 
     [Alias('dev-dependencies')]
-    DevDependencies: TArray<string>;
+    DevDependencies: TArray<TDependency>;
 
     destructor Destroy; override;
     procedure Validate;
@@ -115,10 +128,10 @@ type
   TPackagelocked = class
   public
     [Alias('dependencies')]
-    Dependencies: TArray<string>;
+    Dependencies: TArray<TDependency>;
 
     [Alias('dev-dependencies')]
-    DevDependencies: TArray<string>;
+    DevDependencies: TArray<TDependency>;
   end;
 
   TConfiguration = class
@@ -224,9 +237,9 @@ end;
 
 { TDependency }
 
-constructor TDependency.Create(const Value: string);
+procedure TDependency.Prepare;
 const
-  REGEX = '^(\w+)(\+(\w+\:\/\/[^:]+:\d+))?:(([^;]+:[^:]+)@)?([\w-]+)\/([\w-]+)#([a-f0-9]+|latest)$';
+  REGEX = '^(\w+)((\+(\w+\:\/\/[^:]+:\d+))?:(([^;]+:[^:]+)@))?$';
   GROUP_REPO = 1;
   GROUP_HOST = 3;
   GROUP_AUTH = 5;
@@ -240,9 +253,8 @@ var
 begin
   AuthUser := EmptyStr;
   AuthPass := EmptyStr;
-  Full := Value;
 
-  Match := TRegEx.Match(Value, REGEX);
+  Match := TRegEx.Match(Repository, REGEX);
 
   if not Match.Success then
     raise EDependencyDefinitionException.Create('Invalid dependency definition pattern');
@@ -250,34 +262,25 @@ begin
   Group := Match.Groups.Item[GROUP_REPO];
   Repo := Group.Value;
 
+  if Match.Groups.Count < 3 then
+    Exit;
+
   Group := Match.Groups.Item[GROUP_HOST];
   Host := Group.Value;
 
   Group := Match.Groups.Item[GROUP_AUTH];
   Auth := Group.Value.Split([':']);
 
-  Group := Match.Groups.Item[GROUP_USER];
-  User := Group.Value;
-
-  Group := Match.Groups.Item[GROUP_PROJECT];
-  Project := Group.Value;
-
-  if Match.Groups.Count < 8 then
-  begin
-    Repo := 'latest';
-    Exit;
-  end;
-
-  Group := Match.Groups.Item[GROUP_VERSION];
-  Version := IfThen(Group.Success, Group.Value, 'latest');
-
-  Name := User + '/' + Project;
-
   if Length(Auth) < 2 then
     Exit;
 
   AuthUser := Auth[0];
   AuthPass := Auth[1];
+end;
+
+function TDependency.Identifier: string;
+begin
+  Result := GroupId + '\' + ArtifactId;
 end;
 
 end.

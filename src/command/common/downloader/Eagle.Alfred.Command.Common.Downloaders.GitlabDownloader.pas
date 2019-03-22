@@ -22,7 +22,7 @@ function TGitlabDownloader.MountUrl(Dependency: TDependency): string;
 var
   Host, ProjectId: string;
 begin
-  ProjectId := Dependency.User + '%2F' + Dependency.Project;
+  ProjectId := Dependency.GroupId + '%2F' + Dependency.ArtifactId;
 
   if Dependency.Host.IsEmpty then
     Host := 'https://gitlab.com'
