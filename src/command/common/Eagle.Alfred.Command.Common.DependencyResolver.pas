@@ -167,6 +167,8 @@ begin
   FConsoleIO.WriteInfo('Buiding dependency...');
   Builder.Build(Dependency, 'Debug');
   SaveCache(Dependency, 'Debug');
+  Builder.Build(Dependency, 'Release');
+  SaveCache(Dependency, 'Release');
   FConsoleIO.WriteInfo('Buiding dependency... Done');
 end;
 
@@ -599,10 +601,14 @@ begin
   for Dependency in FRemovedDependencies.ToArray do
     FMainProject.RemoveLibInSearchPath(FVendorDir + Dependency.ArtifactId);
 
-  for Path in FPaths do
-    FMainProject.AddPathInUnitSearchPath(Path);
+  for Dependency in FInstalledDependencies.Values.ToArray do
+  begin
+    FMainProject.AddPathInReleaseUnitSearchPath(FRelativeVendorPath + FVendorDir + Dependency.ArtifactId + '\bin\release');
+    FMainProject.AddPathInDebugUnitSearchPath(FRelativeVendorPath + FVendorDir + Dependency.ArtifactId + '\bin\debug');
+  end;
 
-  //FInstalledDependencies
+  for Path in FPaths do
+    FMainProject.AddPathInUnitSourcePath(Path);
 
   FMainProject.Save;
 end;
@@ -644,8 +650,14 @@ begin
   for Dependency in FRemovedDependencies.ToArray do
     FTestProject.RemoveLibInSearchPath(FVendorDir + Dependency.ArtifactId);
 
+  for Dependency in FInstalledDependencies.Values.ToArray do
+  begin
+    FMainProject.AddPathInReleaseUnitSearchPath(FRelativeVendorPath + Dependency.ArtifactId + '\bin\release');
+    FMainProject.AddPathInDebugUnitSearchPath(FRelativeVendorPath + Dependency.ArtifactId + '\bin\debug');
+  end;
+
   for Path in FPaths do
-    FTestProject.AddPathInUnitSearchPath(Path);
+    FTestProject.AddPathInUnitSourcePath(Path);
 
   FTestProject.Save;
 end;

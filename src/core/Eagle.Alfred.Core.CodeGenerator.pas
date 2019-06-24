@@ -142,8 +142,8 @@ begin
   FDprojParser.AddUnit(InterfaceName, '..\..\' + FFilePath + InterfaceName);
   FDprojParser.AddUnit(ClassName, '..\..\' + FFilePath + 'impl\' + ClassName);
 
-  FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath);
-  FDprojTestParser.AddPathInUnitSearchPath('..\..\' + FFilePath + 'impl\');
+  FDprojTestParser.AddPathInReleaseUnitSearchPath('..\..\' + FFilePath);
+  FDprojTestParser.AddPathInReleaseUnitSearchPath('..\..\' + FFilePath + 'impl\');
 
   AddUnitToCoverage(FNamespace + 'Impl.' + FClassName, '..\..\..\' + FFilePath + 'impl');
 end;

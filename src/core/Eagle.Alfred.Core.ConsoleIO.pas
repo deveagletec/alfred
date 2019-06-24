@@ -15,6 +15,7 @@ type
       procedure WriteInfoFmt(const Msg: string; const Args: array of const);
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string; const Color: Byte = LightGray);
+      procedure WriteProcessLn(const Msg : string; const Color: Byte = LightGray);
       procedure WriteSuccess(const Msg: string);
       procedure WriteSuccessFmt(const Msg: string; const Args: array of const);
       function ReadInfo(const Msg: String; Color: Byte = LightGray): String;
@@ -36,6 +37,7 @@ type
       procedure WriteInfoFmt(const Msg: string; const Args: array of const);
       procedure WriteError(const Msg : string);
       procedure WriteProcess(const Msg : string; const Color: Byte = LightGray);
+      procedure WriteProcessLn(const Msg : string; const Color: Byte = LightGray);
       procedure WriteSuccess(const Msg: string);
       procedure WriteSuccessFmt(const Msg: string; const Args: array of const);
       function ReadData(const Msg: string): string;
@@ -127,6 +129,12 @@ procedure TConsoleIO.WriteProcess(const Msg : string; const Color: Byte);
 begin
    GotoXY(WhereX - (WhereX -1), WhereY);
    WriteColor(Msg, Color, False);
+end;
+
+procedure TConsoleIO.WriteProcessLn(const Msg: string; const Color: Byte);
+begin
+  WriteProcess(Msg, Color);
+  NewLine;
 end;
 
 procedure TConsoleIO.WriteSuccess(const Msg: string);
