@@ -7,15 +7,22 @@ uses
 
   Eagle.Alfred.Core.Exceptions;
 
+const
+  RELEASE_MODE = '$(Cfg_1_Win32)';
+  DEBUG_MODE = '$(Cfg_2_Win32)';
+
 type
 
   IDprojParser = interface
     ['{995EE77F-1CD3-45A1-9F77-C718A86293D5}']
     procedure AddForm(const UnitName, FormName, Path: string);
     procedure AddUnit(const Name, Path: string);
-    procedure AddPathInUnitSearchPath(const Path: string);
     procedure DeleteUnit(const Name, Path: string);
-    procedure DeletePathInUnitSearchPath(const Path: string);
+    procedure AddPathInReleaseUnitSearchPath(const Path: string);
+    procedure AddPathInDebugUnitSearchPath(const Path: string);
+    procedure AddPathInUnitSourcePath(const Path: string);
+    procedure DeletePathInReleaseUnitSearchPath(const Path: string);
+    procedure DeletePathInDebugUnitSearchPath(const Path: string);
     procedure RemoveLibInSearchPath(const Name: string);
     procedure Save;
   end;
@@ -29,20 +36,32 @@ type
       FDprFile: string;
       FUnitsList: TList<string>;
       FUnitsDeleted: TList<string>;
-      FUnitSearchPathList: TList<string>;
-      FUnitSearchPathNode: IXMLDOMNode;
+      FReleaseUnitSearchPathList: TList<string>;
+      FDebugUnitSearchPathList: TList<string>;
+      FUnitSourcePathList:  TList<string>;
+      FReleaseUnitSearchPathNode: IXMLDOMNode;
+      FDebugUnitSearchPathNode: IXMLDOMNode;
+      FUnitSourcePathNode: IXMLDOMNode;
       FChanged: Boolean;
+      procedure DoRemoveLibInDebugSearchPath(const Name: string);
+      procedure DoRemoveLibInReleaseSeachPath(const Name: string);
       procedure UpdateDpr;
-      function GetUnitSearchPathNode: IXMLDOMNode;
+      function GetUnitPathNode(const Mode, NodeTag: string): IXMLDOMNode;
       procedure InitXMLDomDocument;
+      procedure LoadDebugUnitSearchPathList;
+      procedure LoadReleaseUnitSearchPathList;
+      procedure LoadUnitSourcePathList;
     public
       constructor Create(const PackagePath, ProjectName: string);
       destructor Destroy; override;
       procedure AddForm(const UnitName, FormName, Path: string);
       procedure AddUnit(const Name, Path: string);
       procedure DeleteUnit(const Name, Path: string);
-      procedure AddPathInUnitSearchPath(const Path: string);
-      procedure DeletePathInUnitSearchPath(const Path: string);
+      procedure AddPathInReleaseUnitSearchPath(const Path: string);
+      procedure AddPathInDebugUnitSearchPath(const Path: string);
+      procedure AddPathInUnitSourcePath(const Path: string);
+      procedure DeletePathInReleaseUnitSearchPath(const Path: string);
+      procedure DeletePathInDebugUnitSearchPath(const Path: string);
       procedure RemoveLibInSearchPath(const Name: string);
       procedure Save;
   end;
@@ -70,7 +89,7 @@ begin
   FChanged := True;
 end;
 
-procedure TDprojParser.AddPathInUnitSearchPath(const Path: string);
+procedure TDprojParser.AddPathInReleaseUnitSearchPath(const Path: string);
 var
   UnitPath: string;
 begin
@@ -79,10 +98,31 @@ begin
   if UnitPath.EndsWith('\') then
     UnitPath := UnitPath.Remove(UnitPath.Length-1);
 
-  if UnitPath.IsEmpty or FUnitSearchPathList.Contains(UnitPath) then
+  if UnitPath.IsEmpty or FReleaseUnitSearchPathList.Contains(UnitPath) then
     Exit;
 
-  FUnitSearchPathList.Add(UnitPath);
+  FReleaseUnitSearchPathList.Add(UnitPath);
+
+  FChanged := True;
+end;
+
+procedure TDprojParser.AddPathInUnitSourcePath(const Path: string);
+begin
+end;
+
+procedure TDprojParser.AddPathInDebugUnitSearchPath(const Path: string);
+var
+  UnitPath: string;
+begin
+  UnitPath := Path.Trim;
+
+  if UnitPath.EndsWith('\') then
+    UnitPath := UnitPath.Remove(UnitPath.Length-1);
+
+  if UnitPath.IsEmpty or FDebugUnitSearchPathList.Contains(UnitPath) then
+    Exit;
+
+  FDebugUnitSearchPathList.Add(UnitPath);
 
   FChanged := True;
 end;
@@ -139,23 +179,39 @@ begin
 
   FUnitsDeleted := TList<string>.Create;
 
-  FUnitSearchPathList := TList<string>.Create;
+  FReleaseUnitSearchPathList := TList<string>.Create;
+  FDebugUnitSearchPathList := TList<string>.Create;
+  FUnitSourcePathList := TList<string>.Create;
 
   InitXMLDomDocument;
 
   FChanged := False;
 end;
 
-procedure TDprojParser.DeletePathInUnitSearchPath(const Path: string);
+procedure TDprojParser.DeletePathInDebugUnitSearchPath(const Path: string);
 var
   UnitPath: string;
 begin
   UnitPath := Path.Trim;
 
-  if UnitPath.IsEmpty or not FUnitSearchPathList.Contains(UnitPath) then
+  if UnitPath.IsEmpty or not FDebugUnitSearchPathList.Contains(UnitPath) then
     Exit;
 
-  FUnitSearchPathList.Remove(UnitPath);
+  FDebugUnitSearchPathList.Remove(UnitPath);
+
+  FChanged := True;
+end;
+
+procedure TDprojParser.DeletePathInReleaseUnitSearchPath(const Path: string);
+var
+  UnitPath: string;
+begin
+  UnitPath := Path.Trim;
+
+  if UnitPath.IsEmpty or not FReleaseUnitSearchPathList.Contains(UnitPath) then
+    Exit;
+
+  FReleaseUnitSearchPathList.Remove(UnitPath);
 
   FChanged := True;
 end;
@@ -173,38 +229,94 @@ begin
   if Assigned(FUnitsDeleted) then
     FreeAndNil(FUnitsDeleted);
 
-  if Assigned(FUnitSearchPathList) then
-    FreeAndNil(FUnitSearchPathList);
+  if Assigned(FReleaseUnitSearchPathList) then
+    FreeAndNil(FReleaseUnitSearchPathList);
+
+  if Assigned(FDebugUnitSearchPathList) then
+    FreeAndNil(FDebugUnitSearchPathList);
+
+  if Assigned(FUnitSourcePathList) then
+    FreeAndNil(FUnitSourcePathList);
 end;
 
-function TDprojParser.GetUnitSearchPathNode: IXMLDOMNode;
+procedure TDprojParser.DoRemoveLibInDebugSearchPath(const Name: string);
 var
-  Node, UnitSearchPathNode, ExeOutputNode: IXMLDOMNode;
+  I: Integer;
+  Count: Integer;
+  Value: string;
+begin
+  Count := FDebugUnitSearchPathList.Count;
+
+  I := 0;
+
+  while I < Count do
+  begin
+    Value := FDebugUnitSearchPathList.Items[I];
+
+    if Value.Contains(Name) then
+    begin
+      FDebugUnitSearchPathList.Delete(I);
+      Dec(Count);
+    end
+    else
+      Inc(I);
+  end;
+
+  FDebugUnitSearchPathList.TrimExcess;
+  FChanged := True;
+end;
+
+procedure TDprojParser.DoRemoveLibInReleaseSeachPath(const Name: string);
+var
+  I: Integer;
+  Count: Integer;
+  Value: string;
+begin
+  Count := FReleaseUnitSearchPathList.Count;
+
+  I := 0;
+
+  while I < Count do
+  begin
+    Value := FReleaseUnitSearchPathList.Items[I];
+
+    if Value.Contains(Name) then
+    begin
+      FReleaseUnitSearchPathList.Delete(I);
+      Dec(Count);
+    end
+    else
+      Inc(I);
+  end;
+
+  FReleaseUnitSearchPathList.TrimExcess;
+  FChanged := True;
+end;
+
+function TDprojParser.GetUnitPathNode(const Mode, NodeTag: string): IXMLDOMNode;
+var
+  Node, UnitPathNode: IXMLDOMNode;
   Expression, Condition: string;
 begin
-  Condition := '$(Base_Win32)'.QuotedString + '!=' + ''.QuotedString;
+  Condition := Mode.QuotedString + '!=' + ''.QuotedString;
 
   Expression := '/Project/PropertyGroup[@Condition="' + Condition + '"]';
 
+  UnitPathNode := FXMLDocument.selectSingleNode(Expression + '/' + NodeTag);
+
+  if Assigned(UnitPathNode) then
+    Exit(UnitPathNode);
+
   Node := FXMLDocument.selectSingleNode(Expression);
 
-  UnitSearchPathNode := Node.selectSingleNode('//DCC_UnitSearchPath');
+  UnitPathNode := FXMLDocument.createNode(NODE_ELEMENT, NodeTag, Node.namespaceURI);
 
-  if Assigned(UnitSearchPathNode) then
-    Exit(UnitSearchPathNode);
+  Node.appendChild(UnitPathNode);
 
-  ExeOutputNode := Node.selectSingleNode('//DCC_ExeOutput');
-
-  UnitSearchPathNode := FXMLDocument.createNode(ExeOutputNode.nodeType, 'DCC_UnitSearchPath', ExeOutputNode.namespaceURI);
-
-  Node.appendChild(UnitSearchPathNode);
-
-  Result := UnitSearchPathNode;
+  Result := UnitPathNode;
 end;
 
 procedure TDprojParser.InitXMLDomDocument;
-var
-  UnitsList: string;
 begin
   FXMLDocument := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
   FXMLDocument.async := False;
@@ -213,43 +325,62 @@ begin
 
   FXMLDocument.load(FDprojFile);
 
-  FUnitSearchPathNode := GetUnitSearchPathNode;
+  LoadReleaseUnitSearchPathList;
 
-  if FUnitSearchPathNode = nil then
+  LoadDebugUnitSearchPathList;
+
+  LoadUnitSourcePathList;
+end;
+
+procedure TDprojParser.LoadDebugUnitSearchPathList;
+var
+  UnitsList: string;
+begin
+  FDebugUnitSearchPathNode := GetUnitPathNode(DEBUG_MODE, 'DCC_UnitSearchPath');
+
+  if not Assigned(FDebugUnitSearchPathNode) then
     Exit;
 
-  UnitsList := FUnitSearchPathNode.text;
+  UnitsList := FDebugUnitSearchPathNode.text;
 
-  FUnitSearchPathList.AddRange(UnitsList.Split([';']));
+  FDebugUnitSearchPathList.AddRange(UnitsList.Split([';']));
+end;
+
+procedure TDprojParser.LoadReleaseUnitSearchPathList;
+var
+  UnitsList: string;
+begin
+  FReleaseUnitSearchPathNode := GetUnitPathNode(RELEASE_MODE, 'DCC_UnitSearchPath');
+
+  if not Assigned(FReleaseUnitSearchPathNode) then
+    Exit;
+
+  UnitsList := FReleaseUnitSearchPathNode.text;
+
+  FReleaseUnitSearchPathList.AddRange(UnitsList.Split([';']));
+end;
+
+procedure TDprojParser.LoadUnitSourcePathList;
+var
+  UnitsList: string;
+begin
+  FUnitSourcePathNode := GetUnitPathNode('$(Base_Win32)', 'Debugger_DebugSourcePath');
+
+  if not Assigned(FUnitSourcePathNode) then
+    Exit;
+
+  UnitsList := FUnitSourcePathNode.text;
+
+  FUnitSourcePathList.AddRange(UnitsList.Split([';']));
 end;
 
 procedure TDprojParser.RemoveLibInSearchPath(const Name: string);
-var
-  I, Count: Integer;
-  Value: string;
 begin
   if Name.IsEmpty then
     Exit;
 
-  Count := FUnitSearchPathList.Count;
-
-  I := 0;
-
-  while I < Count do
-  begin
-    Value := FUnitSearchPathList.Items[I];
-
-    if Value.Contains(Name) then
-    begin
-      FUnitSearchPathList.Delete(I);
-      Dec(Count);
-    end
-    else
-      Inc(I);
-  end;
-
-  FUnitSearchPathList.TrimExcess;
-  FChanged := True;
+  DoRemoveLibInReleaseSeachPath(Name);
+  DoRemoveLibInDebugSearchPath(Name);
 end;
 
 procedure TDprojParser.Save;
@@ -259,8 +390,11 @@ begin
 
   UpdateDpr;
 
-  if FUnitSearchPathNode <> nil then
-    FUnitSearchPathNode.text := string.Join(';', FUnitSearchPathList.ToArray);
+  if FReleaseUnitSearchPathNode <> nil then
+    FReleaseUnitSearchPathNode.text := string.Join(';', FReleaseUnitSearchPathList.ToArray);
+
+  if FDebugUnitSearchPathNode <> nil then
+    FDebugUnitSearchPathNode.text := string.Join(';', FDebugUnitSearchPathList.ToArray);
 
   FXMLDocument.save(FDprojFile);
 
