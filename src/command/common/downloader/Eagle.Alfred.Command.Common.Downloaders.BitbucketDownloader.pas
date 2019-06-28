@@ -1,7 +1,11 @@
 unit Eagle.Alfred.Command.Common.Downloaders.BitbucketDownloader;
 
 interface
-uses Eagle.Alfred.Command.Common.Downloaders.Downloader, Eagle.Alfred.Core.Types;
+uses
+  System.SysUtils,
+
+  Eagle.Alfred.Command.Common.Downloaders.Downloader,
+  Eagle.Alfred.Core.Types;
 
 type
 
@@ -17,7 +21,11 @@ implementation
 
 function TBitbucketDownloader.MountUrl(Dependency: TDependency): string;
 begin
- //https://bitbucket.org/sglienke/spring4d/get/4cf6393bf1ae.zip
+  Result := string.Format('https://bitbucket.org/%s/%s/get/%s.zip', [
+    Dependency.GroupId,
+    Dependency.ArtifactId,
+    Dependency.Version
+  ]);
 end;
 
 procedure TBitbucketDownloader.SetAuthentication(Dependency: TDependency);
