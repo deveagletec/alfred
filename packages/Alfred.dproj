@@ -72,7 +72,7 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Build>126</VerInfo_Build>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <Debugger_RunParams>install github:danieleteti/loggerpro#6e67a4ea05fac5cb23bff33187efad9795254896 -f</Debugger_RunParams>
+        <Debugger_RunParams>show eagletecnologia/spring4d</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -146,6 +146,7 @@
         <DCCReference Include="..\src\command\config\project\Eagle.Alfred.Command.Config.Project.Show.pas"/>
         <DCCReference Include="..\src\command\config\project\service\Eagle.Alfred.Command.Config.Project.Service.ExtractorValuePackage.pas"/>
         <DCCReference Include="..\src\command\common\Eagle.Alfred.Command.Common.Builder.pas"/>
+        <DCCReference Include="..\src\command\Eagle.Alfred.Command.Show.pas"/>
         <RcItem Include="..\resources\gitignore.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>

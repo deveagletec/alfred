@@ -39,6 +39,8 @@ type
     VendorPathFull: string;
     [DISABLE]
     Cached: Boolean;
+    [DISABLE]
+    Installed: Boolean;
 
     procedure Prepare;
     function Identifier(): string;
@@ -280,7 +282,7 @@ end;
 
 function TDependency.Identifier: string;
 begin
-  Result := GroupId + '\' + ArtifactId;
+  Result := GroupId + '/' + ArtifactId;
 end;
 
 end.
