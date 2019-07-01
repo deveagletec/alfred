@@ -23,6 +23,7 @@ type
       procedure WriteAlertFmt(const Msg: string; const Args: array of const);
       function ReadData(const Msg: string): string;
       function ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
+      procedure WriteLine(const Color: Byte = LightGray);
    end;
 
    TConsoleIO = class(TInterfacedObject, IConsoleIO)
@@ -42,6 +43,7 @@ type
       procedure WriteSuccessFmt(const Msg: string; const Args: array of const);
       function ReadData(const Msg: string): string;
       function ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
+      procedure WriteLine(const Color: Byte = LightGray);
    end;
 
 implementation
@@ -123,6 +125,11 @@ end;
 procedure TConsoleIO.WriteInfoFmt(const Msg: string; const Args: array of const);
 begin
   WriteInfo(string.Format(Msg, Args));
+end;
+
+procedure TConsoleIO.WriteLine(const Color: Byte);
+begin
+  WriteColor(StringOfChar('-', 60), Color);
 end;
 
 procedure TConsoleIO.WriteProcess(const Msg : string; const Color: Byte);
