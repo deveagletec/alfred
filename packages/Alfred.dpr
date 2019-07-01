@@ -78,9 +78,7 @@ begin
 	{$ENDIF}
 
   try
-
     TAlfred.GetInstance.Run();
-
   except
     on E: Exception do
     begin
