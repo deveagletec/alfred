@@ -99,7 +99,6 @@ procedure TConsoleIO.WriteColor(const Text: string; Color: Byte; const NewLine :
 var
   OldColor: Byte;
 begin
-
   OldColor := TextColor;
   TextColor(Color);
 
@@ -109,7 +108,6 @@ begin
     Writeln(EmptyStr);
 
   TextColor(OldColor);
-
 end;
 
 procedure TConsoleIO.WriteError(const Msg: string);
@@ -141,7 +139,7 @@ end;
 procedure TConsoleIO.WriteProcessLn(const Msg: string; const Color: Byte);
 begin
   WriteProcess(Msg, Color);
-  NewLine;
+  NewEmptyLine;
 end;
 
 procedure TConsoleIO.WriteSuccess(const Msg: string);
