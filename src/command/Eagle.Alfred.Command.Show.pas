@@ -13,18 +13,20 @@ type
   [Command('show', '', 'To list all of the available packages')]
   TShowCommand = class(TCommandAbstract)
   private
+    FDetailAll: Boolean;
     FPackageName: string;
     FVersionOnly: Boolean;
     FNameOnly: Boolean;
     FRootOnly: Boolean;
     FInstalledOnly: Boolean;
 
-    procedure ClearOptions;
     procedure ListAll;
     procedure ListDetails;
     procedure RootDetails;
     procedure Detail(Dependency: TDependency);
     function SelectDependency: TDependency;
+
+    procedure Init; override;
   public
     procedure Execute; override;
 
@@ -48,17 +50,17 @@ implementation
 
 { TShowCommand }
 
-procedure TShowCommand.ClearOptions;
-begin
-  FVersionOnly := False;
-  FNameOnly := False;
-  FRootOnly := False;
-end;
-
 procedure TShowCommand.Detail(Dependency: TDependency);
 begin
-  FConsoleIO.WriteInfo('Name       : ' + Dependency.Identifier);
-  FConsoleIO.WriteInfo('Version    : ' + Dependency.Version);
+  if FDetailAll or FNameOnly then
+    FConsoleIO.WriteInfo('Name       : ' + Dependency.Identifier);
+
+  if FDetailAll or FVersionOnly then
+    FConsoleIO.WriteInfo('Version    : ' + Dependency.Version);
+
+  if not FDetailAll then
+    Exit;
+
   FConsoleIO.WriteInfo('PackageFile: ' + Dependency.PackageFile);
   FConsoleIO.WriteInfo('Repository : ' + Dependency.Repository);
   FConsoleIO.WriteInfo('Installed  : ' + Boolean.ToString(Dependency.Installed, TUseBoolStrs.True));
@@ -81,6 +83,12 @@ begin
     ListDetails;
 end;
 
+procedure TShowCommand.Init;
+begin
+  inherited;
+  FDetailAll := True;
+end;
+
 procedure TShowCommand.Installed;
 begin
   FInstalledOnly := True;
@@ -96,7 +104,7 @@ begin
       Continue;
 
     Detail(Dependency);
-    FConsoleIO.WriteInfo(StringOfChar('-', 60));
+    FConsoleIO.WriteLine;
   end;
 end;
 
@@ -106,30 +114,18 @@ var
 begin
   Dependency := SelectDependency;
 
-  if FVersionOnly then
-  begin
-    FConsoleIO.WriteInfo(Dependency.Version);
-    Exit;
-  end;
-
-  if FNameOnly then
-  begin
-    FConsoleIO.WriteInfo(Dependency.Identifier);
-    Exit;
-  end;
-
   Detail(Dependency);
 end;
 
 procedure TShowCommand.NameOnly;
 begin
-  ClearOptions;
   FNameOnly := True;
+  FRootOnly := False;
+  FDetailAll := False;
 end;
 
 procedure TShowCommand.Root;
 begin
-  ClearOptions;
   FRootOnly := True;
 end;
 
@@ -171,8 +167,9 @@ end;
 
 procedure TShowCommand.Version;
 begin
-  ClearOptions;
   FVersionOnly := True;
+  FRootOnly := False;
+  FDetailAll := False;
 end;
 
 initialization
