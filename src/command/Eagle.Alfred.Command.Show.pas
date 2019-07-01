@@ -3,6 +3,8 @@ unit Eagle.Alfred.Command.Show;
 interface
 uses
   System.SysUtils,
+  System.RegularExpressions,
+
   Eagle.Alfred,
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Attributes,
@@ -24,7 +26,6 @@ type
     procedure ListDetails;
     procedure RootDetails;
     procedure Detail(Dependency: TDependency);
-    function SelectDependency: TDependency;
 
     procedure Init; override;
   public
@@ -36,7 +37,7 @@ type
     [Option('version', '-v', 'List package versions')]
     procedure Version;
 
-    [Option('name-only', '-n', 'List package names only')]
+    [Option('name', '-n', 'List package names only')]
     procedure NameOnly;
 
     [Option('self', '-s', 'List the root package info')]
@@ -111,10 +112,25 @@ end;
 procedure TShowCommand.ListDetails;
 var
   Dependency: TDependency;
+  LPackageName: string;
+  Detailed: Boolean;
 begin
-  Dependency := SelectDependency;
+  Detailed := False;
+  LPackageName := FPackageName.ToLower.Replace('*', '.*').Replace('/', '\/');
+  for Dependency in FPackage.Dependencies do
+  begin
+    if not TRegEx.IsMatch(Dependency.Identifier.ToLower, '^' + LPackageName + '$') then
+      Continue;
 
-  Detail(Dependency);
+    if Detailed then
+      FConsoleIO.WriteLine;
+
+    Detail(Dependency);
+    Detailed := True;
+  end;
+
+  if not Detailed then
+    raise EAlfredException.CreateFmt('Package "%s" not found!', [FPackageName]);
 end;
 
 procedure TShowCommand.NameOnly;
@@ -143,21 +159,6 @@ begin
   FConsoleIO.WriteInfo('TestsDir      : ' + FPackage.TestsDir);
   FConsoleIO.WriteInfo('MigrationDir  : ' + FPackage.MigrationDir);
   FConsoleIO.WriteInfo('VendorDir     : ' + FPackage.VendorDir);
-end;
-
-function TShowCommand.SelectDependency: TDependency;
-var
-  Dependency: TDependency;
-  LPackageName: string;
-begin
-  LPackageName := FPackageName.ToLower;
-  for Dependency in FPackage.Dependencies do
-  begin
-    if Dependency.Identifier.ToLower.Equals(LPackageName) then
-      Exit(Dependency);
-  end;
-
-  raise EAlfredException.CreateFmt('Package "%s" not found!', [FPackageName]);
 end;
 
 procedure TShowCommand.SetName(const Name: string);
