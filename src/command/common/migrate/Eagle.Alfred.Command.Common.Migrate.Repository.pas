@@ -106,7 +106,7 @@ begin
       if SQL.Trim().IsEmpty() then
         continue;
 
-      FDQuery.ExecSQL(SQL);
+      FDQuery.ExecSQL(SQL.Replace(#9#9, #13#10));
 
       if IsAutoCommit then
         FFDConnection.GetConnection.Commit;
