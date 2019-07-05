@@ -8,6 +8,7 @@ uses
 
   FireDAC.Comp.Client,
   FireDAC.Comp.Script,
+  FireDAC.Stan.Param,
   FireDAC.UI.Intf,
   FireDAC.Comp.ScriptCommands,
 
@@ -96,6 +97,9 @@ begin
   else
     SQLList := Migrate.down;
 
+  FFDConnection.GetConnection.ResourceOptions.MacroCreate := False;
+  FFDConnection.GetConnection.ResourceOptions.MacroExpand := False;
+
   FFDConnection.GetConnection.StartTransaction;
 
   try
@@ -106,7 +110,9 @@ begin
       if SQL.Trim().IsEmpty() then
         continue;
 
-      FDQuery.ExecSQL(SQL);
+      FDQuery.SQL.Text := SQL.Replace(#9#9, #13#10).Replace(#9, #13#10);
+
+      FDQuery.ExecSQL();
 
       if IsAutoCommit then
         FFDConnection.GetConnection.Commit;

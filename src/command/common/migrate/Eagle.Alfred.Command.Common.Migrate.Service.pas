@@ -1,5 +1,5 @@
 unit Eagle.Alfred.Command.Common.Migrate.Service;
-
+
 interface
 
 uses
@@ -18,6 +18,7 @@ uses
   Eagle.Alfred.Utils,
   Eagle.Alfred.Core.Enums,
   Eagle.Alfred.Core.Exceptions,
+  Eagle.Alfred.Command.Common.Service.ScaperJSON,
   Eagle.Alfred.Command.Common.Migrate.Model,
   Eagle.Alfred.Command.Common.Migrate.Repository;
 
@@ -54,7 +55,7 @@ type
     function GetMigratesByVersion(const Version: string): TList<TMigrate>;
     function GetMigrateByIdentifier(const Identifier: string): TMigrate;
     function MigrateDirectoryExists: Boolean;
-    procedure RemoveMigratesUnusableList(const ExecutionMode : TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
+    procedure RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
   end;
 
 implementation
@@ -127,8 +128,7 @@ begin
 
   ListFiles := TList<String>.Create;
 
-  Index := FindFirst(Format('%s%s*.json', [FPackage.BaseDir,
-    FPackage.MigrationDir]), faAnyFile, Search);
+  Index := FindFirst(Format('%s%s*.json', [FPackage.BaseDir, FPackage.MigrationDir]), faAnyFile, Search);
 
   while Index = 0 do
   begin
@@ -142,7 +142,7 @@ begin
 
 end;
 
-function TMigrateService.GetMigrateByIdentifier(const Identifier: string) : TMigrate;
+function TMigrateService.GetMigrateByIdentifier(const Identifier: string): TMigrate;
 var
   Migrates: TList<TMigrate>;
   Migrate, MigrateResult: TMigrate;
@@ -158,7 +158,7 @@ begin
     for Migrate in Migrates do
     begin
 
-      if not (Migrate.Id.Equals(Identifier) or Migrate.Name.Replace('.json', '').ToUpper.Equals(Identifier.ToUpper)) then
+      if not(Migrate.Id.Equals(Identifier) or Migrate.Name.Replace('.json', '').ToUpper.Equals(Identifier.ToUpper)) then
         continue;
 
       MigrateResult := Migrates.Extract(Migrate);
@@ -235,6 +235,8 @@ begin
 
   Data := Data.Replace(#13#10, #9);
 
+  Data := TScaperJSON.Scape(Data);
+
   try
     Result := TJSON.Parse<TMigrate>(Data);
     Result.Id := FileName.Split(['_'])[0];
@@ -254,8 +256,7 @@ begin
   Result := DirectoryExists(FPackage.MigrationDir + '\');
 end;
 
-procedure TMigrateService.RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>;
-  const ListMigratesExecuted: TList<string>);
+procedure TMigrateService.RemoveMigratesUnusableList(const ExecutionMode: TExecutionModeMigrate; var Migrates: TList<TMigrate>; const ListMigratesExecuted: TList<string>);
 var
   Migrate: TMigrate;
   CanRemove: Boolean;
@@ -289,3 +290,4 @@ begin
 end;
 
 end.
+
