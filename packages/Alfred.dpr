@@ -59,7 +59,9 @@ uses
   Eagle.Alfred.Command.DB.Migrate.Delete in '..\src\command\db\migrate\Eagle.Alfred.Command.DB.Migrate.Delete.pas',
   Eagle.Alfred.Command.Common.DependencyResolver in '..\src\command\common\Eagle.Alfred.Command.Common.DependencyResolver.pas',
   Eagle.Alfred.Command.Common.DprojParser in '..\src\command\common\Eagle.Alfred.Command.Common.DprojParser.pas',
-  Eagle.Alfred.Command.Common.DownloaderFactory in '..\src\command\common\Eagle.Alfred.Command.Common.DownloaderFactory.pas';
+  Eagle.Alfred.Command.Common.DownloaderFactory in '..\src\command\common\Eagle.Alfred.Command.Common.DownloaderFactory.pas',
+  Eagle.Alfred.Command.Common.Service.ScaperJSON in '..\src\command\common\service\Eagle.Alfred.Command.Common.Service.ScaperJSON.pas',
+  Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression in '..\src\commom\utils\Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression.pas';
 
 var
   OldColor: Byte;
