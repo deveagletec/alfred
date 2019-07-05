@@ -36,7 +36,8 @@ type
     FDataBase: TDataBaseTestHelper;
     FRepository: I{ModelName}Repository;
 
-    procedure DoTestValidation(const Msg: string);
+    procedure ConfigureSearchEvent<T: class, constructor>(const SearchName: string; Registro: T);
+    procedure DoTestValidation(const Msg: string; const IsValid: Boolean);
     procedure ResetDataBase;
   public
     [SetupFixture]
@@ -49,9 +50,10 @@ type
     procedure TearDown;
 
     [Test]
-    [TestCase('Nome vazio', ',Campo requerido!')]
-    [TestCase('Nome maior que o permitido', 'dajfçasjdfjasçdfjaçskdfjçaksjdfçaksjdfkajsdfkajsdçfkjasdçfkjasçdkfjasd,O Nome do "{ModelName}" não pode possuir mais que')]
-    procedure Test_deveria_validar_nomes_com_sucesso(const Value, Msg: string);
+    [TestCase('Nome vazio', ',Campo requerido!,False')]
+    [TestCase('Nome maior que o permitido', 'dajfçasjdfjasçdfjaçskdfjçaksjdfçaksjdfkajsdfkajsdçfkjasdçfkjasçdkfjasd,O Nome do "{ModelName}" não pode possuir mais que,False')]
+    [TestCase('Nome válido', 'Barack Obama,Campo requerido!,True')]
+    procedure Test_deveria_validar_nomes_com_sucesso(const Value, Msg: string; const IsValid: Boolean);
 
     [Test]
     [Category('integration,db')]
@@ -78,7 +80,27 @@ type
 
 implementation
 
-procedure T{ModelName}ViewModelTest.DoTestValidation(const Msg: string);
+procedure T{ModelName}ViewModelTest.ConfigureSearchEvent<T>(const SearchName: string; Registro: T);
+begin
+  DialogServiceMock.Setup.WillExecute(
+    function(const args: TArray<TValue>; const ReturnType: TRttiType): TValue
+    var
+      Event: TSearchResponse<T>;
+    begin
+
+      Event := TSearchResponse<T>.Create();
+      Event.Records := TCollections.CreateList<T>;
+
+      Event.Records.Add(Registro);
+
+      TEventBus.GetDefault.Post(Event);
+
+    end).When.ShowSearch(SearchName, TSearchResponse<T>);
+end;
+
+procedure T{ModelName}ViewModelTest.DoTestValidation(const Msg: string; const IsValid: Boolean);
+var
+  LancouExcecao: Boolean;
 begin
   try
     F{ModelName}ViewModel.OnValidate;
@@ -86,8 +108,14 @@ begin
     Assert.Fail();
   except
     on E: EWrongValuesException do
-      Assert.IsTrue(E.ContainsMsgLike(Msg));
+	  LancouExcecao := E.ContainsMsgLike(PropertyName, Msg);
   end;
+  
+  if (IsValid) then
+    Assert.IsFalse(LancouExcecao)
+  else
+    Assert.IsTrue(LancouExcecao); 
+  
 end;
 
 procedure T{ModelName}ViewModelTest.ResetDataBase;
@@ -247,27 +275,14 @@ end;
 
 procedure T{ModelName}ViewModelTest.Test_deveria_tratar_a_selecao_de_registro_sem_erros;
 var
-  DialogServiceMock: TMock<IDialogService>;
+  Entity: T{ModelName};
 begin
 
-  DialogServiceMock := TMock<IDialogService>.Create();
-
-  DialogServiceMock.Setup.WillExecute(function(const args : TArray<TValue>; const ReturnType : TRttiType):TValue
-    var
-      Event: T{ModelName}SearchResponse;
-      Entity: T{ModelName};
-    begin
-      Entity := T{ModelName}.Create;
-      Entity.Id := 1;
-      Entity.Nome := 'XPTO';
-
-      Event := T{ModelName}SearchResponse.Create;
-      Event.Records := TCollections.CreateList<T{ModelName}>;
-      Event.Records.Add(Entity);
-
-      TEventBus.GetDefault.Post(Event);
-
-    end).When.ShowNewSearch('C{ModelName}', T{ModelName}SearchResponse);
+  Entity := T{ModelName}.Create;
+  Entity.Id := 1;
+  Entity.Nome := 'XPTO';
+	
+  ConfigureSearchEvent<T{ModelName}>('C{ModelName}', Entity);
 
   F{ModelName}ViewModel.SetDialogService(DialogServiceMock.Instance);
 
@@ -277,13 +292,13 @@ begin
   Assert.AreEqual('XPTO', F{ModelName}ViewModel.Nome, 'Nome');
 end;
 
-procedure T{ModelName}ViewModelTest.Test_deveria_validar_nomes_com_sucesso(const Value, Msg: string);
+procedure T{ModelName}ViewModelTest.Test_deveria_validar_nomes_com_sucesso(const Value, Msg: string; const IsValid: Boolean);
 begin
   F{ModelName}ViewModel.OnNew(nil);
 
   F{ModelName}ViewModel.SetNome(Value);
 
-  DoTestValidation(Msg);
+  DoTestValidation(Msg, IsValid);
 end;
 
 initialization
