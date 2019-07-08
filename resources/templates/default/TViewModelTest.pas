@@ -50,9 +50,9 @@ type
     procedure TearDown;
 
     [Test]
-    [TestCase('Nome vazio', ',Campo requerido!,False')]
+    [TestCase('Nome vazio', ',Campo de preenchimento obrigatório!,False')]
     [TestCase('Nome maior que o permitido', 'dajfçasjdfjasçdfjaçskdfjçaksjdfçaksjdfkajsdfkajsdçfkjasdçfkjasçdkfjasd,O Nome do "{ModelName}" não pode possuir mais que,False')]
-    [TestCase('Nome válido', 'Barack Obama,Campo requerido!,True')]
+    [TestCase('Nome válido', 'Barack Obama,Campo de preenchimento obrigatório!,True')]
     procedure Test_deveria_validar_nomes_com_sucesso(const Value, Msg: string; const IsValid: Boolean);
 
     [Test]
