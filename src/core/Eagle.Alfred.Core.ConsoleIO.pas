@@ -10,6 +10,7 @@ type
 
    IConsoleIO = interface
       ['{53469311-2F04-4568-9928-5E85CB2822EC}']
+      procedure NewEmptyLine;
       procedure WriteInfo(const Msg : string);
       procedure WriteInfoFmt(const Msg: string; const Args: array of const);
       procedure WriteError(const Msg : string);
@@ -27,6 +28,7 @@ type
    private
       procedure WriteColor(const Text: string; Color: Byte; const NewLine : Boolean = True);
    public
+      procedure NewEmptyLine;
       function ReadInfo(const Msg: string; Color: Byte = LightGray): String;
       procedure WriteAlert(const msg: string);
       procedure WriteAlertFmt(const Msg: string; const Args: array of const);
@@ -41,6 +43,11 @@ type
    end;
 
 implementation
+
+procedure TConsoleIO.NewEmptyLine;
+begin
+  WriteInfo('');
+end;
 
 function TConsoleIO.ReadBoolean(const Msg: string; const Default: Boolean): Boolean;
 var

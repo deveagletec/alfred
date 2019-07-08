@@ -61,7 +61,9 @@ uses
   Eagle.Alfred.Command.Common.DprojParser in '..\src\command\common\Eagle.Alfred.Command.Common.DprojParser.pas',
   Eagle.Alfred.Command.Common.DownloaderFactory in '..\src\command\common\Eagle.Alfred.Command.Common.DownloaderFactory.pas',
   Eagle.Alfred.Command.Common.Service.ScaperJSON in '..\src\command\common\service\Eagle.Alfred.Command.Common.Service.ScaperJSON.pas',
-  Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression in '..\src\commom\utils\Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression.pas';
+  Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression in '..\src\commom\utils\Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression.pas',
+  Eagle.Alfred.Command.Common.HelpBuilder in '..\src\command\common\Eagle.Alfred.Command.Common.HelpBuilder.pas',
+  Eagle.Alfred.Core.CommandRegisterData in '..\src\core\Eagle.Alfred.Core.CommandRegisterData.pas';
 
 var
   OldColor: Byte;

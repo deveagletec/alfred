@@ -1,6 +1,7 @@
 unit Eagle.Alfred.Core.CommandRegister;
 
 interface
+
 uses
   System.SysUtils,
   System.Rtti,
@@ -8,38 +9,24 @@ uses
 
   Spring.Reflection,
 
+  Eagle.Alfred.Core.CommandRegisterData,
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.Attributes,
   Eagle.Alfred.Core.Command;
 
 type
 
-  TCommandParam = record
-    Method: TRttiMethod;
-    Attrib: ParamAttribute;
-  end;
-
-  TCommandOption = record
-    Method: TRttiMethod;
-    Attrib: OptionAttribute;
-  end;
-
-  TCommandMetaData = record
-    PackageRequired: Boolean;
-    CommandAttrib: CommandAttribute;
-    CommandClass: TClass;
-    CommandType: TRttiType;
-    CommandParams: TArray<TCommandParam>;
-    CommandOptions: TArray<TCommandOption>;
-  end;
-
   ICommandRegister = interface
     ['{B7642446-B1A6-474A-A062-C4D848A8DAEF}']
     procedure AddCommand(CommandClass: TClass);
+
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
-    function Contains(const GroupName, CommandName: string): Boolean;
     function GetGroupsCommand: TArray<string>;
     function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
+
+    function ContainsCommand(const GroupName, CommandName: string): Boolean;
+    function ContainsGroupCommand(const GroupName: string): Boolean;
+
   end;
 
   TCommandRegister = class(TInterfacedObject, ICommandRegister)
@@ -49,18 +36,22 @@ type
     function GetCommandOption(CommandOptionAttrib: OptionAttribute; Method: TRttiMethod): TCommandOption;
     function GetCommandParam(CommandParamAttrib: ParamAttribute; Method: TRttiMethod): TCommandParam;
   public
+
     constructor Create();
     destructor Destroy; override;
+
     procedure AddCommand(CommandClass: TClass);
+
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
-    function Contains(const GroupName, CommandName: string): Boolean;
     function GetGroupsCommand: TArray<string>;
     function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
+
+    function ContainsCommand(const GroupName, CommandName: string): Boolean;
+    function ContainsGroupCommand(const GroupName: string): Boolean;
+
   end;
 
 implementation
-
-{ TCommandRegister }
 
 procedure TCommandRegister.AddCommand(CommandClass: TClass);
 var
@@ -130,14 +121,14 @@ begin
 
 end;
 
-function TCommandRegister.Contains(const GroupName, CommandName: string): Boolean;
+function TCommandRegister.ContainsGroupCommand(const GroupName: string): Boolean;
 begin
   Result := FCommands.ContainsKey(GroupName);
 end;
 
 constructor TCommandRegister.Create;
 begin
-  FCommands := TDictionary<string, TDictionary<string, TCommandMetaData>>.Create;
+  FCommands := TDictionary < string, TDictionary < string, TCommandMetaData >>.Create;
 end;
 
 destructor TCommandRegister.Destroy;
@@ -150,10 +141,23 @@ begin
     for Command in FCommands.Values do
       Command.Free;
 
-     FreeAndNil(FCommands);
+    FreeAndNil(FCommands);
   end;
 
   inherited;
+end;
+
+function TCommandRegister.ContainsCommand(const GroupName, CommandName: string): Boolean;
+begin
+
+  if not FCommands.ContainsKey(GroupName) then
+    Exit(False);
+
+  if not FCommands.Items[GroupName].ContainsKey(CommandName) then
+    Exit(False);
+
+  Result := True;
+
 end;
 
 function TCommandRegister.GetCommand(const GroupName, CommandName: string): TCommandMetaData;
