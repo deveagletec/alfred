@@ -4,7 +4,7 @@ interface
 
 uses
   System.Classes,
-  System.SysUtils,
+  System.SysUtils, StrUtils,
   System.Math,
   System.Generics.Collections,
   System.Rtti,
@@ -16,10 +16,13 @@ uses
   Eagle.Alfred.Core.Exceptions,
   Eagle.Alfred.Core.ConsoleIO,
   Eagle.Alfred.Core.Attributes,
-  Eagle.Alfred.Command.Common.DprojParser,
   Eagle.Alfred.Core.Types,
   Eagle.Alfred.Core.Command,
-  Eagle.Alfred.Core.CommandRegister;
+  Eagle.Alfred.Core.CommandRegister,
+  Eagle.Alfred.Core.CommandRegisterData,
+
+  Eagle.Alfred.Command.Common.DprojParser,
+  Eagle.Alfred.Command.Common.HelpBuilder;
 
 var
   start, stop, elapsed: cardinal;
@@ -30,6 +33,7 @@ type
   private
     class var FInstance: TAlfred;
   private
+
     FConfiguration: TConfiguration;
     FCurrentPath: string;
     FAppPath: string;
@@ -37,29 +41,38 @@ type
     FPackage: TPackage;
     FCommandArgs: TList<string>;
     FCommandRegister: ICommandRegister;
+    FHelpBuilder: IHelpBuilder;
+
     function CreateCommand(CommandMetaData: TCommandMetaData): ICommand;
     function DoGetCommandParamByName(Attrib: ParamAttribute): string;
     function DoGetCommandParamByPosition(Attrib: ParamAttribute; const IsSingle: Boolean): string;
     procedure DoSetParam(Command: ICommand; Method: TRttiMethod; ParamValue: string);
     procedure Execute(const GroupName, CommandName: string);
+    procedure ExecuteHelp(const GroupName, CommandName: string);
     function GetCommandParam(Attrib: ParamAttribute; const IsSingle: Boolean): string;
     procedure Help;
-    procedure HelpCommand(GroupName: string);
+    procedure HelpCommand(const GroupName, CommandName: string);
+    procedure HelpGroupCommands(const GroupName: string);
     procedure HelpProjectInit;
     procedure Init;
+    function IsOptionHelp(const Option: string): Boolean;
+    function IsToExecuteHelp: Boolean;
     procedure LoadCommandArgs;
     procedure LoadConfiguration;
     function OptionExists(const OptionAttrib: OptionAttribute): Boolean;
     procedure SetOptions(Command: ICommand; CommandMetaData: TCommandMetaData);
     procedure SetParams(Command: ICommand; CommandMetaData: TCommandMetaData);
     procedure ShowMessageAlert(const Alert: string);
+
   public
+
     class function GetInstance(): TAlfred;
     class procedure ReleaseInstance();
     constructor Create;
     destructor Destroy; override;
     procedure Run();
     procedure &Register(Cmd: TClass);
+
   end;
 
 implementation
@@ -72,6 +85,7 @@ begin
   FCurrentPath := GetCurrentDir;
   FAppPath := ExtractFilePath(ParamStr(0));
   FConsoleIO := TConsoleIO.Create;
+  FHelpBuilder := THelpBuilder.Create;
 
   FCommandArgs := TList<string>.Create;
 
@@ -105,8 +119,8 @@ begin
     TValue.From<string>(FCurrentPath),
     TValue.From<TConfiguration>(FConfiguration),
     TValue.From<TPackage>(FPackage),
-    TValue.From<IConsoleIO>(FConsoleIO)
-  ]).AsType<ICommand>;
+    TValue.From<IConsoleIO>(FConsoleIO)])
+  .AsType<ICommand>;
 
 end;
 
@@ -119,7 +133,7 @@ begin
 
   for Arg in FCommandArgs.ToArray do
   begin
-    if not Arg.ToLower.StartsWith(Attrib.Name+'=') then
+    if not Arg.ToLower.StartsWith(Attrib.Name + '=') then
       Continue;
 
     Values := Arg.Split(['=']);
@@ -127,7 +141,7 @@ begin
     if Length(Values) = 1 then
       raise ERequiredParameterException.CreateFmt('Value Required "%s" Not Found', [Attrib.Description]);
 
-    Result := Values[1].Replace('''', '',[rfReplaceAll]).Replace('"', '', [rfReplaceAll]).Trim;
+    Result := Values[1].Replace('''', '', [rfReplaceAll]).Replace('"', '', [rfReplaceAll]).Trim;
 
     if Result.IsEmpty then
       raise ERequiredParameterException.CreateFmt('Value Required "%s" Not Found', [Attrib.Description]);
@@ -175,6 +189,25 @@ begin
   Command.Execute;
 end;
 
+procedure TAlfred.ExecuteHelp(const GroupName, CommandName: string);
+begin
+
+  if (GroupName.IsEmpty and CommandName.IsEmpty) or (not FCommandRegister.ContainsGroupCommand(GroupName)) then
+  begin
+    Help;
+    Exit;
+  end;
+
+  if (not FCommandRegister.ContainsCommand(GroupName, CommandName)) then
+  begin
+    HelpGroupCommands(GroupName);
+    Exit;
+  end;
+
+  HelpCommand(GroupName, CommandName);
+
+end;
+
 function TAlfred.GetCommandParam(Attrib: ParamAttribute; const IsSingle: Boolean): string;
 begin
   Result := DoGetCommandParamByPosition(Attrib, IsSingle);
@@ -195,46 +228,24 @@ begin
 end;
 
 procedure TAlfred.Help;
-var
-  Value: string;
 begin
-
-  FConsoleIO.WriteAlert(sLineBreak + '| ' + 'Usage: alfred <command>');
-  FConsoleIO.WriteAlert('* -------------------------');
-  FConsoleIO.WriteAlert('| ' + 'COMMANDS:');
-  FConsoleIO.WriteAlert('* ----------------------------------------------------- ');
-
-  for Value in FCommandRegister.GetGroupsCommand do
-    FConsoleIO.WriteInfo('| ' + Value);
-
-  FConsoleIO.WriteInfo('* ----------------------------------------------------- ' + sLineBreak);
-
-  FConsoleIO.WriteInfo(sLineBreak + 'alfred <command> [-h | --help]  Quick help on <command>');
-
+  FHelpBuilder.ShowSimpleList(FCommandRegister.GetGroupsCommand, 'groups commands', 'group command');
 end;
 
-procedure TAlfred.HelpCommand(GroupName: string);
+procedure TAlfred.HelpCommand(const GroupName, CommandName: string);
 var
-  Commands: TArray<TCommandMetaData>;
   Command: TCommandMetaData;
-  CommandAttrib: CommandAttribute;
 begin
-  FConsoleIO.WriteAlert(sLineBreak + '| Usage: alfred ' + GroupName + ' <option>');
-  FConsoleIO.WriteAlert('* -------------------------');
-  FConsoleIO.WriteAlert('| ' + 'OPTIONS:');
-  FConsoleIO.WriteAlert('* ----------------------------------------------------- ');
+  Command := FCommandRegister.GetCommand(GroupName, CommandName);
+  FHelpBuilder.ShowCommand(Command);
+end;
 
-  Commands := FCommandRegister.GetGroup(GroupName).Values.ToArray;
-
-  for Command in Commands do
-  begin
-    CommandAttrib := Command.CommandAttrib;
-
-    FConsoleIO.WriteInfo('| ' + CommandAttrib.Name.PadRight(15, ' ') + CommandAttrib.Description);
-
-  end;
-
-  FConsoleIO.WriteInfo('* ----------------------------------------------------- ' + sLineBreak);
+procedure TAlfred.HelpGroupCommands(const GroupName: string);
+var
+  Commands: TDictionary<string, TCommandMetaData>;
+begin
+  Commands := FCommandRegister.GetGroup(GroupName);
+  FHelpBuilder.ShowCommandsOfGroup(GroupName, Commands);
 end;
 
 procedure TAlfred.HelpProjectInit;
@@ -259,11 +270,25 @@ begin
 
   try
     FPackage := TJSON.Parse<TPackage>(Data);
-  except on E: Exception do
-    raise EAlfredException.Create('Package configuration invalid! ' + E.Message);
+  except
+    on E: Exception do
+      raise EAlfredException.Create('Package configuration invalid! ' + E.Message);
   end;
 
   FPackage.Validate;
+end;
+
+function TAlfred.IsOptionHelp(const Option: string): Boolean;
+begin
+  Result := Option.Contains('-h') or Option.Contains('-help')
+end;
+
+function TAlfred.IsToExecuteHelp: Boolean;
+const
+  ALIAS_HELP = '-h';
+  NAME_HELP = '--help';
+begin
+  Result := FCommandArgs.Contains(ALIAS_HELP) or FCommandArgs.Contains(NAME_HELP);
 end;
 
 procedure TAlfred.LoadCommandArgs;
@@ -294,8 +319,9 @@ begin
   begin
     try
       FConfiguration := TJSON.Parse<TConfiguration>(Data);
-    except on E: Exception do
-      raise EAlfredException.Create('Global configuration invalid! ' + E.Message);
+    except
+      on E: Exception do
+        raise EAlfredException.Create('Global configuration invalid! ' + E.Message);
     end;
 
     Exit;
@@ -327,11 +353,20 @@ var
   GroupName, CommandName: string;
 begin
 
-  GroupName := ParamStr(1).ToLower;
-  CommandName := ParamStr(2).ToLower;
+  if not IsOptionHelp(ParamStr(1).ToLower) then
+    GroupName := ParamStr(1).ToLower;
+
+  if not IsOptionHelp(ParamStr(2).ToLower) then
+    CommandName := ParamStr(2).ToLower;
 
   try
     Init;
+
+    if IsToExecuteHelp() then
+    begin
+      ExecuteHelp(GroupName, CommandName);
+      Exit;
+    end;
 
     Execute(GroupName, CommandName);
   except
@@ -340,13 +375,16 @@ begin
       Help;
 
     on E: ECommandNotFound do
-      HelpCommand(GroupName);
+      HelpGroupCommands(GroupName);
 
     on E: EPackageNotFoundException do
       HelpProjectInit;
 
     on E: ERequiredParameterException do
+    begin
       ShowMessageAlert(E.Message);
+      FConsoleIO.WriteInfo(Format('alfred %s %s [-h | --help] to show helper ', [GroupName, CommandName]));
+    end;
 
     on E: EAlfredException do
       ShowMessageAlert(E.Message);

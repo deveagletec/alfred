@@ -1,6 +1,7 @@
 unit Eagle.Alfred.Core.Command;
 
 interface
+
 uses
   Eagle.Alfred.Core.ConsoleIO,
   Eagle.Alfred.Core.Types,
@@ -13,7 +14,7 @@ type
     procedure Execute;
   end;
 
-  TCommandAbstract = class abstract (TInterfacedObject, ICommand)
+  TCommandAbstract = class abstract(TInterfacedObject, ICommand)
   protected
     FAppPath: string;
     FCurrentPath: string;
@@ -28,7 +29,7 @@ type
     constructor Create(const AAppPath, ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
     procedure Execute; virtual; abstract;
 
-    [OptionAttribute('verbose', 'v', 'Adds more details to output logging.')]
+    [OptionAttribute('verbose', 'v', 'Adds more details to output logging')]
     procedure Verbose;
   end;
 
@@ -36,8 +37,7 @@ implementation
 
 { TCommandAbstract }
 
-constructor TCommandAbstract.Create(const AAppPath, ACurrentPath: string;
-    AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
+constructor TCommandAbstract.Create(const AAppPath, ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
 begin
   FAppPath := AAppPath;
   FCurrentPath := ACurrentPath + '\';
