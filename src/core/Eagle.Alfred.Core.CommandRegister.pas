@@ -36,16 +36,12 @@ type
     function GetCommandOption(CommandOptionAttrib: OptionAttribute; Method: TRttiMethod): TCommandOption;
     function GetCommandParam(CommandParamAttrib: ParamAttribute; Method: TRttiMethod): TCommandParam;
   public
-
     constructor Create();
     destructor Destroy; override;
-
     procedure AddCommand(CommandClass: TClass);
-
     function GetCommand(const GroupName, CommandName: string): TCommandMetaData;
     function GetGroupsCommand: TArray<string>;
     function GetGroup(const GroupName: string): TDictionary<string, TCommandMetaData>;
-
     function ContainsCommand(const GroupName, CommandName: string): Boolean;
     function ContainsGroupCommand(const GroupName: string): Boolean;
 
@@ -67,7 +63,6 @@ var
   CommandParams: TList<TCommandParam>;
   CommandOptions: TList<TCommandOption>;
 begin
-
   RttiContext := TRttiContext.Create;
 
   CommandParams := TList<TCommandParam>.Create;
@@ -118,7 +113,6 @@ begin
     CommandParams.Free;
     CommandOptions.Free;
   end;
-
 end;
 
 function TCommandRegister.ContainsGroupCommand(const GroupName: string): Boolean;
@@ -128,7 +122,7 @@ end;
 
 constructor TCommandRegister.Create;
 begin
-  FCommands := TDictionary < string, TDictionary < string, TCommandMetaData >>.Create;
+  FCommands := TDictionary<string, TDictionary<string, TCommandMetaData>>.Create;
 end;
 
 destructor TCommandRegister.Destroy;
@@ -149,15 +143,10 @@ end;
 
 function TCommandRegister.ContainsCommand(const GroupName, CommandName: string): Boolean;
 begin
-
   if not FCommands.ContainsKey(GroupName) then
     Exit(False);
 
-  if not FCommands.Items[GroupName].ContainsKey(CommandName) then
-    Exit(False);
-
-  Result := True;
-
+  Result := FCommands.Items[GroupName].ContainsKey(CommandName);
 end;
 
 function TCommandRegister.GetCommand(const GroupName, CommandName: string): TCommandMetaData;
@@ -166,7 +155,6 @@ const
 var
   CommandGroup: TDictionary<string, TCommandMetaData>;
 begin
-
   if not FCommands.ContainsKey(GroupName) then
     raise ECommandGroupNotFoundException.Create('Command Group not found');
 
