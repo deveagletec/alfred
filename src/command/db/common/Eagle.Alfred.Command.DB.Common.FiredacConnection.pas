@@ -76,6 +76,8 @@ begin
   FConnection.Params.Add('Password=' + FPassword);
   FConnection.Params.Add('Port=' + FPort);
 
+  FConnection.Params.Add('CharacterSet=WIN1252');
+
 end;
 
 destructor TFireDacFirebirdConnection.Destroy;
