@@ -46,6 +46,8 @@ type
     Pass: string;
     [Alias('port')]
     Port: Integer;
+    [Alias('character-set')]
+    CharacterSet: string;
   end;
 
   TPackage = class
@@ -148,6 +150,8 @@ type
     DBPass: string;
     [Alias('db-port')]
     DBPort: Integer;
+    [Alias('character-set')]
+    CharacterSet: string;
 
     [Alias('default-editor')]
     DefaultEditor: string;
@@ -200,6 +204,7 @@ begin
   DBUser := 'sysdba';
   DBPass := 'masterkey';
   DBPort := 3050;
+  CharacterSet := 'WIN1252';
 end;
 
 { TDependency }

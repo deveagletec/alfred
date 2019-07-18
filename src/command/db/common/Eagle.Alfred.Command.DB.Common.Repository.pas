@@ -43,8 +43,6 @@ type
 implementation
 
 constructor TRepository.Create(const APackage: TPackage);
-var
-  DataBase, HostName, UserName, Password, Port: String;
 begin
   inherited Create();
 
@@ -53,13 +51,7 @@ begin
 
   FPackage := APackage;
 
-  DataBase := FPackage.DataBase.&File;
-  HostName := FPackage.DataBase.Host;
-  UserName := FPackage.DataBase.User;
-  Password := FPackage.DataBase.Pass;
-  Port := string.Parse(FPackage.DataBase.Port);
-
-  FFDConnection := TFireDacFirebirdConnection.Create(HostName, DataBase, UserName, Password, Port);
+  FFDConnection := TFireDacFirebirdConnection.Create(FPackage.DataBase);
 
   FFDConnection.GetConnection.TxOptions.AutoCommit := False;
 

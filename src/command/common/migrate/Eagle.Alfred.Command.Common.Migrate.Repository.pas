@@ -70,7 +70,7 @@ begin
   Password := FPackage.DataBase.Pass;
   Port := string.Parse(FPackage.DataBase.Port);
 
-  FFDConnection := TFireDacFirebirdConnection.Create(HostName, DataBase, UserName, Password, Port);
+  FFDConnection := TFireDacFirebirdConnection.Create(FPackage.DataBase);
 
   FDQuery := TFDQuery.Create(nil);
   FDQuery.Connection := FFDConnection.GetConnection;

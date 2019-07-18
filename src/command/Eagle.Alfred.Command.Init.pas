@@ -19,6 +19,7 @@ type
   TInitCommand = class(TCommandAbstract)
   private
     function CreateMessage(const Msg: string; Default: string): string;
+    procedure ReadDBCharacterSet;
     procedure ReadProjectName;
     procedure ReadDBFile;
     procedure ReadDBHost;
@@ -102,6 +103,18 @@ begin
   FPackage.TestsDir := FConfiguration.TestsDir;
   FPackage.Namespace := FConfiguration.Namespace;
   FPackage.Modular := FConfiguration.Modular;
+end;
+
+procedure TInitCommand.ReadDBCharacterSet;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('characterSet: ', FPackage.DataBase.CharacterSet);
+
+  Value := ReadRequiredData(Msg, FPackage.DataBase.CharacterSet, 'characterSet required!');
+
+  if not Value.IsEmpty then
+    FPackage.DataBase.CharacterSet := Value;
 end;
 
 procedure TInitCommand.ReadDBFile;
@@ -215,12 +228,15 @@ begin
   FPackage.DataBase.User := FConfiguration.DBUser;
   FPackage.DataBase.Pass := FConfiguration.DBPass;
   FPackage.DataBase.Port := FConfiguration.DBPort;
+  FPackage.DataBase.CharacterSet := FConfiguration.CharacterSet;
 
   ReadDBHost;
   ReadDBFile;
   ReadDBUser;
   ReadDBPass;
   ReadDBPort;
+  ReadDBCharacterSet;
+
 end;
 
 procedure TInitCommand.ReadProjectDescription;
