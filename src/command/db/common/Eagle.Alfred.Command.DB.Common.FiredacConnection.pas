@@ -17,6 +17,7 @@ uses
   FireDAC.Phys.FB,
   FireDAC.VCLUI.Wait,
 
+  Eagle.Alfred.Core.Types,
   Eagle.Alfred.Command.DB.Common.Connection;
 
 type
@@ -28,6 +29,7 @@ type
     FUserName: string;
     FPassword: string;
     FPort: string;
+    FCharacterSet: string;
 
     FDDriverLink: TFDPhysFBDriverLink;
     FConnection: TFDConnection;
@@ -35,7 +37,7 @@ type
     procedure CreateConnection;
 
   public
-    constructor Create(const HostName: string; const DataBase: string; const UserName: string; const Password: string; const Port: string);
+    constructor Create(const DataBaseConfig: TDataBase);
     destructor Destroy; override;
     procedure Initialize;
     procedure Release;
@@ -45,17 +47,16 @@ type
 
 implementation
 
-{ TFireDacFirebirdConnection }
-
-constructor TFireDacFirebirdConnection.Create(const HostName: string; const DataBase: string; const UserName: string; const Password: string; const Port: string);
+constructor TFireDacFirebirdConnection.Create(const DataBaseConfig: TDataBase);
 begin
   inherited Create();
 
-  FDatabase := DataBase;
-  FHostName := HostName;
-  FUserName := UserName;
-  FPassword := Password;
-  FPort := Port;
+  FDatabase := DataBaseConfig.&File;
+  FHostName := DataBaseConfig.Host;
+  FUserName := DataBaseConfig.User;
+  FPassword := DataBaseConfig.Pass;
+  FPort := DataBaseConfig.Port.ToString;
+  FCharacterSet := DataBaseConfig.CharacterSet;
 
   Initialize;
 
@@ -76,7 +77,8 @@ begin
   FConnection.Params.Add('Password=' + FPassword);
   FConnection.Params.Add('Port=' + FPort);
 
-  FConnection.Params.Add('CharacterSet=WIN1252');
+  if not FCharacterSet.IsEmpty then
+    FConnection.Params.Add('CharacterSet=' + FCharacterSet);
 
 end;
 
