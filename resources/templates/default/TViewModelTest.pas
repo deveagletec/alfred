@@ -37,7 +37,7 @@ type
     FRepository: I{ModelName}Repository;
 
     procedure ConfigureSearchEvent<T: class, constructor>(const SearchName: string; Registro: T);
-    procedure DoTestValidation(const Msg: string; const IsValid: Boolean);
+    procedure DoTestValidation(const PropertyName, Msg: string; const IsValid: Boolean);
     procedure ResetDataBase;
   public
     [SetupFixture]
@@ -98,23 +98,24 @@ begin
     end).When.ShowSearch(SearchName, TSearchResponse<T>);
 end;
 
-procedure T{ModelName}ViewModelTest.DoTestValidation(const Msg: string; const IsValid: Boolean);
+procedure T{ModelName}ViewModelTest.DoTestValidation(const PropertyName, Msg: string; const IsValid: Boolean);
 var
   LancouExcecao: Boolean;
 begin
+   LancouExcecao := False;	
+
   try
     F{ModelName}ViewModel.OnValidate;
-
-    Assert.Fail();
   except
     on E: EWrongValuesException do
+	begin
 	  LancouExcecao := E.ContainsMsgLike(PropertyName, Msg);
+	  Assert.AreEqual(IsValid, LancouExcecao);	  
+	end;
+	  
   end;
-  
-  if (IsValid) then
-    Assert.IsFalse(LancouExcecao)
-  else
-    Assert.IsTrue(LancouExcecao); 
+
+  Assert.IsFalse(not LancouExcecao); 
   
 end;
 
@@ -298,7 +299,7 @@ begin
 
   F{ModelName}ViewModel.SetNome(Value);
 
-  DoTestValidation(Msg, IsValid);
+  DoTestValidation('Name', Msg, IsValid);
 end;
 
 initialization
