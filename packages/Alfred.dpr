@@ -17,7 +17,6 @@ uses
   Eagle.Alfred.Core.Enums in '..\src\core\Eagle.Alfred.Core.Enums.pas',
   Eagle.Alfred.Core.IOUtils in '..\src\core\Eagle.Alfred.Core.IOUtils.pas',
   Eagle.Alfred.Command.Init in '..\src\command\Eagle.Alfred.Command.Init.pas',
-  Eagle.Alfred.Command.Config.Edit in '..\src\command\config\Eagle.Alfred.Command.Config.Edit.pas',
   Eagle.Alfred.Command.Generate.Crud in '..\src\command\generate\Eagle.Alfred.Command.Generate.Crud.pas',
   Eagle.Alfred.Command.Generate.CrudFile in '..\src\command\generate\Eagle.Alfred.Command.Generate.CrudFile.pas',
   Eagle.Alfred.Command.Generate.Migrate in '..\src\command\generate\Eagle.Alfred.Command.Generate.Migrate.pas',
@@ -63,7 +62,11 @@ uses
   Eagle.Alfred.Command.Common.Service.ScaperJSON in '..\src\command\common\service\Eagle.Alfred.Command.Common.Service.ScaperJSON.pas',
   Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression in '..\src\commom\utils\Eagle.Alfred.Commom.Utils.GroupExtractorRegularExpression.pas',
   Eagle.Alfred.Command.Common.HelpBuilder in '..\src\command\common\Eagle.Alfred.Command.Common.HelpBuilder.pas',
-  Eagle.Alfred.Core.CommandRegisterData in '..\src\core\Eagle.Alfred.Core.CommandRegisterData.pas';
+  Eagle.Alfred.Core.CommandRegisterData in '..\src\core\Eagle.Alfred.Core.CommandRegisterData.pas',
+  Eagle.Alfred.Command.Config.Global.Edit in '..\src\command\config\global\Eagle.Alfred.Command.Config.Global.Edit.pas',
+  Eagle.Alfred.Command.Config.Project.Edit in '..\src\command\config\project\Eagle.Alfred.Command.Config.Project.Edit.pas',
+  Eagle.Alfred.Command.Config.Project.Show in '..\src\command\config\project\Eagle.Alfred.Command.Config.Project.Show.pas',
+  Eagle.Alfred.Command.Config.Project.Service.ExtractorValuePackage in '..\src\command\config\project\service\Eagle.Alfred.Command.Config.Project.Service.ExtractorValuePackage.pas';
 
 var
   OldColor: Byte;

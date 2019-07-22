@@ -85,6 +85,9 @@ type
     [Alias('migration-dir')]
     MigrationDir: string;
 
+    [Alias('update-script-dir')]
+    UpdateScriptDir: string;
+
     [Alias('vendor-dir')]
     VendorDir: string;
 
