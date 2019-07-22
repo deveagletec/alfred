@@ -142,6 +142,9 @@ type
     [Alias('migration-dir')]
     MigrationDir: string;
 
+    [Alias('update-script-dir')]
+    UpdateScriptDir: string;
+
     [Alias('vendor-dir')]
     VendorDir: string;
 
@@ -202,6 +205,7 @@ begin
   Namespace := '';
   Version := '1.0.0';
   Modular := False;
+  UpdateScriptDir := 'migrations\updates';
 
   DBHost := 'localhost';
   DBUser := 'sysdba';
