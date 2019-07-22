@@ -17,8 +17,8 @@ implementation
 
 class function TScaperJSON.Scape(const JSON: string): string;
 const
-  EXPRESSION_REGULAR = '(?:\''(?<identifier>[^\'']+)\s*(?<parameters>.*?)\'')';
-  GROUP_INDEX = 1;
+  EXPRESSION_REGULAR = '''[^'']*''';
+  GROUP_INDEX = 0;
   CARACTER_TO_SCAPE = '"';
   CARACTER_SCAPED = '\"';
 var
