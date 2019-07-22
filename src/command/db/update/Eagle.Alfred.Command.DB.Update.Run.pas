@@ -49,16 +49,14 @@ end;
 
 procedure TUpdateRun.Execute;
 var
-  FileName, FilePath: String;
+  FileName: String;
   SQL: String;
 begin
   inherited;
 
-  FilePath := Format('%s%s%s', [FPackage.BaseDir, FPackage.MigrationDir, 'Updates\']);
-
   FileName := Format('%s%s%s', ['Update_', FVersion, '.sql']);
 
-  if not FileExists(FilePath + FileName) then
+  if not FileExists(FPackage.UpdateScriptDir + FileName) then
   begin
     ShowMessageFileNotFound();
     exit;
@@ -68,7 +66,7 @@ begin
 
   try
 
-    FRepository.RunFile(filePath + fileName);
+    FRepository.RunFile(FPackage.UpdateScriptDir + fileName);
 
     ShowMessageSucessFull();
 

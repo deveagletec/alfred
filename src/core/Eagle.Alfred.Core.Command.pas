@@ -35,8 +35,6 @@ type
 
 implementation
 
-{ TCommandAbstract }
-
 constructor TCommandAbstract.Create(const AAppPath, ACurrentPath: string; AConfig: TConfiguration; APackage: TPackage; ConsoleIO: IConsoleIO);
 begin
   FAppPath := AAppPath;
@@ -50,11 +48,11 @@ end;
 
 procedure TCommandAbstract.DoShowMessageSuccessful(const Msg: string);
 begin
-  FConsoleIO.WriteInfo('');
+  FConsoleIO.NewEmptyLine;
   FConsoleIO.WriteSuccess('* ------- ');
   FConsoleIO.WriteSuccessFmt('| %s ;) ', [Msg]);
   FConsoleIO.WriteSuccess('* ----------------------------------------------------- ');
-  FConsoleIO.WriteInfo('');
+  FConsoleIO.NewEmptyLine;
 end;
 
 procedure TCommandAbstract.Init;

@@ -183,6 +183,7 @@ var
 begin
 
   ListFiles := GetListFilesMigrate();
+  ExecutedMigrates := nil;
 
   try
 
