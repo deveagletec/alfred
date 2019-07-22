@@ -36,6 +36,7 @@ type
     procedure ReadProjectPackageDir;
     procedure ReadProjectSourceDir;
     procedure ReadProjectTestsDir;
+    procedure ReadProjectUpdateScriptDir;
     procedure ReadProjectVersion;
     function ReadRequiredData(const Msg, Default, Alert: string): string;
     procedure ShowGenerationConfirmation;
@@ -86,6 +87,7 @@ begin
   ReadProjectSourceDir;
   ReadProjectTestsDir;
   ReadProjectMigrationDir;
+  ReadProjectUpdateScriptDir;
   ReadProjectDBConfig;
 
   ShowGenerationConfirmation;
@@ -103,6 +105,7 @@ begin
   FPackage.TestsDir := FConfiguration.TestsDir;
   FPackage.Namespace := FConfiguration.Namespace;
   FPackage.Modular := FConfiguration.Modular;
+  FPackage.UpdateScriptDir := FConfiguration.UpdateScriptDir;
 end;
 
 procedure TInitCommand.ReadDBCharacterSet;
@@ -336,6 +339,18 @@ begin
 
   if not Value.IsEmpty then
     FPackage.TestsDir := Value;
+end;
+
+procedure TInitCommand.ReadProjectUpdateScriptDir;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('update-script-dir: ', FPackage.UpdateScriptDir);
+
+  Value := ReadDir(Msg);
+
+  if not Value.IsEmpty then
+    FPackage.UpdateScriptDir := Value;
 end;
 
 procedure TInitCommand.ReadProjectVersion;
