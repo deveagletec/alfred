@@ -61,10 +61,10 @@ type
     [ParamAttribute(2, 'Destiny version')]
     procedure SetDestinyVersion(const Version: string);
 
-    [Option('forcegeneration', 'f', 'Force generation of script update even without migrates founded')]
+    [Option('force', 'f', 'Force generation of script update even without migrates founded')]
     procedure SetForceGeneration;
 
-    [Option('savepathinfile', 's', 'Save path in file on current diretory')]
+    [Option('save', 's', 'Save path in file on current diretory')]
     procedure SetOptionSaveFileWithPath;
 
   end;
