@@ -41,7 +41,6 @@ type
     procedure MountFooter;
     procedure MountHeader;
     procedure SaveFileUpdate;
-    function InsertBreakLine(const Value: string): string;
     procedure SavePathInFile(const FullFileName: string);
     procedure ShowMessageFounded(ConflictsMigrates: TDictionary < string, TList < string >> );
     procedure ShowMessageMigratesNotFounded;
@@ -73,7 +72,6 @@ implementation
 
 destructor TUpdateJoin.Destroy;
 begin
-
   if Assigned(FMigrates) then
     FMigrates.Free();
 
@@ -84,7 +82,6 @@ end;
 
 procedure TUpdateJoin.Execute;
 begin
-
   FMigrates := FMigrateService.GetMigratesByVersion(FDestinyVersion.Trim());
 
   ValidateExistsMigrates();
@@ -96,7 +93,6 @@ begin
   SaveFileUpdate();
 
   ShowMessageSucessFull();
-
 end;
 
 procedure TUpdateJoin.Init;
@@ -109,35 +105,6 @@ begin
 
   FForceGeneration := False;
   FSaveFileWithPath := False;
-end;
-
-function TUpdateJoin.InsertBreakLine(const Value: string): string;
-var
-  Char, PreviousChar: string;
-  NewValue: string;
-  I: Integer;
-begin
-
-  NewValue := Value;
-  I := 1;
-
-  while I < NewValue.Length do
-  begin
-
-    Char := NewValue[I];
-    PreviousChar := NewValue[I - 1];
-
-    if Char.Equals(#9) and (not PreviousChar.Equals(#10)) and (not PreviousChar.Equals(#9)) then
-      NewValue.Insert(I - 1, #10)
-    else
-      Inc(I);
-
-  end;
-
-  NewValue := NewValue.Replace(#10#9, #10);
-
-  Result := NewValue;
-
 end;
 
 procedure TUpdateJoin.JoinMigrates;
@@ -176,9 +143,12 @@ begin
     begin
 
       if FUpdateService.IndexIsIgnored(Index, Migrate) then
+      begin
+        Inc(Index);
         continue;
+      end;
 
-      SQLReplaced := InsertBreakLine(SQL);
+      SQLReplaced := SQL.Replace(#9, #13#10);
 
       FScripts.Add(SQLReplaced);
       FScripts.Add(#10'/* *********************************************************************** */'#10);
@@ -188,6 +158,7 @@ begin
     end;
 
     FScripts.Add('');
+    FScripts.Add(Format('INSERT INTO MIGRATIONS VALUES (%s);', [Migrate.Id.QuotedString]));
     FScripts.Add('COMMIT WORK;');
     FScripts.Add('');
 
@@ -351,10 +322,10 @@ var
   ConflictMigrateList: TList<String>;
 begin
 
-  FConsoleIO.WriteInfo(' ');
-  FConsoleIO.WriteError('* ------- ');
-  FConsoleIO.WriteError('| Conflicts founded :( ');
-  FConsoleIO.WriteError('* ----------------------------------------------------- ');
+  FConsoleIO.NewEmptyLine;
+  FConsoleIO.WriteAlert('* ------- ');
+  FConsoleIO.WriteAlert('| Conflicts founded :( ');
+  FConsoleIO.WriteAlert('* ----------------------------------------------------- ');
 
   try
 
@@ -362,9 +333,6 @@ begin
     begin
 
       ConflictsMigrates.TryGetValue(Key, ConflictMigrateList);
-
-      if not ConflictsMigrates.Count > 1 then
-        continue;
 
       ListMigrates := String.Join(', ', ConflictMigrateList.ToArray());
 
@@ -425,7 +393,7 @@ begin
     if Assigned(ConflictsMigrates) and (ConflictsMigrates.Count > 0) then
     begin
       ShowMessageFounded(ConflictsMigrates);
-      Exit;
+      Abort;
     end;
 
   finally
