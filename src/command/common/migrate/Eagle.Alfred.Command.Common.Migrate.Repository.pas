@@ -32,6 +32,9 @@ type
   TMigrateRepository = class(TInterfacedObject, IMigrateRepository)
   private
     FDQuery: TFDQuery;
+
+    FDScript: TFDScript;
+
     FFDConnection: IConnection;
 
     FPackage: TPackage;
@@ -75,21 +78,25 @@ begin
   FDQuery := TFDQuery.Create(nil);
   FDQuery.Connection := FFDConnection.GetConnection;
 
+  FDScript := TFDScript.Create(nil);
+  FDScript.Connection := FFDConnection.GetConnection;
+
 end;
 
 destructor TMigrateRepository.Destroy;
 begin
   inherited;
-
   FFDConnection.GetConnection.Connected := False;
 
   FDQuery.Free;
+  FDScript.Free;
 end;
 
 procedure TMigrateRepository.ExecuteMigrate(const Migrate: TMigrate; const ExecutionMode: TExecutionModeMigrate; const IsAutoCommit: Boolean = False);
 var
   SQLList: TArray<String>;
-  SQL: String;
+  SQL, SQLFormatado: string;
+  Script: TStringList;
 begin
 
   if ExecutionMode = TExecutionModeMigrate.TUp then
@@ -102,49 +109,55 @@ begin
 
   FFDConnection.GetConnection.StartTransaction;
 
+  Script := TStringList.Create();
+
   try
+    try
 
-    for SQL in SQLList do
-    begin
+      for SQL in SQLList do
+      begin
 
-      if SQL.Trim().IsEmpty() then
-        continue;
+        if SQL.Trim().IsEmpty() then
+          continue;
 
-      FDQuery.SQL.Text := SQL.Replace(#9#9, #13#10).Replace(#9, #13#10);
+        SQLFormatado := SQL.Replace(#9, #13#10);
 
-      FDQuery.ExecSQL();
+        Script.Add(SQLFormatado);
 
-      if IsAutoCommit then
-        FFDConnection.GetConnection.Commit;
+        FDScript.ExecuteScript(Script);
+
+        if IsAutoCommit then
+          FFDConnection.GetConnection.Commit;
+
+      end;
+
+      if ExecutionMode = TExecutionModeMigrate.TUp then
+        InsertCodeMigrate(Migrate.Id)
+      else
+        DeleteCodeMigrate(Migrate.Id);
+
+      FFDConnection.GetConnection.Commit;
+
+    except
+
+      on E: Exception do
+      begin
+        FFDConnection.GetConnection.Rollback;
+        raise EDataBaseException.Create(Format('Erro ao executar arquivo %s! ||| %s', [Migrate.Id, E.Message]));
+      end;
 
     end;
-
-    if ExecutionMode = TExecutionModeMigrate.TUp then
-      InsertCodeMigrate(Migrate.Id)
-    else
-      DeleteCodeMigrate(Migrate.Id);
-
-    FFDConnection.GetConnection.Commit;
-
-  except
-
-    on E: Exception do
-    begin
-      FFDConnection.GetConnection.Rollback;
-      raise EDataBaseException.Create(Format('Erro ao executar arquivo %s! ||| %s', [Migrate.Id, E.Message]));
-    end;
-
+  finally
+    Script.Free;
   end;
 
 end;
 
 function TMigrateRepository.GetLastScriptExecuted: string;
 begin
-
   FDQuery.Open('SELECT MAX(ID) AS ID FROM MIGRATIONS');
 
   Result := FDQuery.FieldByName('ID').AsString;
-
 end;
 
 procedure TMigrateRepository.ConsoleLog(AEngine: TFDScript; const AMessage: string; AKind: TFDScriptOutputKind);

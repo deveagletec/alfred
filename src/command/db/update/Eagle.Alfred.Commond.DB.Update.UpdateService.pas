@@ -124,9 +124,12 @@ procedure TUpdateService.removeRegisterInvalid(var conflictMigrates: TDictionary
 var
   key: String;
   conflictMigratesList: TList<String>;
+  Keys: TArray<string>;
 begin
 
-  for key in conflictMigrates.Keys do
+  Keys := conflictMigrates.Keys.ToArray;
+
+  for key in Keys do
   begin
 
     conflictMigrates.TryGetValue(key, conflictMigratesList);
