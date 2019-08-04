@@ -319,7 +319,6 @@ end;
 procedure TUpdateJoin.ShowMessageFounded(ConflictsMigrates: TDictionary < string, TList < string >> );
 var
   Key, ListMigrates: String;
-  ConflictMigrateList: TList<String>;
 begin
 
   FConsoleIO.NewEmptyLine;
@@ -332,9 +331,7 @@ begin
     for Key in ConflictsMigrates.Keys do
     begin
 
-      ConflictsMigrates.TryGetValue(Key, ConflictMigrateList);
-
-      ListMigrates := String.Join(', ', ConflictMigrateList.ToArray());
+      ListMigrates := String.Join(', ', ConflictsMigrates.Items[Key].ToArray());
 
       FConsoleIO.WriteInfo(Format('| %s >>>> %s', [Key, ListMigrates]));
       FConsoleIO.WriteInfo('  --------------');
@@ -343,8 +340,8 @@ begin
 
   finally
 
-    if Assigned(ConflictMigrateList) then
-      ConflictMigrateList.Free();
+    for Key in ConflictsMigrates.Keys do
+      ConflictsMigrates.Items[Key].Free;
 
   end;
 
