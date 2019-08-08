@@ -66,7 +66,7 @@ var
   FileName: string;
 begin
 
-  FileName := IfThen(FKeyName.IsEmpty, 'package-cópia', FKeyName) + '.txt';
+  FileName :=  '.\' + IfThen(FKeyName.IsEmpty, 'package-cópia', FKeyName) + '.txt';
   Data := TStringList.Create;
 
   try
