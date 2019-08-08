@@ -101,7 +101,7 @@ begin
   if not match.Success then
     exit;
 
-  objectName := match.Groups[4].Value;
+  objectName := match.Groups[3].Value + ':' + match.Groups[4].Value;
 
   Result := objectName;
 

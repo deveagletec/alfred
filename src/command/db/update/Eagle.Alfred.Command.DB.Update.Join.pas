@@ -266,7 +266,7 @@ begin
 
   CreateDiretories([FPackage.UpdateScriptDir]);
 
-  FileName := Format('update_%s', [FDestinyVersion]);
+  FileName := Format('update%s', [FDestinyVersion.Replace('.', '')]);
 
   FullFileName := Format('%s%s%s', [FPackage.UpdateScriptDir, FileName, '.sql']);
 
