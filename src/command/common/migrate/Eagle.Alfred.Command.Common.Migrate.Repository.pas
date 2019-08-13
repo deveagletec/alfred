@@ -80,6 +80,8 @@ begin
 
   FDScript := TFDScript.Create(nil);
   FDScript.Connection := FFDConnection.GetConnection;
+  FDScript.ScriptOptions.MacroExpand := False;
+  FDScript.OnConsolePut := ConsoleLog;
 
 end;
 
@@ -103,9 +105,6 @@ begin
     SQLList := Migrate.up
   else
     SQLList := Migrate.down;
-
-  FFDConnection.GetConnection.ResourceOptions.MacroCreate := False;
-  FFDConnection.GetConnection.ResourceOptions.MacroExpand := False;
 
   FFDConnection.GetConnection.StartTransaction;
 

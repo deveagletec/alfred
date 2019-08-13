@@ -234,9 +234,10 @@ begin
 
   Data := TFile.ReadAllText(FPackage.MigrationDir + FileName);
 
-  Data := Data.Replace(#13#10, #9);
+  Data := Data.Replace(#9, '    ').Replace(#13#10, #9);
 
-  Data := TScaperJSON.Scape(Data);
+  if Data.Contains('"') then
+    Data := TScaperJSON.Scape(Data);
 
   try
     Result := TJSON.Parse<TMigrate>(Data);
