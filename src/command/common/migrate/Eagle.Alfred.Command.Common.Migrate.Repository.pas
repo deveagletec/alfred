@@ -121,6 +121,7 @@ begin
 
         SQLFormatado := SQL.Replace(#9, #13#10);
 
+        Script.Clear();
         Script.Add(SQLFormatado);
 
         FDScript.ExecuteScript(Script);
