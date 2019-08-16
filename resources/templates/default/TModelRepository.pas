@@ -8,6 +8,7 @@ uses
   Spring.Container.Common,
 
   Eagle.ERP.Common.DB.Connection,
+  Eagle.ERP.Common.DB.SessionHelper,
 
   Eagle.ERP.{ModuleName}.Model.Repository.{ModelName}Repository,
 
@@ -19,10 +20,10 @@ type
   [Interceptor('transactional')]
   T{ModelName}Repository = class(TInterfacedObject, I{ModelName}Repository)
   private
-    [Inject]
+
+    [Inject('FiredacConnection')]
     FConnection : IConnection;
 
-    function GetRecord(const Sql: string): I{ModelName};
   public
     constructor Create; overload;
     constructor Create(Con: IConnection); overload;
@@ -64,67 +65,39 @@ begin
 end;
 
 function T{ModelName}Repository.GetFirst: I{ModelName};
-const
-  SQL_ID = 'SELECT FIRST 1 {ModelName}S_ID FROM {ModelName}S ORDER BY {ModelName}S_ID';
 begin
-  Result := GetRecord(SQL_ID);
+  Result := FConnection.GetSession.GetFirst<T{ModelName}>;
 end;
 
 function T{ModelName}Repository.GetLast: I{ModelName};
-const
-  SQL_ID = 'SELECT FIRST 1 {ModelName}S_ID FROM {ModelName}S ORDER BY {ModelName}S_ID DESC';
 begin
-  Result := GetRecord(SQL_ID);
+  Result := FConnection.GetSession.GetLast<T{ModelName}>;
 end;
 
 function T{ModelName}Repository.GetNext(Current: I{ModelName}): I{ModelName};
-const
-  SQL_ID = 'SELECT FIRST 1 {ModelName}S_ID FROM {ModelName}S WHERE {ModelName}S_ID > ? ORDER BY {ModelName}S_ID';
 begin
-  Result := GetRecord(SQL_ID.Replace('?', string.Parse(Current.Id).QuotedString));
+   Result := FConnection.GetSession.GetNext<T{ModelName}>(Current as TInterfacedObject);
 end;
 
 function T{ModelName}Repository.GetPrior(Current: I{ModelName}): I{ModelName};
-const
-  SQL_ID = 'SELECT FIRST 1 {ModelName}S_ID FROM {ModelName}S WHERE {ModelName}S_ID < ? ORDER BY 1 DESC';
 begin
-  Result := GetRecord(SQL_ID.Replace('?', string.Parse(Current.Id).QuotedString));
-end;
-
-function T{ModelName}Repository.GetRecord(const Sql: string): I{ModelName};
-var
-  Id: string;
-begin
-  Id := FConnection.GetSession.ExecuteScalar<string>(Sql, []);
-  Result := FConnection.GetSession.FindOne<T{ModelName}>(Id);
+  Result := FConnection.GetSession.GetPrior<T{ModelName}>(Current as TInterfacedObject);
 end;
 
 function T{ModelName}Repository.IsFirst({ModelName}: I{ModelName}): Boolean;
-const
-  SQL_ID = 'SELECT FIRST 1 {ModelName}S_ID FROM {ModelName}S WHERE {ModelName}S_ID < ?';
-var
-  Sql: string;
 begin
   if not Assigned({ModelName}) then
     Exit(False);
 
-  Sql := SQL_ID.Replace('?', string.Parse({ModelName}.Id).QuotedString);
-
-  Result := FConnection.GetSession.ExecuteScalar<string>(Sql, []).Equals('')
+  Result := FConnection.GetSession.IsFirst<T{ModelName}>({ModelName} as TInterfacedObject);
 end;
 
 function T{ModelName}Repository.IsLast({ModelName}: I{ModelName}): Boolean;
-const
-  SQL_ID = 'SELECT FIRST 1 {ModelName}S_ID FROM {ModelName}S WHERE {ModelName}S_ID > ?';
-var
-  Sql: string;
 begin
   if not Assigned({ModelName}) then
     Exit(False);
 
-  Sql := SQL_ID.Replace('?', string.Parse({ModelName}.Id).QuotedString);
-
-  Result := FConnection.GetSession.ExecuteScalar<string>(Sql, []).Equals('')
+  Result := FConnection.GetSession.IsLast<T{ModelName}>({ModelName} as TInterfacedObject);
 end;
 
 function T{ModelName}Repository.Reload(Current: I{ModelName}): I{ModelName};
@@ -134,7 +107,7 @@ end;
 
 procedure T{ModelName}Repository.Save({ModelName}: I{ModelName});
 begin
-  FConnection.GetSession.Save({ModelName} as TInterfacedObject);
+  FConnection.GetSession.InsertOrUpdate<T{ModelName}>({ModelName} as TInterfacedObject);
 end;
 
 initialization
