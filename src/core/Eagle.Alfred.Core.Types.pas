@@ -1,6 +1,7 @@
 unit Eagle.Alfred.Core.Types;
 
 interface
+
 uses
   System.SysUtils,
   System.StrUtils,
@@ -12,8 +13,7 @@ uses
 
 type
 
-  TDependency = record
-    [Alias('groupId')]
+  TDependency = record [Alias('groupId')]
     GroupId: string;
     [Alias('artifactId')]
     ArtifactId: string;
@@ -45,9 +45,8 @@ type
     procedure Prepare;
     function Identifier(): string;
   end;
-  
-  TInstalledDependency = record
-    [Alias('name')]
+
+  TInstalledDependency = record [Alias('name')]
     Name: string;
     [Alias('version')]
     Version: string;
@@ -55,8 +54,7 @@ type
     Paths: TArray<string>;
   end;
 
-  TDataBase = class
-    [Alias('host')]
+  TDataBase = class[Alias('host')]
     Host: string;
     [Alias('file')]
     &File: string;
@@ -111,6 +109,9 @@ type
     [Alias('vendor-dir')]
     VendorDir: string;
 
+    [Alias('config-dir')]
+    ConfigDir: string;
+
     [Alias('coverage-config-dir')]
     CoverageConfigDir: string;
 
@@ -164,6 +165,9 @@ type
 
     [Alias('update-script-dir')]
     UpdateScriptDir: string;
+
+    [Alias('config_dir')]
+    ConfigDir: string;
 
     [Alias('vendor-dir')]
     VendorDir: string;
