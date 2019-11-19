@@ -19,6 +19,7 @@ type
   TInitCommand = class(TCommandAbstract)
   private
     function CreateMessage(const Msg: string; Default: string): string;
+    procedure ReadProjectConfigDir;
     procedure ReadDBCharacterSet;
     procedure ReadProjectName;
     procedure ReadDBFile;
@@ -106,6 +107,19 @@ begin
   FPackage.Namespace := FConfiguration.Namespace;
   FPackage.Modular := FConfiguration.Modular;
   FPackage.UpdateScriptDir := FConfiguration.UpdateScriptDir;
+  FPackage.ConfigDir := FConfiguration.ConfigDir;
+end;
+
+procedure TInitCommand.ReadProjectConfigDir;
+var
+  Msg, Value: string;
+begin
+  Msg := CreateMessage('config-dir: ', FPackage.ConfigDir);
+
+  Value := ReadDir(Msg);
+
+  if not Value.IsEmpty then
+    FPackage.ConfigDir := Value;
 end;
 
 procedure TInitCommand.ReadDBCharacterSet;

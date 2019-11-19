@@ -37,11 +37,13 @@ type
     FScripts: TStringList;
 
     procedure JoinMigrates;
+    procedure LoadByTemplate(const TemplateName: string);
     procedure MountBody;
     procedure MountFooter;
     procedure MountHeader;
     procedure SaveFileUpdate;
     procedure SavePathInFile(const FullFileName: string);
+    function SetVariablesValue(const Value: string): string;
     procedure ShowMessageFounded(ConflictsMigrates: TDictionary < string, TList < string >> );
     procedure ShowMessageMigratesNotFounded;
     procedure ShowMessageSucessFull;
@@ -167,95 +169,60 @@ begin
 end;
 
 procedure TUpdateJoin.MountFooter;
+const
+  TEMPLATE_NAME='template_footer_file_merge_migrates';
 begin
-
-  FScripts.Add('/*');
-  FScripts.Add('');
-  FScripts.Add('    FINALIZANDO ...');
-  FScripts.Add('');
-  FScripts.Add('*/');
-  FScripts.Add('');
-  FScripts.Add('EXECUTE PROCEDURE UTIL_ACERTA_GENERATORS;');
-  FScripts.Add('');
-  FScripts.Add('COMMIT WORK;');
-  FScripts.Add('');
-  FScripts.Add('EXECUTE PROCEDURE UTIL_METADATAINFO;');
-  FScripts.Add('');
-  FScripts.Add('COMMIT WORK;');
-  FScripts.Add('');
-  FScripts.Add(Format('UPDATE VERSAO A SET A.VERSAO = '#39'%s'#39';', [FDestinyVersion]));
-  FScripts.Add('');
-  FScripts.Add('COMMIT WORK;');
-  FScripts.Add('');
-  FScripts.Add('EXECUTE PROCEDURE UTIL_RECOMPILE_VIEWS;');
-  FScripts.Add('');
-  FScripts.Add('COMMIT WORK;');
-
+  LoadByTemplate(TEMPLATE_NAME);
 end;
 
 procedure TUpdateJoin.MountHeader;
+const
+  TEMPLATE_NAME='template_header_file_merge_migrates';
+begin
+  LoadByTemplate(TEMPLATE_NAME);
+end;
+
+procedure TUpdateJoin.LoadByTemplate(const TemplateName: string);
+var
+  FileName: string;
+  Footer: TStringList;
+  FooterValue: string;
 begin
 
-  FScripts.Add('/*');
-  FScripts.Add('');
-  FScripts.Add('SCRIPT DE ATUALIZACAO OU CORRECAO DE BUGS');
-  FScripts.Add('');
-  FScripts.Add(Format('VERSAO DE ORIGEM ....: %s', [FCurrentVersion]));
-  FScripts.Add(Format('VERSAO DE DESTINO ...: %s', [FDestinyVersion]));
-  FScripts.Add('SOFTWARE ............: EAGLE ERP');
-  FScripts.Add(Format('DATA ................: %s', [DateTimeToStr(Now)]));
-  FScripts.Add('');
-  FScripts.Add('*/');
-  FScripts.Add('');
-  FScripts.Add('');
-  FScripts.Add('/*');
-  FScripts.Add('    VERIFICAR A VERSAO ATUAL DO BANCO DE DADOS');
-  FScripts.Add('    A VERSAO ATUAL DEVE SER VERSAO_ANTERIOR');
-  FScripts.Add('*/');
-  FScripts.Add('');
-  FScripts.Add('SET TERM ^ ;');
-  FScripts.Add('');
-  FScripts.Add('EXECUTE BLOCK');
-  FScripts.Add('AS');
-  FScripts.Add('    DECLARE VARIABLE VERSAO VARCHAR(10);');
-  FScripts.Add('BEGIN');
-  FScripts.Add('');
-  FScripts.Add('   /* OBTER A VERSAO ATUAL */');
-  FScripts.Add('');
-  FScripts.Add('    SELECT FIRST 1');
-  FScripts.Add('        A.VERSAO');
-  FScripts.Add('    FROM');
-  FScripts.Add('        VERSAO A');
-  FScripts.Add('    INTO');
-  FScripts.Add('        :VERSAO;');
-  FScripts.Add('');
-  FScripts.Add('    VERSAO = COALESCE (:VERSAO, '#39'NULL'#39' );');
-  FScripts.Add('');
-  FScripts.Add('    /* A EXECUCAO DO SCRIPT NAO PODE CONTINUAR CASO A VERSAO SEJA DIFERENTE! */ ');
-  FScripts.Add('');
-  FScripts.Add(Format('    IF (:VERSAO <> '#39'%s'#39' ) THEN', [FCurrentVersion]));
-  FScripts.Add('    BEGIN');
-  FScripts.Add(Format('        EXCEPTION EAGLEEXCEPTION '#39'@A versao do Banco de Dados deve ser %s. A versao atual e '#39' || :VERSAO || '#39'!@'#39';', [FCurrentVersion]));
-  FScripts.Add('    END');
-  FScripts.Add('');
-  FScripts.Add('    EXIT;');
-  FScripts.Add('');
-  FScripts.Add('END ^');
-  FScripts.Add('');
-  FScripts.Add('SET TERM ; ^');
-  FScripts.Add('');
-  FScripts.Add('');
-  FScripts.Add('/*');
-  FScripts.Add('   ANTES DE INICIAR O PROCESSO, MARCAR VERSAO COMO ATUALIZANDO...');
-  FScripts.Add('   ISTO E IMPORTANTE PARA QUE O SISTEMA NAO INICIE CASO OCORRA ALGUMA FALHA NA ATUALIZACAO.');
-  FScripts.Add('*/');
-  FScripts.Add('');
-  FScripts.Add('UPDATE');
-  FScripts.Add('    VERSAO A');
-  FScripts.Add('SET');
-  FScripts.Add('    A.VERSAO = '#39'ATUALIZANDO'#39';');
-  FScripts.Add('');
-  FScripts.Add('COMMIT WORK;');
+  if not DirectoryExists(FPackage.ConfigDir) then
+    Exit;
+
+  FileName := Format('%s%s.txt', [FPackage.ConfigDir, TemplateName]);
+
+  if not FileExists(FileName) then
+    Exit;
+
+  Footer := TStringList.Create();
+
+  try
+    Footer.LoadFromFile(FileName);
+    FooterValue := Footer.Text;
+  finally
+    Footer.Free();
+  end;
+
+  FooterValue := SetVariablesValue(FooterValue);
+
+  FScripts.Add(FooterValue);
+end;
+
+function TUpdateJoin.SetVariablesValue(const Value: string): string;
+var
+  ProcessedValue: string;
+begin
+
+  ProcessedValue := Value;
+
+  ProcessedValue := ProcessedValue.Replace('{old_version}', FCurrentVersion);
+  ProcessedValue := ProcessedValue.Replace('{new_version}', FDestinyVersion);
+  ProcessedValue := ProcessedValue.Replace('{current_date}', DateTimeToStr(Now));
+
+  Result := ProcessedValue;
 
 end;
 
