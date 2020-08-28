@@ -39,5 +39,5 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Registry]
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{autopf}\{#MyAppName}"; Flags: createvalueifdoesntexist uninsdeletekeyifempty uninsdeletevalue; Permissions: users-full
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Alfred"; ValueData: "{autopf}\{#MyAppName}"; Flags: createvalueifdoesntexist uninsdeletekeyifempty uninsdeletevalue; Permissions: users-full
 
