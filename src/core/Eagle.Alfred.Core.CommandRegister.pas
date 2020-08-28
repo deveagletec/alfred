@@ -70,7 +70,8 @@ begin
 
   try
 
-    RttiType := RttiContext.GetType(CommandClass.ClassInfo);
+    RttiType := RttiContext.GetType(CommandClass);
+    RttiContext.KeepContext;
 
     if not RttiType.TryGetCustomAttribute<CommandAttribute>(CmdAttrib) then
       raise Exception.Create('CommandAttribute Not Found');
