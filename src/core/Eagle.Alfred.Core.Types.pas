@@ -66,6 +66,8 @@ type
     Port: Integer;
     [Alias('character-set')]
     CharacterSet: string;
+    [Alias('driver')]
+    Driver: string;
   end;
 
   TPackage = class

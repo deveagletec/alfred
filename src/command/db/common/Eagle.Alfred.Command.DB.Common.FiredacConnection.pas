@@ -4,6 +4,7 @@ interface
 
 uses
   SysUtils,
+  System.StrUtils,
   Data.DB,
 
   FireDAC.Phys.FBDef,
@@ -14,6 +15,7 @@ uses
   FireDAC.Phys,
   FireDAC.Phys.IBBase,
   FireDAC.Comp.Client,
+  FireDAC.Phys.PG,
   FireDAC.Phys.FB,
   FireDAC.VCLUI.Wait,
 
@@ -21,28 +23,37 @@ uses
   Eagle.Alfred.Command.DB.Common.Connection;
 
 type
+  TDriver = (FIREBIRD, POSTGRES);
+
+  TDriverHelper = record helper for TDriver
+    function GetName(): string;
+    function GetDLL(): string;
+    class function FromName(const Value: string): TDriver; static; inline;
+  end;
+
   TFireDacFirebirdConnection = class(TInterfacedObject, IConnection)
-  private
+    private
 
-    FDatabase: string;
-    FHostName: string;
-    FUserName: string;
-    FPassword: string;
-    FPort: string;
-    FCharacterSet: string;
+      FDatabase: string;
+      FHostName: string;
+      FUserName: string;
+      FPassword: string;
+      FPort: string;
+      FCharacterSet: string;
+      FDriver: TDriver;
 
-    FDDriverLink: TFDPhysFBDriverLink;
-    FConnection: TFDConnection;
+      FDDriverLink: TFDPhysDriverLink;
+      FConnection: TFDConnection;
 
-    procedure CreateConnection;
+      procedure CreateConnection;
 
-  public
-    constructor Create(const DataBaseConfig: TDataBase);
-    destructor Destroy; override;
-    procedure Initialize;
-    procedure Release;
-    procedure Refresh;
-    function GetConnection: TFDConnection;
+    public
+      constructor Create(const DataBaseConfig: TDataBase);
+      destructor Destroy; override;
+      procedure Initialize;
+      procedure Release;
+      procedure Refresh;
+      function GetConnection: TFDConnection;
   end;
 
 implementation
@@ -57,6 +68,7 @@ begin
   FPassword := DataBaseConfig.Pass;
   FPort := DataBaseConfig.Port.ToString;
   FCharacterSet := DataBaseConfig.CharacterSet;
+  FDriver := TDriver.FromName(DataBaseConfig.Driver);
 
   Initialize;
 
@@ -64,12 +76,15 @@ end;
 
 procedure TFireDacFirebirdConnection.CreateConnection;
 begin
+  case FDriver of
+    FIREBIRD: FDDriverLink := TFDPhysFBDriverLink.Create(nil);
+    POSTGRES: FDDriverLink := TFDPhysPGDriverLink.Create(nil);
+  end;
+  FDDriverLink.VendorLib := FDriver.getDLL();
 
-  FDDriverLink := TFDPhysFBDriverLink.Create(nil);
-  FDDriverLink.VendorLib := 'fbclient.dll';
   FConnection := TFDConnection.Create(nil);
   FConnection.LoginPrompt := False;
-  FConnection.DriverName := 'FB';
+  FConnection.DriverName := FDriver.getName();
 
   FConnection.Params.Add('Database=' + FDatabase);
   FConnection.Params.Add('Hostname=' + FHostName);
@@ -111,6 +126,36 @@ procedure TFireDacFirebirdConnection.Release;
 begin
   FreeAndNil(FConnection);
   FreeAndNil(FDDriverLink);
+end;
+
+function TDriverHelper.GetName(): string;
+begin
+  case self of
+    FIREBIRD:
+      Result := 'FB';
+    POSTGRES:
+      Result := 'PG';
+  end;
+end;
+
+function TDriverHelper.GetDLL(): string;
+begin
+  case self of
+    FIREBIRD:
+      Result := 'fbclient.dll';
+    POSTGRES:
+      Result := 'libpq.dll';
+  end;
+end;
+
+class function TDriverHelper.FromName(const Value: string): TDriver;
+begin
+  case AnsiindexStr(Value, [FIREBIRD.GetName(), POSTGRES.GetName()]) of
+    0:
+      Result := FIREBIRD;
+    1:
+      Result := POSTGRES;
+  end;
 end;
 
 end.
