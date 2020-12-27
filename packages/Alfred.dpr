@@ -68,7 +68,8 @@ uses
   Eagle.Alfred.Command.Config.Project.Show in '..\src\command\config\project\Eagle.Alfred.Command.Config.Project.Show.pas',
   Eagle.Alfred.Command.Config.Project.Service.ExtractorValuePackage in '..\src\command\config\project\service\Eagle.Alfred.Command.Config.Project.Service.ExtractorValuePackage.pas',
   Eagle.Alfred.Command.Common.Builder in '..\src\command\common\Eagle.Alfred.Command.Common.Builder.pas',
-  Eagle.Alfred.Command.Show in '..\src\command\Eagle.Alfred.Command.Show.pas';
+  Eagle.Alfred.Command.Show in '..\src\command\Eagle.Alfred.Command.Show.pas',
+  Eagle.Alfred.Command.DB.Common.Driver in '..\src\command\db\common\Eagle.Alfred.Command.DB.Common.Driver.pas';
 
 var
   OldColor: Byte;

@@ -15,22 +15,13 @@ uses
   FireDAC.Phys,
   FireDAC.Phys.IBBase,
   FireDAC.Comp.Client,
-  FireDAC.Phys.PG,
-  FireDAC.Phys.FB,
   FireDAC.VCLUI.Wait,
 
   Eagle.Alfred.Core.Types,
-  Eagle.Alfred.Command.DB.Common.Connection;
+  Eagle.Alfred.Command.DB.Common.Connection,
+  Eagle.Alfred.Command.DB.Common.Driver;
 
 type
-  TDriver = (FIREBIRD, POSTGRES);
-
-  TDriverHelper = record helper for TDriver
-    function GetName(): string;
-    function GetDLL(): string;
-    class function FromName(const Value: string): TDriver; static; inline;
-  end;
-
   TFireDacFirebirdConnection = class(TInterfacedObject, IConnection)
     private
 
@@ -68,7 +59,7 @@ begin
   FPassword := DataBaseConfig.Pass;
   FPort := DataBaseConfig.Port.ToString;
   FCharacterSet := DataBaseConfig.CharacterSet;
-  FDriver := TDriver.FromName(DataBaseConfig.Driver);
+  FDriver := TDriver.construirDriver(DataBaseConfig.Driver);
 
   Initialize;
 
@@ -76,11 +67,8 @@ end;
 
 procedure TFireDacFirebirdConnection.CreateConnection;
 begin
-  case FDriver of
-    FIREBIRD: FDDriverLink := TFDPhysFBDriverLink.Create(nil);
-    POSTGRES: FDDriverLink := TFDPhysPGDriverLink.Create(nil);
-  end;
-  FDDriverLink.VendorLib := FDriver.getDLL();
+  FDDriverLink := FDriver.GetDriverLink();
+  FDDriverLink.VendorLib := FDriver.GetDLL();
 
   FConnection := TFDConnection.Create(nil);
   FConnection.LoginPrompt := False;
@@ -126,36 +114,6 @@ procedure TFireDacFirebirdConnection.Release;
 begin
   FreeAndNil(FConnection);
   FreeAndNil(FDDriverLink);
-end;
-
-function TDriverHelper.GetName(): string;
-begin
-  case self of
-    FIREBIRD:
-      Result := 'FB';
-    POSTGRES:
-      Result := 'PG';
-  end;
-end;
-
-function TDriverHelper.GetDLL(): string;
-begin
-  case self of
-    FIREBIRD:
-      Result := 'fbclient.dll';
-    POSTGRES:
-      Result := 'libpq.dll';
-  end;
-end;
-
-class function TDriverHelper.FromName(const Value: string): TDriver;
-begin
-  case AnsiindexStr(Value, [FIREBIRD.GetName(), POSTGRES.GetName()]) of
-    0:
-      Result := FIREBIRD;
-    1:
-      Result := POSTGRES;
-  end;
 end;
 
 end.
