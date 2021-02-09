@@ -101,7 +101,7 @@ procedure TUpdateJoin.Init;
 begin
   inherited;
   FMigrateService := TMigrateService.Create(FPackage);
-  FUpdateService := TUpdateService.Create();
+  FUpdateService := TUpdateService.Create(FPackage.DataBase.Driver);
 
   FScripts := TStringList.Create();
 

@@ -8,7 +8,8 @@ uses
   System.Generics.Collections,
   System.RegularExpressions,
 
-  Eagle.Alfred.Command.Common.Migrate.Model;
+  Eagle.Alfred.Command.Common.Migrate.Model,
+  Eagle.Alfred.Command.DB.Common.Driver;
 
 type
 
@@ -18,19 +19,26 @@ type
   end;
 
   TUpdateService = class(TInterfacedObject, IUpdateService)
-
   private
+    FDriver: TDriver;
     function getObjectNameBySQL(const SQL: String): String;
     procedure removeRegisterInvalid(var conflictMigrates: TDictionary < String, TList < String >> );
   public
+    constructor Create(const DriverName: String);
     function indexIsIgnored(const indexCurrent: Integer; const Migrate: TMigrate): Boolean;
     function getConflictMigrates(const migrates: TList<TMigrate>): TDictionary<String, TList<String>>;
   end;
 
 const
-  REGULAR_EXPRESSION_FIND_CONFLICTS_MIGRATES = 'CREATE( OR ALTER)?\s+((TRIGGER|PROCEDURE|TABLE|VIEW|GENERATOR|INDEX)\s+(\w+))';
+  REGULAR_EXPRESSION_FIND_CONFLICTS_MIGRATES_FB = 'CREATE( OR ALTER)?\s+((TRIGGER|PROCEDURE|TABLE|VIEW|GENERATOR|INDEX)\s+(\w+))';
+  REGULAR_EXPRESSION_FIND_CONFLICTS_MIGRATES_PG = 'CREATE( OR REPLACE)?\s+(\w+\.)?((TRIGGER|PROCEDURE|FUNCTION|TABLE|VIEW|GENERATOR|INDEX)( IF NOT EXISTS)?\s+(\w+))';
 
 implementation
+
+constructor TUpdateService.Create(const DriverName: String);
+begin
+  FDriver := TDriver.ConstruirDriver(DriverName);
+end;
 
 function TUpdateService.getConflictMigrates(const migrates: TList<TMigrate>): TDictionary<String, TList<String>>;
 var
@@ -93,8 +101,10 @@ var
   objectName: String;
   match: TMatch;
 begin
-
-  validator := TRegEx.Create(REGULAR_EXPRESSION_FIND_CONFLICTS_MIGRATES);
+  case FDriver of
+    FIREBIRD: validator := TRegEx.Create(REGULAR_EXPRESSION_FIND_CONFLICTS_MIGRATES_FB);
+    POSTGRES: validator := TRegEx.Create(REGULAR_EXPRESSION_FIND_CONFLICTS_MIGRATES_PG);
+  end;
 
   match := validator.match(SQL);
 
