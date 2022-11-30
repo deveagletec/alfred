@@ -16,7 +16,7 @@ uses
 
   Eagle.ERP.Core.ViewModel.Utils.SearchUtils,
 
-  Eagle.Core.Common.Exception.WrongValuesException.pas,
+  Eagle.Core.Common.Exception.WrongValuesException,
 
   Eagle.ERP.{ModuleName}.ViewModel.{ModelName}ViewModel,
   Eagle.ERP.{ModuleName}.Model.Repository.{ModelName}Repository,
