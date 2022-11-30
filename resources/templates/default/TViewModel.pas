@@ -5,16 +5,18 @@ uses
   System.SysUtils,
   Spring.Container,
   Spring.Container.Common,
+  
+  Vcl.Dialogs,
 
   EventBus.Attributes,
 
-  Eagle.ERP.Common.Bind.Attributes,
+  Eagle.Core.Bind.Attributes,
 
   Eagle.ERP.Common.ViewModel.CrudNavigateViewModel,
 
-  Eagle.ERP.Common.ViewModel.Utils.SearchUtils,
+  Eagle.ERP.Core.ViewModel.Utils.SearchUtils,
 
-  Eagle.ERP.Common.Exception.WrongValuesException,
+  Eagle.Core.Common.Exception.WrongValuesException.pas,
 
   Eagle.ERP.{ModuleName}.ViewModel.{ModelName}ViewModel,
   Eagle.ERP.{ModuleName}.Model.Repository.{ModelName}Repository,
@@ -86,7 +88,7 @@ end;
 procedure T{ModelName}ViewModel.OnSearch(Sender: TObject);
 begin
   { TODO 3 : Alterar o nome da pesquisa das entidades {ModelName}s }
-  FDialogService.ShowSearch('C{ModelName}S', T{ModelName}SearchResponse);
+  FDialogWindow.ShowSearch('C{ModelName}S', T{ModelName}SearchResponse);
 end;
 
 procedure T{ModelName}ViewModel.OnValidate();
