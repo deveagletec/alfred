@@ -29,14 +29,14 @@ type
     TabGeral: TTabSheet;
     [AutoBinding('CrudActions')]
     CrudActions: TCrudNavigateBar;
-    lb_{ModelName}_id: TLabel;
-    lb_{ModelName}_nome: TLabel;
-    [DataBinding('Codigo', '{ModelName}_id.Text')]
-    {ModelName}_id: TMyEdit;
-    [DataBinding('Nome', '{ModelName}_nome.Text', True)]
-    {ModelName}_nome: TMyEdit;
-    [DataBinding('IsInativo', '{ModelName}_inativo.Checked')]
-    {ModelName}_inativo: TCheckBox;
+    LB{ModelName}_id: TLabel;
+    LB{ModelName}_nome: TLabel;
+    [DataBinding('Codigo', 'ME{ModelName}_id.Text')]
+    ME{ModelName}_id: TMyEdit;
+    [DataBinding('Nome', 'ME{ModelName}_nome.Text', True)]
+    ME{ModelName}_nome: TMyEdit;
+    [DataBinding('IsInativo', 'CB{ModelName}_inativo.Checked')]
+    CB{ModelName}_inativo: TCheckBox;
 
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private

@@ -11,6 +11,7 @@ object {ModelName}View: T{ModelName}View
   Font.Color = clWindowText
   Font.Height = -13
   Font.Name = 'Verdana'
+  Font.Size = 10
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
@@ -18,7 +19,7 @@ object {ModelName}View: T{ModelName}View
   Position = poMainFormCenter
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 16
   object PageControl1: TPageControl
     Left = 8
     Top = 8
@@ -28,27 +29,27 @@ object {ModelName}View: T{ModelName}View
     TabOrder = 0
     object TabGeral: TTabSheet
       Caption = 'Geral'
-      object lb_{ModelName}_id: TLabel
-        Left = 19
+      object LB{ModelName}_id: TLabel
+        Left = 77
         Top = 19
-        Width = 37
-        Height = 13
+        Width = 53
+        Height = 16
         Alignment = taRightJustify
         Caption = 'C'#243'digo:'
       end
-      object lb_{ModelName}_nome: TLabel
-        Left = 16
-        Top = 57
-        Width = 40
-        Height = 13
+      object LB{ModelName}_nome: TLabel
+        Left = 74
+        Top = 58
+        Width = 56
+        Height = 16
         Alignment = taRightJustify
         Caption = '* Nome:'
       end
-      object {ModelName}_id: TMyEdit
-        Left = 62
+      object ME{ModelName}_id: TMyEdit
+        Left = 138
         Top = 16
-        Width = 73
-        Height = 21
+        Width = 76
+        Height = 24
         Alignment = taCenter
         CharCase = ecUpperCase
         Enabled = False
@@ -60,11 +61,11 @@ object {ModelName}View: T{ModelName}View
         MaxValue = 2147483647.000000000000000000
         FieldMapping = 'entity_id'
       end
-      object {ModelName}_nome: TMyEdit
-        Left = 62
+      object ME{ModelName}_nome: TMyEdit
+        Left = 138
         Top = 54
-        Width = 609
-        Height = 21
+        Width = 557
+        Height = 24
         CharCase = ecUpperCase
         MaxLength = 10
         TabOrder = 1
@@ -72,11 +73,12 @@ object {ModelName}View: T{ModelName}View
         MaxValue = 2147483647.000000000000000000
         FieldMapping = 'entity_nome'
       end
-      object {ModelName}_inativo: TCheckBox
-        Left = 62
-        Top = 90
-        Width = 97
+      object CB{ModelName}_inativo: TCheckBox
+        Left = 629
+        Top = 20
+        Width = 66
         Height = 17
+        Margins.Right = 0
         Caption = 'Inativo'
         TabOrder = 2
       end
