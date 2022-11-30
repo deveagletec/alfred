@@ -48,11 +48,11 @@ type
     property Nome: string read GetNome write SetNome;
     property IsInativo: Boolean read GetIsInativo write SetIsInativo;
 
-    [Secured('permissao:CanNew')]
+    [Secured('permissao:{perfil}:CanNew')]
     property CanNew;
-    [Secured('permissao:CanEdit')]
+    [Secured('permissao:{perfil}:CanEdit')]
     property CanEdit;
-    [Secured('permissao:CanDelete')]
+    [Secured('permissao:{perfil}:CanDelete')]
     property CanDelete;
 
  end;
