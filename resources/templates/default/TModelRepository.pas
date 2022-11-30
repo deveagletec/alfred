@@ -7,8 +7,8 @@ uses
   Spring.Container,
   Spring.Container.Common,
 
-  Eagle.ERP.Common.DB.Connection,
-  Eagle.ERP.Common.DB.SessionHelper,
+  Eagle.Core.DB.Connection,
+  Eagle.Core.DB.SessionHelper,
 
   Eagle.ERP.{ModuleName}.Model.Repository.{ModelName}Repository,
 
