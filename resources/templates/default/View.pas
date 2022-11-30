@@ -10,9 +10,9 @@ uses
 
   DSharp.Bindings.VCLControls,
 
-  Eagle.ERP.Common.Bind.Attributes,
+  Eagle.Core.Bind.Attributes,
 
-  Eagle.ERP.Common.View.Inseptors.VCLControls.MyEdit,
+  Eagle.Core.View.Inseptors.VCLControls.MyEdit,
   Eagle.ERP.Common.View.NavigationActions,
   Eagle.ERP.Common.View.ActionsCrud,
   Eagle.ERP.Common.View.CrudNavigateBar;
