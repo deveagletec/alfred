@@ -11,12 +11,12 @@ uses
 
   EventBus,
 
-  Eagle.ERP.Common.Test.DataBaseTestHelper,
+  Eagle.ERP.Core.Test.DataBaseTestHelper,
 
-  Eagle.ERP.Common.Exception.WrongValuesException,
-  Eagle.ERP.Common.Exception.Helper.WrongValuesExceptionHelper,
+  Eagle.Core.Common.Exception.WrongValuesException,
+  Eagle.Core.Common.Exception.Helper.WrongValuesExceptionHelper,
 
-  Eagle.ERP.Common.ViewModel.DialogService,
+  Eagle.Core.ViewModel.DialogService,
 
   Eagle.ERP.{ModuleName}.Model.Entity.{ModelName},
   Eagle.ERP.{ModuleName}.Model.Entity.Impl.{ModelName},
